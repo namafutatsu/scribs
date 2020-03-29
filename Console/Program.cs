@@ -7,12 +7,12 @@ namespace Console {
         static void Main(string[] args) {
             var project = new DiskStorage(@"C:\temp\scribs\").Load("gdrtf", "jlg", true);
             var serializer = new DataContractJsonSerializer(typeof(Project));
-            //using (var stream = new MemoryStream()) {
-            //    serializer.WriteObject(stream, project);
-            //    stream.Position = 0;
-            //    var reader = new StreamReader(stream);
-            //    var json = reader.ReadToEnd();
-            //}
+            using (var stream = new MemoryStream()) {
+                serializer.WriteObject(stream, project);
+                stream.Position = 0;
+                var reader = new StreamReader(stream);
+                var json = reader.ReadToEnd();
+            }
         }
     }
 }
