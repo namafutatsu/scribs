@@ -6,8 +6,8 @@ using System.Linq;
 
 namespace Scribs.Core {
     public abstract class Storage {
-        public abstract Project Load(string userName, string key, bool content = false);
-        public abstract Project Save(bool content = false);
+        public abstract Document Load(string userName, string name, bool content = false);
+        public abstract void Save(Document project, bool content = false);
     }
 
     public abstract class ServerStorage : Storage {
@@ -17,21 +17,65 @@ namespace Scribs.Core {
         }
     }
 
+    public class JsonStorage : ServerStorage {
+        public JsonStorage(string root) : base(root) {
+        }
+
+        public override Document Load(string userName, string name, bool content = false) {
+            throw new NotImplementedException();
+        }
+
+        public override void Save(Document project, bool content = false) {
+            throw new NotImplementedException();
+        }
+    }
+
     public class DiskStorage : ServerStorage {
         public DiskStorage(string root) : base(root) {
         }
 
-        public override Project Save(bool content = false) {
-            throw new System.NotImplementedException();
+        public override void Save(Document project, bool content = false) {
+            var path = Path.Combine(Root, project.User.Path, project.Name);
+            if (Directory.Exists(path))
+                Directory.Delete(path, true);
+            SaveDirectory(project, content);
         }
 
-        public override Project Load(string userName, string key, bool content = false) {
+        private void SaveDirectory(Document parent, bool content) {
+            Directory.CreateDirectory(Path.Combine(Root, parent.Path));
+            if (parent.Metadata.Any(o => o.Value != null) || parent.Text != null)
+                WriteDocument(parent, Path.Combine(Root, parent.Path, ".document"), content);
+            if (parent.Documents == null)
+                return;
+            foreach (var document in parent.Documents) {
+                if (!document.IsLeaf)
+                    SaveDirectory(document, content);
+                else
+                    SaveFile(document, content);
+            }
+        }
+
+        private void SaveFile(Document document, bool content) {
+            WriteDocument(document, Path.Combine(Root, document.Path), content);
+        }
+
+        private void WriteDocument(Document document, string path, bool content) {
+            using (StreamWriter sw = File.CreateText(path)) {
+                sw.WriteLine("---");
+                foreach (var metadata in document.Metadata)
+                    sw.WriteLine($"{metadata.Key}: {metadata.Value}");
+                sw.WriteLine("---");
+                if (content)
+                    sw.Write(document.Text);
+            }
+        }
+
+        public override Document Load(string userName, string name, bool content = false) {
             var user = new User(userName);
-            var directory = LoadDirectory(user, null, Path.Combine(Root, user.Path, key), content);
-            return Project.FromDocument(this, directory);
+            return LoadDirectory(user, null, Path.Combine(Root, user.Path, name), content);
         }
 
-        public Document LoadDocument(User user, Document parent, string path, bool content, bool isLeaf) {
+        private Document LoadDocument(User user, Document parent, string path, bool content, bool isLeaf) {
             var name = Path.GetFileName(path);
             if (isLeaf)
                 name = name.Substring(0, name.LastIndexOf("."));
@@ -54,22 +98,21 @@ namespace Scribs.Core {
             return document;
         }
 
-        public Document LoadDirectory(User user, Document parent, string path, bool content) {
+        private Document LoadDirectory(User user, Document parent, string path, bool content) {
             if (!Directory.Exists(path))
                 Directory.CreateDirectory(path);
             var directory = LoadDocument(user, parent, path, content, false);
             var documents = new List<Document>();
             foreach (var subdirectory in Directory.GetDirectories(path, "*", SearchOption.TopDirectoryOnly))
-                documents.Add(LoadDirectory(user, parent, subdirectory, content));
+                documents.Add(LoadDirectory(user, directory, subdirectory, content));
             foreach (var file in Directory.GetFiles(path).Where(o => o.EndsWith(".md")))
-                documents.Add(LoadFile(user, parent, file, content));
-            if (documents.Any())
-                directory.Documents = new ObservableCollection<Document>(
-                    documents.OrderBy(o => o.IsLeaf).ThenBy(o => o.Index).ThenBy(o => o.Name));
+                documents.Add(LoadFile(user, directory, file, content));
+            directory.Documents = new ObservableCollection<Document>(
+                documents.OrderBy(o => o.IsLeaf).ThenBy(o => o.Index).ThenBy(o => o.Name));
             return directory;
         }
 
-        public Document LoadFile(User user, Document parent, string path, bool content) {
+        private Document LoadFile(User user, Document parent, string path, bool content) {
             return LoadDocument(user, parent, path, content, true);
         }
 

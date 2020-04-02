@@ -1,19 +1,20 @@
-﻿using System.Collections.ObjectModel;
+﻿using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Runtime.Serialization;
 
 namespace Scribs.Core {
 
     [DataContract]
-    public class Document : IPhysical {
+    public class Document {
         [DataMember]
         public string Key { get; set; }
         [DataMember]
-        public string Name { get; protected set; }
+        public string Name { get; set; }
         [DataMember]
         public ObservableCollection<Document> Documents { get; set; }
         [DataMember]
         public int Index { get; set; }
-        [DataMember]
+        //[DataMember]
         public string Text { get; set; }
 
         public bool IsLeaf => Documents == null;
@@ -35,5 +36,9 @@ namespace Scribs.Core {
             var oldIndex = Documents.IndexOf(document);
             Documents.Move(oldIndex, index);
         }
+
+        public IDictionary<string, string> Metadata => new Dictionary<string, string> {
+            ["id"] = Key
+        };
     }
 }
