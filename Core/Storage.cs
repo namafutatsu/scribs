@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
+using System.Runtime.Serialization.Json;
+using System.Text;
 
 namespace Scribs.Core {
     public abstract class Storage {
@@ -18,19 +20,90 @@ namespace Scribs.Core {
     }
 
     public class JsonStorage : ServerStorage {
+        public const string jsonDocument = ".json";
+
         public JsonStorage(string root) : base(root) {
         }
 
+        public object JsonConvert { get; private set; }
+
         public override Document Load(string userName, string name, bool content = false) {
-            throw new NotImplementedException();
+            var user = new User(userName);
+            string path = Path.Combine(Root, user.Path, name);
+            if (!Directory.Exists(path))
+                Directory.CreateDirectory(path);
+            var project = ReadJson(Path.Combine(path, jsonDocument));
+            Document.BuildProject(project);
+            if (content) {
+                foreach (var document in project.AllDocuments.Values) {
+                    ReadDocument(path, document);
+                }
+            }
+            return project;
+        }
+
+        private Document ReadJson(string path) {
+            Document project;
+            using (StreamReader reader = new StreamReader(path)) {
+                var text = reader.ReadToEnd();
+                using (var ms = new MemoryStream(Encoding.Unicode.GetBytes(text))) {
+                    var deserializer = new DataContractJsonSerializer(typeof(Document));
+                    project = (Document)deserializer.ReadObject(ms);
+                }
+            }
+            return project;
+        }
+
+        private void ReadDocument(string path, Document document) {
+            if (!File.Exists(Path.Combine(path, document.Key)))
+                return;
+            using (StreamReader reader = new StreamReader(Path.Combine(path, document.Key))) {
+                document.Text = reader.ReadToEnd();
+            }
         }
 
         public override void Save(Document project, bool content = false) {
-            throw new NotImplementedException();
+            string path = Path.Combine(Root, project.User.Path, project.Name);
+            if (Directory.Exists(path))
+                Directory.Delete(path, true);
+            Directory.CreateDirectory(path);
+            CreateJson(project, Path.Combine(path, jsonDocument));
+            if (content)
+                SaveDocument(project, path);
+        }
+
+        private void SaveDocument(Document document, string path) {
+            if (document.Text != null)
+                WriteDocument(document, Path.Combine(path, document.Key));
+            if (document.Documents == null)
+                return;
+            foreach (var child in document.Documents) {
+                SaveDocument(child, path);
+            }
+        }
+
+        private void WriteDocument(Document document, string path) {
+            using (StreamWriter sw = File.CreateText(path))
+                sw.Write(document.Text);
+        }
+
+        private void CreateJson(Document project, string path) {
+            var serializer = new DataContractJsonSerializer(typeof(Document));
+            using (var stream = new MemoryStream()) {
+                serializer.WriteObject(stream, project);
+                stream.Position = 0;
+                var reader = new StreamReader(stream);
+                var json = reader.ReadToEnd();
+                using (StreamWriter sw = File.CreateText(path)) {
+                    sw.Write(json);
+                }
+            }
         }
     }
 
     public class DiskStorage : ServerStorage {
+        public const string directoryDocument = ".document";
+
         public DiskStorage(string root) : base(root) {
         }
 
@@ -44,7 +117,7 @@ namespace Scribs.Core {
         private void SaveDirectory(Document parent, bool content) {
             Directory.CreateDirectory(Path.Combine(Root, parent.Path));
             if (parent.Metadata.Any(o => o.Value != null) || parent.Text != null)
-                WriteDocument(parent, Path.Combine(Root, parent.Path, ".document"), content);
+                WriteDocument(parent, Path.Combine(Root, parent.Path, directoryDocument), content);
             if (parent.Documents == null)
                 return;
             foreach (var document in parent.Documents) {
@@ -56,7 +129,7 @@ namespace Scribs.Core {
         }
 
         private void SaveFile(Document document, bool content) {
-            WriteDocument(document, Path.Combine(Root, document.Path), content);
+            WriteDocument(document, Path.Combine(Root, document.Path + ".md"), content);
         }
 
         private void WriteDocument(Document document, string path, bool content) {
@@ -86,12 +159,15 @@ namespace Scribs.Core {
                 name = sections.Skip(1).Aggregate((a, b) => a + "." + b);
             var document = new Document(Utils.CreateGuid(), name, user, parent);
             document.Index = index;
-            if (content) {
-                if (isLeaf) {
+            if (isLeaf) {
+                ReadMetadata(document, path);
+                if (content)
                     ReadDocument(document, path);
-                } else {
-                    var hidden = Directory.GetFiles(path, ".document").SingleOrDefault();
-                    if (hidden != null)
+            } else {
+                var hidden = Directory.GetFiles(path, directoryDocument).SingleOrDefault();
+                if (hidden != null) {
+                    ReadMetadata(document, hidden);
+                    if (content)
                         ReadDocument(document, hidden);
                 }
             }
@@ -116,7 +192,7 @@ namespace Scribs.Core {
             return LoadDocument(user, parent, path, content, true);
         }
 
-        private void ReadDocument(Document document, string path) {
+        private void ReadMetadata(Document document, string path) {
             using (StreamReader reader = new StreamReader(path)) {
                 if (reader.ReadLine().StartsWith("---")) {
                     string line = reader.ReadLine();
@@ -133,11 +209,23 @@ namespace Scribs.Core {
                         }
                         line = reader.ReadLine();
                     }
+                }
+            }
+        }
+
+        private void ReadDocument(Document document, string path) {
+            using (StreamReader reader = new StreamReader(path)) {
+                if (reader.ReadLine().StartsWith("---")) {
+                    string line = reader.ReadLine();
+                    while (!line.StartsWith("---"))
+                        line = reader.ReadLine();
                 } else {
                     reader.DiscardBufferedData();
                     reader.BaseStream.Seek(0, SeekOrigin.Begin);
                 }
-                document.Text = reader.ReadToEnd();
+                var text = reader.ReadToEnd();
+                if (!String.IsNullOrEmpty(text))
+                    document.Text = text;
             }
         }
     }
