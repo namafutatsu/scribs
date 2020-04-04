@@ -13,7 +13,7 @@ namespace Console {
             string username = ConfigurationManager.AppSettings["username"];
             string password = ConfigurationManager.AppSettings["password"];
             diskStorage.SetCredentials(username, password);
-            diskStorage.Save(project, true);
+            diskStorage.Save(project);
             //var jsonStorage = new JsonStorage(@"C:\Storage\json\");
             //jsonStorage.Save(project, true);
             //var project = jsonStorage.Load("gdrtf", "jlg2", true);

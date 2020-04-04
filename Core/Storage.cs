@@ -12,7 +12,7 @@ using System.Text;
 namespace Scribs.Core {
     public abstract class Storage {
         public abstract Document Load(string userName, string name, bool content = false);
-        public abstract void Save(Document project, bool content = false);
+        //public abstract void Save(Document project, bool content = false);
     }
 
     public abstract class ServerStorage : Storage {
@@ -62,7 +62,7 @@ namespace Scribs.Core {
                 document.Text = reader.ReadToEnd();
         }
 
-        public override void Save(Document project, bool content = false) {
+        public void Save(Document project, bool content = false) {
             string path = Path.Combine(Root, project.User.Path, project.Name);
             if (Directory.Exists(path))
                 Directory.Delete(path, true);
@@ -101,7 +101,7 @@ namespace Scribs.Core {
     }
 
     public class DiskStorage : ServerStorage {
-        private const string directoryDocument = ".document";
+        private const string directoryDocument = ".dir.md";
         private static LibGit2Sharp.Signature Signature => new LibGit2Sharp.Signature(new Identity("System", "system@scribs.io"), DateTimeOffset.Now);
         private UsernamePasswordCredentials credentials;
         private GitHubClient client;
@@ -110,7 +110,7 @@ namespace Scribs.Core {
         public DiskStorage(string root) : base(root) {
         }
 
-        public override void Save(Document project, bool content = false) {
+        public void Save(Document project, string message = null) {
             string repoName = $"scribs_{project.User.Name}_{project.Name}";
             Octokit.Repository repo;
             try {
@@ -125,7 +125,23 @@ namespace Scribs.Core {
                 gitClone(repoName, path);
             }
             EmptyProject(path);
-            SaveDirectory(project, content);
+            SaveDirectory(project, true);
+            if (message == null)
+                message = DateTime.Now.ToString();
+            gitCommit(path, message);
+        }
+
+        private void gitCommit(string path, string message) {
+            using (var repo = new LibGit2Sharp.Repository(path)) {
+                var changes = repo.Diff.Compare<TreeChanges>();
+                if (changes.Any()) {
+                    Commands.Stage(repo, "*");
+                    repo.Commit(message, Signature, Signature);
+                    repo.Network.Push(repo.Branches["master"], new LibGit2Sharp.PushOptions {
+                        CredentialsProvider = new CredentialsHandler((url, usernameFromUrl, types) => credentials)
+                    });
+                }
+            }
         }
 
         public void SetCredentials(string username, string password) {
@@ -193,9 +209,8 @@ namespace Scribs.Core {
                 using (StreamWriter sw = File.CreateText(path)) {
                     if (metadataLines.Any()) {
                         sw.WriteLine("---");
-                        foreach (var line in metadataLines) {
+                        foreach (var line in metadataLines)
                             sw.WriteLine(line);
-                        }
                         sw.WriteLine("---");
                     }
                     if (content && document.Text != null)
