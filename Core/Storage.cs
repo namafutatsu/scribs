@@ -1,5 +1,6 @@
 ﻿using LibGit2Sharp;
 using LibGit2Sharp.Handlers;
+using Octokit;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -101,32 +102,56 @@ namespace Scribs.Core {
 
     public class DiskStorage : ServerStorage {
         private const string directoryDocument = ".document";
-        private static Signature Signature => new Signature(new Identity("System", "system@scribs.io"), DateTimeOffset.Now);
+        private static LibGit2Sharp.Signature Signature => new LibGit2Sharp.Signature(new Identity("System", "system@scribs.io"), DateTimeOffset.Now);
         private UsernamePasswordCredentials credentials;
+        private GitHubClient client;
+        private Octokit.User user;
 
         public DiskStorage(string root) : base(root) {
         }
 
         public override void Save(Document project, bool content = false) {
+            string repoName = $"scribs_{project.User.Name}_{project.Name}";
+            Octokit.Repository repo;
+            try {
+                repo = client.Repository.Get(credentials.Username, repoName).Result;
+            } catch {
+                repo = client.Repository.Create(new NewRepository(repoName) { Private = true, AutoInit = true }).Result;
+            }
             var path = Path.Combine(Root, project.User.Path, project.Name);
-            if (Directory.Exists(path))
-                EmptyProject(path);
+            if (Directory.Exists(path)) {
+                gitPull(path);
+            } else {
+                gitClone(repoName, path);
+            }
+            EmptyProject(path);
             SaveDirectory(project, content);
         }
 
         public void SetCredentials(string username, string password) {
+            var basicAuth = new Octokit.Credentials(username, password);
+            client = new GitHubClient(new ProductHeaderValue("scribs"));
+            client.Credentials = basicAuth;
+            user = client.User.Get(username).Result;
             credentials = new UsernamePasswordCredentials() {
                 Username = username,
                 Password = password
             };
         }
 
+        private void gitClone(string repoName, string path) {
+            LibGit2Sharp.Repository.Clone("https://github.com/scribssys/" + repoName, path, new CloneOptions {
+                CredentialsProvider = new CredentialsHandler((url, usernameFromUrl, types) => credentials)
+            });
+        }
+
         private void gitPull(string path) {
-            using (var repo = new Repository(path)) {
-                var options = new PullOptions();
-                options.FetchOptions = new FetchOptions();
-                options.FetchOptions.CredentialsProvider = new CredentialsHandler((url, usernameFromUrl, types) => credentials);
-                Commands.Pull(repo, Signature, options);
+            using (var repo = new LibGit2Sharp.Repository(path)) {
+                Commands.Pull(repo, Signature, new PullOptions {
+                    FetchOptions = new FetchOptions {
+                        CredentialsProvider = new CredentialsHandler((url, usernameFromUrl, types) => credentials)
+                    }
+                });
             }
         }
 
@@ -139,7 +164,8 @@ namespace Scribs.Core {
         }
 
         private void SaveDirectory(Document parent, bool content) {
-            Directory.CreateDirectory(Path.Combine(Root, parent.Path));
+            if (!Directory.Exists(Path.Combine(Root, parent.Path)))
+                Directory.CreateDirectory(Path.Combine(Root, parent.Path));
             if (parent.Metadata.Any(o => o.Value != null) || parent.Text != null)
                 WriteDocument(parent, Path.Combine(Root, parent.Path, directoryDocument), content);
             if (parent.Documents == null)
@@ -157,13 +183,24 @@ namespace Scribs.Core {
         }
 
         private void WriteDocument(Document document, string path, bool content) {
-            using (StreamWriter sw = File.CreateText(path)) {
-                sw.WriteLine("---");
-                foreach (var metadata in document.Metadata)
-                    sw.WriteLine($"{metadata.Key}: {metadata.Value}");
-                sw.WriteLine("---");
-                if (content)
-                    sw.Write(document.Text);
+            var metadataLines = new List<string>();
+            foreach (var metadata in document.Metadata) {
+                if (metadata.Key == "id" && document.Text == null)
+                    continue;
+                metadataLines.Add($"{metadata.Key}: {metadata.Value}");
+            }
+            if (metadataLines.Any() || (content && document.Text != null)) {
+                using (StreamWriter sw = File.CreateText(path)) {
+                    if (metadataLines.Any()) {
+                        sw.WriteLine("---");
+                        foreach (var line in metadataLines) {
+                            sw.WriteLine(line);
+                        }
+                        sw.WriteLine("---");
+                    }
+                    if (content && document.Text != null)
+                        sw.Write(document.Text);
+                }
             }
         }
 
