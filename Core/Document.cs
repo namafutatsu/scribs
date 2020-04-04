@@ -23,6 +23,8 @@ namespace Scribs.Core {
         public Document Project { get; protected set; }
         public User User { get; private set; }
         public string Path => System.IO.Path.Join(Parent != null ? Parent.Path : User.Path, Name);
+
+        // Project
         public IDictionary<string, Document> AllDocuments { get; set; }
 
         public Document(string key, string name, User user, Document parent) {
@@ -32,8 +34,9 @@ namespace Scribs.Core {
             SetParent(parent, false);
         }
 
-        public static void BuildProject(Document project) {
+        public static void BuildProject(Document project, User user) {
             project.Project = project;
+            project.User = user;
             foreach (var child in project.Documents) {
                 child.SetParent(project, true);
             }
@@ -46,6 +49,7 @@ namespace Scribs.Core {
             }
             Parent = parent;
             Project = parent.Project;
+            User = parent.User;
             if (Project.AllDocuments == null)
                 Project.AllDocuments = new Dictionary<string, Document>();
             Project.AllDocuments.Add(Key, this);

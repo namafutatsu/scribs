@@ -1,4 +1,6 @@
-﻿using System;
+﻿using LibGit2Sharp;
+using LibGit2Sharp.Handlers;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
@@ -28,17 +30,15 @@ namespace Scribs.Core {
         public object JsonConvert { get; private set; }
 
         public override Document Load(string userName, string name, bool content = false) {
-            var user = new User(userName);
+            var user = User.GetByName(userName);
             string path = Path.Combine(Root, user.Path, name);
             if (!Directory.Exists(path))
                 Directory.CreateDirectory(path);
             var project = ReadJson(Path.Combine(path, jsonDocument));
-            Document.BuildProject(project);
-            if (content) {
-                foreach (var document in project.AllDocuments.Values) {
+            Document.BuildProject(project, user);
+            if (content)
+                foreach (var document in project.AllDocuments.Values)
                     ReadDocument(path, document);
-                }
-            }
             return project;
         }
 
@@ -57,9 +57,8 @@ namespace Scribs.Core {
         private void ReadDocument(string path, Document document) {
             if (!File.Exists(Path.Combine(path, document.Key)))
                 return;
-            using (StreamReader reader = new StreamReader(Path.Combine(path, document.Key))) {
+            using (StreamReader reader = new StreamReader(Path.Combine(path, document.Key)))
                 document.Text = reader.ReadToEnd();
-            }
         }
 
         public override void Save(Document project, bool content = false) {
@@ -77,9 +76,8 @@ namespace Scribs.Core {
                 WriteDocument(document, Path.Combine(path, document.Key));
             if (document.Documents == null)
                 return;
-            foreach (var child in document.Documents) {
+            foreach (var child in document.Documents)
                 SaveDocument(child, path);
-            }
         }
 
         private void WriteDocument(Document document, string path) {
@@ -102,7 +100,9 @@ namespace Scribs.Core {
     }
 
     public class DiskStorage : ServerStorage {
-        public const string directoryDocument = ".document";
+        private const string directoryDocument = ".document";
+        private static Signature Signature => new Signature(new Identity("System", "system@scribs.io"), DateTimeOffset.Now);
+        private UsernamePasswordCredentials credentials;
 
         public DiskStorage(string root) : base(root) {
         }
@@ -110,8 +110,32 @@ namespace Scribs.Core {
         public override void Save(Document project, bool content = false) {
             var path = Path.Combine(Root, project.User.Path, project.Name);
             if (Directory.Exists(path))
-                Directory.Delete(path, true);
+                EmptyProject(path);
             SaveDirectory(project, content);
+        }
+
+        public void SetCredentials(string username, string password) {
+            credentials = new UsernamePasswordCredentials() {
+                Username = username,
+                Password = password
+            };
+        }
+
+        private void gitPull(string path) {
+            using (var repo = new Repository(path)) {
+                var options = new PullOptions();
+                options.FetchOptions = new FetchOptions();
+                options.FetchOptions.CredentialsProvider = new CredentialsHandler((url, usernameFromUrl, types) => credentials);
+                Commands.Pull(repo, Signature, options);
+            }
+        }
+
+        private void EmptyProject(string path) {
+            var gitPath = Path.Combine(path, ".git");
+            foreach (var file in Directory.GetFiles(path))
+                File.Delete(file);
+            foreach (var directory in Directory.GetDirectories(path).Where(o => o != gitPath))
+                Directory.Delete(directory, true);
         }
 
         private void SaveDirectory(Document parent, bool content) {
@@ -144,7 +168,7 @@ namespace Scribs.Core {
         }
 
         public override Document Load(string userName, string name, bool content = false) {
-            var user = new User(userName);
+            var user = User.GetByName(userName);
             return LoadDirectory(user, null, Path.Combine(Root, user.Path, name), content);
         }
 

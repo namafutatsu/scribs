@@ -7,5 +7,10 @@
         public User(string name) {
             Name = name;
         }
+
+        public static User GetByName(string name) {
+            // todo
+            return new User(name);
+        }
     }
 }

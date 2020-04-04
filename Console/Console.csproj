@@ -9,4 +9,19 @@
     <ProjectReference Include="..\Core\Core.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Compile Update="Debug.Designer.cs">
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Debug.settings</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="Debug.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Debug.Designer.cs</LastGenOutput>
+    </None>
+  </ItemGroup>
+
 </Project>
