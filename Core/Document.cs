@@ -7,14 +7,10 @@ namespace Scribs.Core {
 
     [DataContract]
     public class Document {
-        [DataMember]
-        public string Key { get; set; }
-        [DataMember]
-        public string Name { get; set; }
-        [DataMember]
-        public ObservableCollection<Document> Documents { get; set; }
-        [DataMember]
-        public int Index { get; set; }
+        [DataMember] public string Key { get; set; }
+        [DataMember] public string Name { get; set; }
+        [DataMember] public ObservableCollection<Document> Documents { get; set; }
+        [DataMember] public int Index { get; set; }
         //[DataMember]
         public string Text { get; set; }
 
@@ -26,6 +22,7 @@ namespace Scribs.Core {
 
         // Project
         public IDictionary<string, Document> AllDocuments { get; set; }
+        [DataMember] public string Repo { get; set; }
 
         public Document(string key, string name, User user, Document parent) {
             Key = key;
@@ -63,8 +60,15 @@ namespace Scribs.Core {
             Documents.Move(oldIndex, index);
         }
 
-        public IDictionary<string, string> Metadata => new Dictionary<string, string> {
-            ["id"] = Key
-        };
+        public IDictionary<string, string> Metadata {
+            get {
+                var metadata = new Dictionary<string, string> {
+                    ["id"] = Key
+                };
+                if (Repo != null)
+                    metadata.Add("repo", Repo);
+                return metadata;
+            }
+        }
     }
 }

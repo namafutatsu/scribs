@@ -1,7 +1,4 @@
-﻿using LibGit2Sharp;
-using LibGit2Sharp.Handlers;
-using Octokit;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
@@ -11,8 +8,8 @@ using System.Text;
 
 namespace Scribs.Core {
     public abstract class Storage {
-        public abstract Document Load(string userName, string name, bool content = false);
-        //public abstract void Save(Document project, bool content = false);
+        public abstract Document Load(string userName, string name);
+        public abstract void Save(Document project);
     }
 
     public abstract class ServerStorage : Storage {
@@ -30,7 +27,10 @@ namespace Scribs.Core {
 
         public object JsonConvert { get; private set; }
 
-        public override Document Load(string userName, string name, bool content = false) {
+        public override Document Load(string userName, string name) => Load(userName, name, true);
+        public override void Save(Document project) => Save(project, true);
+
+        public Document Load(string userName, string name, bool content = true) {
             var user = User.GetByName(userName);
             string path = Path.Combine(Root, user.Path, name);
             if (!Directory.Exists(path))
@@ -62,7 +62,7 @@ namespace Scribs.Core {
                 document.Text = reader.ReadToEnd();
         }
 
-        public void Save(Document project, bool content = false) {
+        public void Save(Document project, bool content) {
             string path = Path.Combine(Root, project.User.Path, project.Name);
             if (Directory.Exists(path))
                 Directory.Delete(path, true);
@@ -100,75 +100,29 @@ namespace Scribs.Core {
         }
     }
 
-    public class DiskStorage : ServerStorage {
+    public class GitStorage : ServerStorage {
         private const string directoryDocument = ".dir.md";
-        private static LibGit2Sharp.Signature Signature => new LibGit2Sharp.Signature(new Identity("System", "system@scribs.io"), DateTimeOffset.Now);
-        private UsernamePasswordCredentials credentials;
-        private GitHubClient client;
-        private Octokit.User user;
 
-        public DiskStorage(string root) : base(root) {
+        public GitStorage(string root) : base(root) {
         }
+
+        public override Document Load(string userName, string name) => Load(userName, name, true);
+        public override void Save(Document project) => Save(project);
 
         public void Save(Document project, string message = null) {
             string repoName = $"scribs_{project.User.Name}_{project.Name}";
-            Octokit.Repository repo;
-            try {
-                repo = client.Repository.Get(credentials.Username, repoName).Result;
-            } catch {
-                repo = client.Repository.Create(new NewRepository(repoName) { Private = true, AutoInit = true }).Result;
-            }
             var path = Path.Combine(Root, project.User.Path, project.Name);
-            if (Directory.Exists(path)) {
-                gitPull(path);
-            } else {
-                gitClone(repoName, path);
-            }
+            if (!Git.IsRepo(path))
+                Git.Create(repoName);
+            if (Directory.Exists(path))
+                Git.Pull(path);
+            else
+                Git.Clone(repoName, path);
             EmptyProject(path);
             SaveDirectory(project, true);
             if (message == null)
                 message = DateTime.Now.ToString();
-            gitCommit(path, message);
-        }
-
-        private void gitCommit(string path, string message) {
-            using (var repo = new LibGit2Sharp.Repository(path)) {
-                var changes = repo.Diff.Compare<TreeChanges>();
-                if (changes.Any()) {
-                    Commands.Stage(repo, "*");
-                    repo.Commit(message, Signature, Signature);
-                    repo.Network.Push(repo.Branches["master"], new LibGit2Sharp.PushOptions {
-                        CredentialsProvider = new CredentialsHandler((url, usernameFromUrl, types) => credentials)
-                    });
-                }
-            }
-        }
-
-        public void SetCredentials(string username, string password) {
-            var basicAuth = new Octokit.Credentials(username, password);
-            client = new GitHubClient(new ProductHeaderValue("scribs"));
-            client.Credentials = basicAuth;
-            user = client.User.Get(username).Result;
-            credentials = new UsernamePasswordCredentials() {
-                Username = username,
-                Password = password
-            };
-        }
-
-        private void gitClone(string repoName, string path) {
-            LibGit2Sharp.Repository.Clone("https://github.com/scribssys/" + repoName, path, new CloneOptions {
-                CredentialsProvider = new CredentialsHandler((url, usernameFromUrl, types) => credentials)
-            });
-        }
-
-        private void gitPull(string path) {
-            using (var repo = new LibGit2Sharp.Repository(path)) {
-                Commands.Pull(repo, Signature, new PullOptions {
-                    FetchOptions = new FetchOptions {
-                        CredentialsProvider = new CredentialsHandler((url, usernameFromUrl, types) => credentials)
-                    }
-                });
-            }
+            Git.Commit(path, message);
         }
 
         private void EmptyProject(string path) {
@@ -186,12 +140,11 @@ namespace Scribs.Core {
                 WriteDocument(parent, Path.Combine(Root, parent.Path, directoryDocument), content);
             if (parent.Documents == null)
                 return;
-            foreach (var document in parent.Documents) {
+            foreach (var document in parent.Documents)
                 if (!document.IsLeaf)
                     SaveDirectory(document, content);
                 else
                     SaveFile(document, content);
-            }
         }
 
         private void SaveFile(Document document, bool content) {
@@ -219,9 +172,27 @@ namespace Scribs.Core {
             }
         }
 
-        public override Document Load(string userName, string name, bool content = false) {
+        public Document Load(string userName, string name, bool content = false) {
             var user = User.GetByName(userName);
-            return LoadDirectory(user, null, Path.Combine(Root, user.Path, name), content);
+            string path = Path.Combine(Root, user.Path, name);
+            Git.Pull(path);
+            var project = LoadDirectory(user, null, path, content);
+            project.Repo = Git.Url(path);
+            return project;
+        }
+
+        private Document LoadDirectory(User user, Document parent, string path, bool content) {
+            if (!Directory.Exists(path))
+                Directory.CreateDirectory(path);
+            var directory = LoadDocument(user, parent, path, content, false);
+            var documents = new List<Document>();
+            foreach (var subdirectory in Directory.GetDirectories(path, "*", SearchOption.TopDirectoryOnly))
+                documents.Add(LoadDirectory(user, directory, subdirectory, content));
+            foreach (var file in Directory.GetFiles(path).Where(o => o.EndsWith(".md")))
+                documents.Add(LoadFile(user, directory, file, content));
+            directory.Documents = new ObservableCollection<Document>(
+                documents.OrderBy(o => o.IsLeaf).ThenBy(o => o.Index).ThenBy(o => o.Name));
+            return directory;
         }
 
         private Document LoadDocument(User user, Document parent, string path, bool content, bool isLeaf) {
@@ -250,20 +221,6 @@ namespace Scribs.Core {
             return document;
         }
 
-        private Document LoadDirectory(User user, Document parent, string path, bool content) {
-            if (!Directory.Exists(path))
-                Directory.CreateDirectory(path);
-            var directory = LoadDocument(user, parent, path, content, false);
-            var documents = new List<Document>();
-            foreach (var subdirectory in Directory.GetDirectories(path, "*", SearchOption.TopDirectoryOnly))
-                documents.Add(LoadDirectory(user, directory, subdirectory, content));
-            foreach (var file in Directory.GetFiles(path).Where(o => o.EndsWith(".md")))
-                documents.Add(LoadFile(user, directory, file, content));
-            directory.Documents = new ObservableCollection<Document>(
-                documents.OrderBy(o => o.IsLeaf).ThenBy(o => o.Index).ThenBy(o => o.Name));
-            return directory;
-        }
-
         private Document LoadFile(User user, Document parent, string path, bool content) {
             return LoadDocument(user, parent, path, content, true);
         }
@@ -279,6 +236,9 @@ namespace Scribs.Core {
                         switch (key) {
                             case "id":
                                 document.Key = value;
+                                break;
+                            case "repo":
+                                document.Repo = value;
                                 break;
                             default:
                                 throw new NotImplementedException();

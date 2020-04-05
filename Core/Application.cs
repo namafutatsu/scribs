@@ -7,7 +7,7 @@ namespace Scribs.Core {
         public static Application Current {
             get {
                 if (current == null)
-                    current = new Application(new DiskStorage("C:/Storage/Disk"));
+                    current = new Application(new GitStorage("C:/Storage/Disk"));
                 return current;
             }
         }
