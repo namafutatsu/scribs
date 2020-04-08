@@ -3,15 +3,18 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Runtime.Serialization;
 
-namespace Scribs.Core {
+using MongoDB.Bson;
+using MongoDB.Bson.Serialization.Attributes;
+using MongoDB.Driver;
+
+namespace Scribs.Core.Entities {
 
     [DataContract]
     public class Document {
-        [DataMember] public string Key { get; set; }
-        [DataMember] public string Name { get; set; }
-        [DataMember] public ObservableCollection<Document> Documents { get; set; }
-        [DataMember] public int Index { get; set; }
-        //[DataMember]
+        [BsonId][BsonRepresentation(BsonType.ObjectId)][BsonElement("_id")][DataMember] public string Key { get; set; }
+        [BsonElement("Name")][DataMember] public string Name { get; set; }
+        [BsonElement("Documents")][DataMember] public ObservableCollection<Document> Documents { get; set; }
+        [BsonElement("Index")][DataMember] public int Index { get; set; }
         public string Text { get; set; }
 
         public bool IsLeaf => Documents == null;
@@ -22,7 +25,7 @@ namespace Scribs.Core {
 
         // Project
         public IDictionary<string, Document> AllDocuments { get; set; }
-        [DataMember] public string Repo { get; set; }
+        [BsonElement("Repo")][DataMember]public string Repo { get; set; }
 
         public Document(string key, string name, User user, Document parent) {
             Key = key;

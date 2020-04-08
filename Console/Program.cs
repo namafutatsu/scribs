@@ -1,22 +1,21 @@
-﻿using LibGit2Sharp;
+﻿using System.IO;
+using System.Reflection;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Scribs.Core;
-using System.Configuration;
-using System.IO;
-using System.Runtime.Serialization.Json;
+using Scribs.Core.Entities;
+using Scribs.Core.Storages;
 
 namespace Console {
     class Program {
         static void Main(string[] args) {
-            var gitStorage = new GitStorage(@"C:\Storage\disk\");
-            //project.Name = "def";
-            string username = ConfigurationManager.AppSettings["username"];
-            string password = ConfigurationManager.AppSettings["password"];
-            Git.SetCredentials(username, password);
-            var project = gitStorage.Load("gdrtf", "def", true);
-            //gitStorage.Save(project);
-            var jsonStorage = new JsonStorage(@"C:\Storage\json\");
-            jsonStorage.Save(project);
-            //var project = jsonStorage.Load("gdrtf", "jlg2", true);.
+            var configurationBuilder = new ConfigurationBuilder().SetBasePath(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location)).AddJsonFile("appsettings.json");
+            var configuration = configurationBuilder.Build();
+            var services = new ServiceCollection().Configure(configuration).BuildServiceProvider();
+            var gdrtf = services.GetFactory<User>().GetByName("gdrtf");
+            var project = services.GetService<GitStorage>().Load(gdrtf.Name, "test");
+            services.GetService<JsonStorage>().Save(project);
+            project = services.GetService<JsonStorage>().Load(gdrtf.Name, "test");
         }
     }
 }
