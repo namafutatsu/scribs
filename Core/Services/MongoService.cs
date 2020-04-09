@@ -10,7 +10,7 @@ namespace Scribs.Core.Services {
             collection = mongoService.GetCollection<E>(typeof(E).Name);
         }
 
-        public E Create(E entity) {
+        public virtual E Create(E entity) {
             collection.InsertOne(entity);
             return entity;
         }
@@ -22,6 +22,8 @@ namespace Scribs.Core.Services {
         public List<E> Get() => collection.Find(o => true).ToList();
 
         public void Update(string id, E entity) => collection.ReplaceOne(o => o.Key == id, entity);
+
+        public void Update(E entity) => Update(entity.Key, entity);
 
         public void Remove(E entity) => collection.DeleteOne(o => o.Key == entity.Key);
 

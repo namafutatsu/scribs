@@ -4,7 +4,7 @@ using Newtonsoft.Json;
 
 namespace Scribs.Core {
 
-    public class Entity {
+    public abstract class Entity {
         [BsonId]
         [BsonRepresentation(BsonType.ObjectId)]
         [BsonElement("_id")]
