@@ -7,7 +7,8 @@ namespace Scribs.Core.Services {
         private IMongoCollection<E> collection;
 
         public Factory(MongoService mongoService) {
-            collection = mongoService.GetCollection<E>(typeof(E).Name);
+            if (mongoService != null)
+                collection = mongoService.GetCollection<E>(typeof(E).Name);
         }
 
         public virtual E Create(E entity) {

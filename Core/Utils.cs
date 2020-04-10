@@ -24,25 +24,28 @@ namespace Scribs.Core {
                 // Mongo
                 .Configure<MongoSettings>(configuration.GetSection(nameof(MongoSettings)))
                 .AddSingleton<IMongoSettings>(s => s.GetRequiredService<IOptions<MongoSettings>>().Value)
-                .AddSingleton<MongoService>()
-                // Factories
-                .AddSingleton<Factory<User>>()
                 // GitHub
                 .Configure<GitHubSettings>(configuration.GetSection(nameof(GitHubSettings)))
                 .AddSingleton<IGitHubSettings>(s => s.GetRequiredService<IOptions<GitHubSettings>>().Value)
-                .AddSingleton<GitHubService>()
                 // Repository
                 .Configure<RepositorySettings>(configuration.GetSection(nameof(RepositorySettings)))
                 .AddSingleton<IRepositorySettings>(s => s.GetRequiredService<IOptions<RepositorySettings>>().Value)
-                .AddSingleton<RepositoryService>()
                 // Git storage
                 .Configure<GitStorageSettings>(configuration.GetSection(nameof(GitStorageSettings)))
                 .AddSingleton(s => s.GetRequiredService<IOptions<GitStorageSettings>>().Value)
-                .AddSingleton<GitStorage>()
                 // Json storage
                 .Configure<JsonStorageSettings>(configuration.GetSection(nameof(JsonStorageSettings)))
-                .AddSingleton(s => s.GetRequiredService<IOptions<JsonStorageSettings>>().Value)
-                .AddSingleton<JsonStorage>();
+                .AddSingleton(s => s.GetRequiredService<IOptions<JsonStorageSettings>>().Value);
+        }
+
+        public static IServiceCollection AddServices(this IServiceCollection serviceCollection) {
+            return serviceCollection
+                .AddSingleton<MongoService>()
+                .AddSingleton<GitHubService>()
+                .AddSingleton<RepositoryService>()
+                .AddSingleton<GitStorage>()
+                .AddSingleton<JsonStorage>()
+                .AddSingleton<Factory<User>>();
         }
     }
 }

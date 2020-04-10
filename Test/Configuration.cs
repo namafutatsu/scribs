@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Reflection;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.TestHost;
@@ -28,7 +29,12 @@ namespace Scribs.Test {
                 configureAction = (sc) => { };
             }
             var builder = new WebHostBuilder()
-                .ConfigureServices(sc => sc.AddSingleton<Action<IServiceCollection>>(configureAction))
+                .ConfigureServices(sc => sc.AddSingleton(configureAction))
+                .UseConfiguration(new ConfigurationBuilder()
+                    .SetBasePath(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location))
+                    .AddJsonFile("appsettings.json")
+                    .Build()
+                )
                 .UseStartup<ConfigurableStartup>()
                 .UseSetting(WebHostDefaults.ApplicationKey, typeof(Startup).GetTypeInfo().Assembly.GetName().Name);
             return builder;
