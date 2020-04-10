@@ -26,7 +26,9 @@ namespace Scribs.API {
         public void ConfigureServices(IServiceCollection services) {
             services.Configure(Configuration)
                 .AddControllers();
+            ConfigureAdditionalServices(services); ;
         }
+
         protected virtual void ConfigureAdditionalServices(IServiceCollection services) {
         }
 

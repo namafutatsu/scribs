@@ -15,9 +15,9 @@ namespace Scribs.Core.Services {
             return entity;
         }
 
-        public E Get(string id) => collection.Find<E>(o => o.Key == id).FirstOrDefault();
+        public virtual E Get(string id) => collection.Find<E>(o => o.Key == id).FirstOrDefault();
 
-        public E GetByName(string name) => collection.Find<E>(o => o.Name == name).FirstOrDefault();
+        public virtual E GetByName(string name) => collection.Find<E>(o => o.Name == name).FirstOrDefault();
 
         public List<E> Get() => collection.Find(o => true).ToList();
 
