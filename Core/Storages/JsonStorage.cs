@@ -4,13 +4,13 @@ using System.Text;
 using Scribs.Core.Entities;
 
 namespace Scribs.Core.Storages {
-    public class JsonStorage {
-        private string root;
+    public class JsonStorage: ILocalStorage {
         public const string jsonDocument = ".json";
+        public string Root { get; }
 
         public JsonStorage(JsonStorageSettings settings) {
             if (settings.Local)
-                root = settings.Root;
+                Root = settings.Root;
         }
 
         public object JsonConvert { get; private set; }
@@ -20,7 +20,7 @@ namespace Scribs.Core.Storages {
 
         public Document Load(string userName, string name, bool content = true) {
             var user = User.GetByName(userName);
-            string path = Path.Combine(root, user.Path, name);
+            string path = Path.Combine(Root, user.Path, name);
             if (!Directory.Exists(path))
                 Directory.CreateDirectory(path);
             var project = ReadJson(Path.Combine(path, jsonDocument));
@@ -51,7 +51,7 @@ namespace Scribs.Core.Storages {
         }
 
         public void Save(Document project, bool content) {
-            string path = Path.Combine(root, project.User.Path, project.Name);
+            string path = Path.Combine(Root, project.User.Path, project.Name);
             if (Directory.Exists(path))
                 Directory.Delete(path, true);
             Directory.CreateDirectory(path);

@@ -1,22 +1,69 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.IO;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
-using Moq;
+using Scribs.Core;
 using Scribs.Core.Entities;
 using Scribs.Core.Services;
+using Scribs.Core.Storages;
 
 namespace Scribs.Test {
     public class Fixture: IDisposable {
-        public ConfigurableServer Server { get; }
+        public string userName = "Kenny";
+        public string projectName = "Test";
+        public ConfigurableServer Server => new ConfigurableServer();
+        public IServiceProvider Services => Server.Services;
+        public User User { get; }
+        public Document Project { get; }
 
         public Fixture() {
-            var userFactory = new Mock<Factory<User>>(null);
-            userFactory.Setup(m => m.GetByName(It.Is<string>(o => o == "gdrtf"))).Returns(new User("gdrtf") { Mail = "gdrtf@mail.com" });
-            var serviceDescriptor = new ServiceDescriptor(typeof(Factory<User>), userFactory.Object);
-            Server = new ConfigurableServer(sc => sc.Replace(serviceDescriptor));
+            User = CreateUser(userName);
+            Project = new Document(projectName, User);
+            ClearData();
+            //SaveEntity(User);
+            //Services.GetService<GitHubService>().Create(Project);
         }
 
+        private User CreateUser(string userName) => new User(userName) {
+            Mail = $"{userName}@scribs.io",
+            Password = "azerty",
+        };
+
+        private void SaveEntity<E>(E entity) where E : Entity {
+            var factory = Services.GetFactory<E>();
+            factory.Create(entity);
+        }
+
+        private void DeleteEntity<E>(string name) where E : Entity {
+            var factory = Services.GetFactory<E>();
+            E entity = factory.GetByName(name);
+            if (entity != null) {
+                factory.Remove(entity);
+            }
+        }
+
+        public void ClearData() {
+            Services.GetService<GitHubService>().Delete(Project);
+            DeleteEntity<User>(userName);
+            foreach (var storage in new List<ILocalStorage> {
+                Services.GetService<GitStorage>(),
+                Services.GetService<JsonStorage>()
+            }) {
+                string path = Path.Combine(storage.Root, User.Path);
+                if (Directory.Exists(path))
+                    Directory.Delete(path, true);
+            }
+        }
+
+        //public void CloneTestRepo() {
+        //    var repositoryService = Server.Services.GetService<RepositoryService>();
+        //    var gitStorage = Server.Services.GetService<GitStorage>();
+        //    string path = Path.Combine(gitStorage.Root, User.Path, repoName);
+        //    repositoryService.Clone($"scribs_{userName}_{repoName}", path);
+        //}
+
         public void Dispose() {
+            //ClearData();
             Server.Dispose();
         }
     }

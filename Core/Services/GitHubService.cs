@@ -1,8 +1,10 @@
 ﻿using Octokit;
+using Scribs.Core.Entities;
 
 namespace Scribs.Core.Services {
     public class GitHubService {
         private GitHubClient gitHubClient;
+        private string owner;
 
         public GitHubService(IGitHubSettings settings) {
             var basicAuth = new Octokit.Credentials(settings.Username, settings.Password);
@@ -10,9 +12,20 @@ namespace Scribs.Core.Services {
             gitHubClient.Credentials = basicAuth;
         }
 
+        public string GetRepoName(Document project) => $"scribs_{project.User.Name}_{project.Name}";
+
         public void Create(string repoName) {
             gitHubClient.Repository.Create(new NewRepository(repoName) { Private = true, AutoInit = true }).Wait();
         }
+
+        public void Create(Document project) => Create(GetRepoName(project));
+
+        public void Delete(string repoName) {
+            var repo = gitHubClient.Repository.Get(gitHubClient.Credentials.Login, repoName);
+            gitHubClient.Repository.Delete(repo.Id).Wait();
+        }
+
+        public void Delete(Document project) => Delete(GetRepoName(project));
     }
 
     public class GitHubSettings : IGitHubSettings {

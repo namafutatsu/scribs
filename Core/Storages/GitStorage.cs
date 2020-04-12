@@ -7,15 +7,15 @@ using Scribs.Core.Entities;
 using Scribs.Core.Services;
 
 namespace Scribs.Core.Storages {
-    public class GitStorage {
-        private string root;
+    public class GitStorage: ILocalStorage {
         private const string directoryDocument = ".dir.md";
         private GitHubService gitHubService;
         public RepositoryService repositoryService;
+        public string Root { get; }
 
         public GitStorage(GitStorageSettings settings, GitHubService gitHubService, RepositoryService repositoryService) {
             if (settings.Local)
-                root = settings.Root;
+                Root = settings.Root;
             this.gitHubService = gitHubService;
             this.repositoryService = repositoryService;
         }
@@ -24,14 +24,13 @@ namespace Scribs.Core.Storages {
         public void Save(Document project) => Save(project);
 
         public void Save(Document project, string message = null) {
-            string repoName = $"scribs_{project.User.Name}_{project.Name}";
-            var path = Path.Combine(root, project.User.Path, project.Name);
+            var path = Path.Combine(Root, project.User.Path, project.Name);
             if (!repositoryService.IsRepo(path))
-                gitHubService.Create(repoName);
+                gitHubService.Create(project);
             if (Directory.Exists(path))
                 repositoryService.Pull(path);
             else
-                repositoryService.Clone(repoName, path);
+                repositoryService.Clone(gitHubService.GetRepoName(project), path);
             EmptyProject(path);
             SaveDirectory(project, true);
             if (message == null)
@@ -48,10 +47,10 @@ namespace Scribs.Core.Storages {
         }
 
         private void SaveDirectory(Document parent, bool content) {
-            if (!Directory.Exists(Path.Combine(root, parent.Path)))
-                Directory.CreateDirectory(Path.Combine(root, parent.Path));
+            if (!Directory.Exists(Path.Combine(Root, parent.Path)))
+                Directory.CreateDirectory(Path.Combine(Root, parent.Path));
             if (parent.Metadata.Any(o => o.Value != null) || parent.Text != null)
-                WriteDocument(parent, Path.Combine(root, parent.Path, directoryDocument), content);
+                WriteDocument(parent, Path.Combine(Root, parent.Path, directoryDocument), content);
             if (parent.Documents == null)
                 return;
             foreach (var document in parent.Documents)
@@ -62,7 +61,7 @@ namespace Scribs.Core.Storages {
         }
 
         private void SaveFile(Document document, bool content) {
-            WriteDocument(document, Path.Combine(root, document.Path + ".md"), content);
+            WriteDocument(document, Path.Combine(Root, document.Path + ".md"), content);
         }
 
         private void WriteDocument(Document document, string path, bool content) {
@@ -88,7 +87,7 @@ namespace Scribs.Core.Storages {
 
         public Document Load(string userName, string name, bool content = true) {
             var user = User.GetByName(userName);
-            string path = Path.Combine(root, user.Path, name);
+            string path = Path.Combine(Root, user.Path, name);
             repositoryService.Pull(path);
             var project = LoadDirectory(user, null, path, content);
             project.Repo = repositoryService.Url(path);
@@ -121,7 +120,7 @@ namespace Scribs.Core.Storages {
                 index = 0;
             else if (sections.Length > 1)
                 name = sections.Skip(1).Aggregate((a, b) => a + "." + b);
-            var document = new Document(Utils.CreateGuid(), name, user, parent);
+            var document = new Document(name, user, Utils.CreateGuid(), parent);
             document.Index = index;
             if (isLeaf) {
                 ReadMetadata(document, path);

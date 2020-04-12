@@ -11,9 +11,8 @@ namespace Scribs.Core.Services {
                 collection = mongoService.GetCollection<E>(typeof(E).Name);
         }
 
-        public virtual E Create(E entity) {
+        public virtual void Create(E entity) {
             collection.InsertOne(entity);
-            return entity;
         }
 
         public virtual E Get(string id) => collection.Find<E>(o => o.Key == id).FirstOrDefault();

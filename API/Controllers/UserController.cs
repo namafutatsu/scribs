@@ -9,7 +9,7 @@ using Scribs.Core.Services;
 
 namespace Scribs.API.Controllers {
 
-    [Route("api/[controller]")]
+    [Route("api/[controller]/[action]")]
     [ApiController]
     public class UserController : ControllerBase {
 
@@ -17,32 +17,32 @@ namespace Scribs.API.Controllers {
 
         public UserController(Factory<User> factory) => this.factory = factory;
 
-        // GET: api/User
         [HttpGet]
-        public User Get() {
-            var user = factory.GetByName("gdrtf");
-            return user;
+        public List<User> Get() {
+            return factory.Get();
         }
 
-        // GET: api/User/5
         [HttpGet("{id}", Name = "Get")]
-        public string Get(int id) {
-            return "value";
+        public User Get(string id) {
+            return factory.Get(id);
         }
 
-        // POST: api/User
-        [HttpPost]
-        public void Post([FromBody] string value) {
+        [HttpGet("{name}", Name = "GetByName")]
+        public User GetByName(string name) {
+            return factory.GetByName(name);
         }
 
-        // PUT: api/User/5
-        [HttpPut("{id}")]
-        public void Put(int id, [FromBody] string value) {
-        }
+        //[HttpPost]
+        //public void Post([FromBody] string value) {
+        //}
 
-        // DELETE: api/ApiWithActions/5
+        //[HttpPut("{id}")]
+        //public void Put(int id, [FromBody] string value) {
+        //}
+
         [HttpDelete("{id}")]
-        public void Delete(int id) {
+        public void Delete(string id) {
+            factory.Remove(id);
         }
     }
 }

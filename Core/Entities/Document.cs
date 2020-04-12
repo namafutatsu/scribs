@@ -10,11 +10,13 @@ using MongoDB.Driver;
 namespace Scribs.Core.Entities {
 
     [DataContract]
-    public class Document {
-        [BsonId][BsonRepresentation(BsonType.ObjectId)][BsonElement("_id")][DataMember] public string Key { get; set; }
-        [BsonElement("Name")][DataMember] public string Name { get; set; }
-        [BsonElement("Documents")][DataMember] public ObservableCollection<Document> Documents { get; set; }
-        [BsonElement("Index")][DataMember] public int Index { get; set; }
+    public class Document: Entity {
+        [BsonElement("Documents")]
+        [DataMember]
+        public ObservableCollection<Document> Documents { get; set; }
+        [BsonElement("Index")]
+        [DataMember]
+        public int Index { get; set; }
         public string Text { get; set; }
 
         public bool IsLeaf => Documents == null;
@@ -27,8 +29,8 @@ namespace Scribs.Core.Entities {
         public IDictionary<string, Document> AllDocuments { get; set; }
         [BsonElement("Repo")][DataMember]public string Repo { get; set; }
 
-        public Document(string key, string name, User user, Document parent) {
-            Key = key;
+        public Document(string name, User user, string key = null, Document parent = null) {
+            Key = key ?? Utils.CreateGuid();
             Name = name;
             User = user;
             SetParent(parent, false);
