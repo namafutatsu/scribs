@@ -4,10 +4,8 @@ using Scribs.Core.Entities;
 namespace Scribs.Core.Services {
     public class GitHubService {
         private GitHubClient gitHubClient;
-        private string owner;
-
         public GitHubService(IGitHubSettings settings) {
-            var basicAuth = new Octokit.Credentials(settings.Username, settings.Password);
+            var basicAuth = new Credentials(settings.Username, settings.Password);
             gitHubClient = new GitHubClient(new ProductHeaderValue("scribs"));
             gitHubClient.Credentials = basicAuth;
         }
@@ -21,11 +19,15 @@ namespace Scribs.Core.Services {
         public void Create(Document project) => Create(GetRepoName(project));
 
         public void Delete(string repoName) {
-            var repo = gitHubClient.Repository.Get(gitHubClient.Credentials.Login, repoName);
-            gitHubClient.Repository.Delete(repo.Id).Wait();
+            try {
+                var repo = gitHubClient.Repository.Get(gitHubClient.Credentials.Login, repoName).Result;
+                gitHubClient.Repository.Delete(repo.Id).Wait();
+            } catch { }
         }
 
         public void Delete(Document project) => Delete(GetRepoName(project));
+        public bool Exists(string repoName) => gitHubClient.Repository.Get(gitHubClient.Credentials.Login, repoName) != null;
+        public bool Exists(Document project) => Exists(GetRepoName(project));
     }
 
     public class GitHubSettings : IGitHubSettings {

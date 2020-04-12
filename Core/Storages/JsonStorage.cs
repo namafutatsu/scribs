@@ -89,7 +89,7 @@ namespace Scribs.Core.Storages {
     }
 
     public class JsonStorageSettings : IStorageSettings {
-        public bool Local { get; set; }
-        public string Root { get; set; }
+        public virtual bool Local { get; set; }
+        public virtual string Root { get; set; }
     }
 }

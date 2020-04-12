@@ -21,12 +21,7 @@ namespace Scribs.Core.Services {
         }        
 
         public bool IsRepo(string path) {
-            try {
-                new Repository(path);
-                return true;
-            } catch {
-                return false;
-            }
+            return Repository.IsValid(path);
         }
 
         public string Url(string path) {

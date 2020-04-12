@@ -21,7 +21,6 @@ namespace Scribs.Core.Storages {
         }
 
         public Document Load(string userName, string name) => Load(userName, name, true);
-        public void Save(Document project) => Save(project);
 
         public void Save(Document project, string message = null) {
             var path = Path.Combine(Root, project.User.Path, project.Name);
@@ -120,7 +119,7 @@ namespace Scribs.Core.Storages {
                 index = 0;
             else if (sections.Length > 1)
                 name = sections.Skip(1).Aggregate((a, b) => a + "." + b);
-            var document = new Document(name, user, Utils.CreateGuid(), parent);
+            var document = new Document(name, user, parent, Utils.CreateGuid());
             document.Index = index;
             if (isLeaf) {
                 ReadMetadata(document, path);
@@ -183,7 +182,7 @@ namespace Scribs.Core.Storages {
     }
 
     public class GitStorageSettings : IStorageSettings {
-        public bool Local { get; set; }
-        public string Root { get; set; }
+        public virtual bool Local { get; set; }
+        public virtual string Root { get; set; }
     }
 }

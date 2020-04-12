@@ -29,11 +29,21 @@ namespace Scribs.Core.Entities {
         public IDictionary<string, Document> AllDocuments { get; set; }
         [BsonElement("Repo")][DataMember]public string Repo { get; set; }
 
-        public Document(string name, User user, string key = null, Document parent = null) {
+        public Document(string name, User user, Document parent = null, string key = null) {
             Key = key ?? Utils.CreateGuid();
             Name = name;
             User = user;
             SetParent(parent, false);
+        }
+
+        public Document CreateDocument(string name, string text = null) {
+            var document = new Document(name, User, this) {
+                Text = text
+            };
+            if (Documents == null)
+                Documents = new ObservableCollection<Document>();
+            Documents.Add(document);
+            return document;
         }
 
         public static void BuildProject(Document project, User user) {

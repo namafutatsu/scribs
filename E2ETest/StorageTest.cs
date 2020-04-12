@@ -3,7 +3,7 @@ using Newtonsoft.Json;
 using Xunit;
 using Scribs.Core.Entities;
 
-namespace Scribs.Test {
+namespace Scribs.E2ETest {
     public class StorageTest : IClassFixture<Fixture> {
         Fixture fixture;
 
