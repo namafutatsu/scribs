@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
 using System.Runtime.Serialization;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
@@ -30,6 +31,7 @@ namespace Scribs.Core.Entities {
 
         public Document(string name, User user, Document parent = null, string key = null) {
             Key = key ?? Utils.CreateGuid();
+            NoMetadata = key == null;
             Name = name;
             User = user;
             SetParent(parent, false);
@@ -62,7 +64,9 @@ namespace Scribs.Core.Entities {
             Project = parent.Project;
             User = parent.User;
             if (Project.AllDocuments == null)
-                Project.AllDocuments = new Dictionary<string, Document>();
+                Project.AllDocuments = new Dictionary<string, Document> {
+                    [Project.Key] = Project
+                };
             Project.AllDocuments.Add(Key, this);
             if (recurrence && Documents != null)
                 foreach (var child in Documents)
@@ -72,6 +76,26 @@ namespace Scribs.Core.Entities {
         public void OrderDocument(Document document, int index) {
             var oldIndex = Documents.IndexOf(document);
             Documents.Move(oldIndex, index);
+        }
+
+        public bool NoMetadata { get; set; } = false;
+        public override bool Equals(object obj) {
+            var other = obj as Document;
+            if (Name != other.Name ||
+                User.Name != other.User.Name ||
+                Text != other.Text)
+                return false;
+            if (!NoMetadata && !other.NoMetadata && (Key != other.Key || Index != other.Index))
+                return false;
+            if (Documents?.Count != other.Documents?.Count)
+                return false;
+            if (Documents != null) 
+                foreach (var document in Documents) {
+                    var otherDocument = other.Documents?.SingleOrDefault(o => o.Name == document.Name);
+                    if (otherDocument == null || !document.Equals(otherDocument))
+                        return false;
+                }
+            return true;
         }
 
         public IDictionary<string, string> Metadata {

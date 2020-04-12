@@ -100,11 +100,11 @@ namespace Scribs.Core.Storages {
             var directory = LoadDocument(user, parent, path, content, false);
             var documents = new List<Document>();
             foreach (var subdirectory in Directory.GetDirectories(path, "*", SearchOption.TopDirectoryOnly)) {
-                if (Path.GetFileName(subdirectory) == ".git")
+                if (Path.GetFileName(subdirectory).StartsWith("."))// == ".git")
                     continue;
                 documents.Add(LoadDirectory(user, directory, subdirectory, content));
             }
-            foreach (var file in Directory.GetFiles(path).Where(o => o.EndsWith(".md")))
+            foreach (var file in Directory.GetFiles(path).Where(o => o.EndsWith(".md") && !Path.GetFileName(o).StartsWith(".")))
                 documents.Add(LoadFile(user, directory, file, content));
             directory.Documents = new ObservableCollection<Document>(
                 documents.OrderBy(o => o.IsLeaf).ThenBy(o => o.Index).ThenBy(o => o.Name));
