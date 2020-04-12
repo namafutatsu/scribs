@@ -4,15 +4,22 @@ using System.IO;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Moq;
+using Xunit;
 using Scribs.Core;
 using Scribs.Core.Entities;
 using Scribs.Core.Services;
 using Scribs.Core.Storages;
 
 namespace Scribs.E2ETest {
+
+    [CollectionDefinition("E2E")]
+    public class DatabaseCollection : ICollectionFixture<Fixture> {
+    }
+
     public class Fixture: IDisposable {
-        public string userName = "Kenny";
-        public string projectName = "Test";
+        public string UserName => "Kenny";
+        public string UserMail => $"{UserName}@scribs.io";
+        public string ProjectName => "Test";
         public ConfigurableServer Server;
         public IServiceProvider Services => Server.Services;
         public User User { get; }
@@ -20,12 +27,13 @@ namespace Scribs.E2ETest {
 
         public Fixture() {
             Server = CreateServer();
-            User = CreateUser(userName);
-            Project = new Document(projectName, User);
+            User = CreateUser(UserName);
+            Project = new Document(ProjectName, User);
             ClearData();
             SaveEntity(User);
             FillProject(Project);
-            SaveProject(Project);
+            SaveProject<GitStorage>(Project);
+            SaveProject<JsonStorage>(Project);
             CommitRepo(Project);
         }
 
@@ -45,7 +53,7 @@ namespace Scribs.E2ETest {
         }
 
         private User CreateUser(string userName) => new User(userName) {
-            Mail = $"{userName}@scribs.io",
+            Mail = UserMail,
             Password = "azerty",
         };
 
@@ -74,7 +82,7 @@ namespace Scribs.E2ETest {
 
         public void ClearData() {
             DeleteGitHubRepo(Project);
-            DeleteEntity<User>(userName);
+            DeleteEntity<User>(UserName);
             foreach (var storage in new List<ILocalStorage> {
                 Services.GetService<GitStorage>(),
                 Services.GetService<JsonStorage>()
@@ -106,12 +114,12 @@ namespace Scribs.E2ETest {
             archives.CreateDocument("archives01", "Praesent sit amet enim urna. Nunc facilisis laoreet urna a efficitur. Nulla et egestas nisi. Integer vitae commodo justo. Nulla semper felis at elit maximus aliquam. Donec ornare nisl ut malesuada viverra. Duis eget interdum lacus. Donec ante diam, pellentesque eu diam vel, interdum convallis dolor. Integer eget nisl vel neque sollicitudin fermentum. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam quis urna nisl. Vestibulum vestibulum, nunc blandit tempor condimentum, orci eros ultricies felis, vitae aliquam tortor dolor tincidunt est. Cras posuere, mauris ac pulvinar tempor, enim metus pulvinar velit, in rutrum enim ante sed tellus.");
         }
 
-        private void SaveProject(Document project) {
-            Services.GetService<GitStorage>().Save(project);
+        private void SaveProject<S>(Document project) where S: ILocalStorage {
+            Services.GetService<S>().Save(project);
         }
 
         public void Dispose() {
-            //ClearData();
+            ClearData();
             Server.Dispose();
         }
     }

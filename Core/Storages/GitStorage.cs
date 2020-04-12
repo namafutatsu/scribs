@@ -21,6 +21,7 @@ namespace Scribs.Core.Storages {
         }
 
         public Document Load(string userName, string name) => Load(userName, name, true);
+        public void Save(Document project) => Save(project, null);
 
         public void Save(Document project, string message = null) {
             var path = Path.Combine(Root, project.User.Path, project.Name);

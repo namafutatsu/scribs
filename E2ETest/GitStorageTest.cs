@@ -4,15 +4,17 @@ using Xunit;
 using Scribs.Core.Entities;
 
 namespace Scribs.E2ETest {
-    public class StorageTest : IClassFixture<Fixture> {
+
+    [Collection("E2E")]
+    public class GitStorageTest : IClassFixture<Fixture> {
         Fixture fixture;
 
-        public StorageTest(Fixture fixture) {
+        public GitStorageTest(Fixture fixture) {
             this.fixture = fixture;
         }
 
         [Fact]
-        public async Task Storage() {
+        public void Storage() {
         }
     }
 }

@@ -1,18 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Runtime.Serialization;
-
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
-using MongoDB.Driver;
 
 namespace Scribs.Core.Entities {
 
     [DataContract]
     public class Document: Entity {
         [BsonElement("Documents")]
-        [DataMember]
+        [DataMember(EmitDefaultValue = false)]
         public ObservableCollection<Document> Documents { get; set; }
         [BsonElement("Index")]
         [DataMember]
@@ -27,7 +24,9 @@ namespace Scribs.Core.Entities {
 
         // Project
         public IDictionary<string, Document> AllDocuments { get; set; }
-        [BsonElement("Repo")][DataMember]public string Repo { get; set; }
+        [BsonElement("Repo")]
+        [DataMember(EmitDefaultValue = false)]
+        public string Repo { get; set; }
 
         public Document(string name, User user, Document parent = null, string key = null) {
             Key = key ?? Utils.CreateGuid();
