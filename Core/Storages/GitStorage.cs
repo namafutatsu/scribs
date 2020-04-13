@@ -3,17 +3,20 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
+using System.Text;
 using Scribs.Core.Entities;
 using Scribs.Core.Services;
 
 namespace Scribs.Core.Storages {
     public class GitStorage: ILocalStorage {
         private const string directoryDocument = ".dir.md";
+        private SystemService system;
         private GitHubService gitHubService;
         public RepositoryService repositoryService;
         public string Root { get; }
 
-        public GitStorage(GitStorageSettings settings, GitHubService gitHubService, RepositoryService repositoryService) {
+        public GitStorage(GitStorageSettings settings, GitHubService gitHubService, RepositoryService repositoryService, SystemService system) {
+            this.system = system;
             if (settings.Local)
                 Root = settings.Root;
             this.gitHubService = gitHubService;
@@ -24,20 +27,20 @@ namespace Scribs.Core.Storages {
         public void Save(Document project) => Save(project, null);
 
         public void Save(Document project, string message = null) {
-            var path = Path.Combine(Root, project.User.Path, project.Name);
+            var path = system.PathCombine(Root, project.User.Path, project.Name);
             if (project.Disconnect) {
-                if (!Directory.Exists(path))
-                    Directory.CreateDirectory(path);
+                if (!system.NodeExists(path))
+                    system.CreateNode(path);
             } else {
                 if (!repositoryService.IsRepo(path))
                     gitHubService.Create(project);
-                if (Directory.Exists(path))
+                if (system.NodeExists(path))
                     repositoryService.Pull(path);
                 else
                     repositoryService.Clone(gitHubService.GetRepoName(project), path);
             }
             EmptyProject(path);
-            SaveDirectory(project, Path.Combine(Root, project.Path), true);
+            SaveDirectory(project, system.PathCombine(Root, project.Path), true);
             if (message == null)
                 message = DateTime.Now.ToString();
             if (!project.Disconnect)
@@ -45,11 +48,11 @@ namespace Scribs.Core.Storages {
         }
 
         private void EmptyProject(string path) {
-            var gitPath = Path.Combine(path, ".git");
-            foreach (var file in Directory.GetFiles(path))
-                File.Delete(file);
-            foreach (var directory in Directory.GetDirectories(path).Where(o => o != gitPath))
-                Directory.Delete(directory, true);
+            var gitPath = system.PathCombine(path, ".git");
+            foreach (var file in system.GetLeaves(path))
+                system.DeleteLeaf(file);
+            foreach (var directory in system.GetNodes(path).Where(o => o != gitPath))
+                system.DeleteNode(directory, true);
         }
 
         private string GetIndexPrefix(Document document) {
@@ -58,22 +61,22 @@ namespace Scribs.Core.Storages {
         }
 
         private void SaveDirectory(Document directory, string path, bool content) {
-            if (!Directory.Exists(path))
-                Directory.CreateDirectory(Path.Combine(Root, path));
+            if (!system.NodeExists(path))
+                system.CreateNode(system.PathCombine(Root, path));
             if (directory.Metadata.Any(o => o.Value != null) || directory.Text != null)
-                WriteDocument(directory, Path.Combine(Root, path, directoryDocument), content);
+                WriteDocument(directory, system.PathCombine(Root, path, directoryDocument), content);
             if (directory.Documents == null)
                 return;
             foreach (var document in directory.Documents)
                 if (!document.IsLeaf) {
-                    SaveDirectory(document, Path.Combine(path, (directory.IndexNodes.HasValue && directory.IndexNodes.Value ? GetIndexPrefix(document) : String.Empty) + document.Name), content);
+                    SaveDirectory(document, system.PathCombine(path, (directory.IndexNodes.HasValue && directory.IndexNodes.Value ? GetIndexPrefix(document) : String.Empty) + document.Name), content);
                 } else {
                     SaveFile(document, path, content, directory.IndexLeaves ?? true);
                 }
         }
 
         private void SaveFile(Document file, string path, bool content, bool saveIndex) {
-            WriteDocument(file, Path.Combine(path, (saveIndex ? GetIndexPrefix(file) : String.Empty) + file.Name + ".md"), content);
+            WriteDocument(file, system.PathCombine(path, (saveIndex ? GetIndexPrefix(file) : String.Empty) + file.Name + ".md"), content);
         }
 
         private void WriteDocument(Document document, string path, bool content) {
@@ -84,22 +87,22 @@ namespace Scribs.Core.Storages {
                 metadataLines.Add($"{metadata.Key}: {metadata.Value}");
             }
             if (metadataLines.Any() || (content && document.Text != null)) {
-                using (StreamWriter sw = File.CreateText(path)) {
-                    if (metadataLines.Any()) {
-                        sw.WriteLine("---");
-                        foreach (var line in metadataLines)
-                            sw.WriteLine(line);
-                        sw.WriteLine("---");
-                    }
-                    if (content && document.Text != null)
-                        sw.Write(document.Text);
+                var builder = new StringBuilder();
+                if (metadataLines.Any()) {
+                    builder.AppendLine("---");
+                    foreach (var line in metadataLines)
+                        builder.AppendLine(line);
+                    builder.AppendLine("---");
                 }
+                if (content && document.Text != null)
+                    builder.Append(document.Text);
+                system.WriteLeaf(path, builder);
             }
         }
 
         public Document Load(string userName, string name, bool content = true) {
             var user = User.GetByName(userName);
-            string path = Path.Combine(Root, user.Path, name);
+            string path = system.PathCombine(Root, user.Path, name);
             bool disconnect = false;
             try {
                 repositoryService.Pull(path);
@@ -114,16 +117,16 @@ namespace Scribs.Core.Storages {
         }
 
         private Document LoadDirectory(User user, Document parent, string path, bool content) {
-            if (!Directory.Exists(path))
-                Directory.CreateDirectory(path);
+            if (!system.NodeExists(path))
+                system.CreateNode(path);
             var directory = LoadDocument(user, parent, path, content, false, parent?.IndexNodes ?? false);
             var documents = new List<Document>();
-            foreach (var subdirectory in Directory.GetDirectories(path, "*", SearchOption.TopDirectoryOnly)) {
-                if (Path.GetFileName(subdirectory).StartsWith("."))// == ".git")
+            foreach (var subdirectory in system.GetNodes(path, "*", SearchOption.TopDirectoryOnly)) {
+                if (system.GetName(subdirectory).StartsWith("."))// == ".git")
                     continue;
                 documents.Add(LoadDirectory(user, directory, subdirectory, content));
             }
-            foreach (var file in Directory.GetFiles(path).Where(o => o.EndsWith(".md") && !Path.GetFileName(o).StartsWith(".")))
+            foreach (var file in system.GetLeaves(path).Where(o => o.EndsWith(".md") && !system.GetName(o).StartsWith(".")))
                 documents.Add(LoadFile(user, directory, file, content));
             directory.Documents = new ObservableCollection<Document>(
                 documents.OrderBy(o => o.IsLeaf).ThenBy(o => o.Index).ThenBy(o => o.Name));
@@ -131,7 +134,7 @@ namespace Scribs.Core.Storages {
         }
 
         private Document LoadDocument(User user, Document parent, string path, bool content, bool isLeaf, bool loadIndex) {
-            var name = Path.GetFileName(path);
+            var name = system.GetName(path);
             if (isLeaf)
                 name = name.Substring(0, name.LastIndexOf("."));
             int index = 0;
@@ -149,7 +152,7 @@ namespace Scribs.Core.Storages {
                 if (content)
                     ReadDocument(document, path);
             } else {
-                var hidden = Directory.GetFiles(path, directoryDocument).SingleOrDefault();
+                var hidden = system.GetLeaves(path, directoryDocument).SingleOrDefault();
                 if (hidden != null) {
                     ReadMetadata(document, hidden);
                     if (content)
@@ -164,7 +167,7 @@ namespace Scribs.Core.Storages {
         }
 
         private void ReadMetadata(Document document, string path) {
-            using (StreamReader reader = new StreamReader(path)) {
+            using (var reader = system.ReadLeaf(path)) {
                 if (reader.ReadLine().StartsWith("---")) {
                     string line = reader.ReadLine();
                     while (!line.StartsWith("---")) {
@@ -194,14 +197,13 @@ namespace Scribs.Core.Storages {
         }
 
         private void ReadDocument(Document document, string path) {
-            using (StreamReader reader = new StreamReader(path)) {
+            using (var reader = system.ReadLeaf(path)) {
                 if (reader.ReadLine().StartsWith("---")) {
                     string line = reader.ReadLine();
                     while (!line.StartsWith("---"))
                         line = reader.ReadLine();
                 } else {
-                    reader.DiscardBufferedData();
-                    reader.BaseStream.Seek(0, SeekOrigin.Begin);
+                    reader.Reset();
                 }
                 var text = reader.ReadToEnd();
                 if (!String.IsNullOrEmpty(text))

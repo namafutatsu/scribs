@@ -33,6 +33,7 @@ namespace Scribs.Core.Services {
 
         public static IServiceCollection AddServices(this IServiceCollection serviceCollection) {
             return serviceCollection
+                .AddSingleton<SystemService>()
                 .AddSingleton<MongoService>()
                 .AddSingleton<GitHubService>()
                 .AddSingleton<RepositoryService>()
