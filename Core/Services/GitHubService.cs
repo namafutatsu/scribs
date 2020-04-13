@@ -1,10 +1,13 @@
 ﻿using Octokit;
 using Scribs.Core.Entities;
+using System;
 
 namespace Scribs.Core.Services {
     public class GitHubService {
         private GitHubClient gitHubClient;
         public GitHubService(IGitHubSettings settings) {
+            if (String.IsNullOrEmpty(settings.Username))
+                return;
             var basicAuth = new Credentials(settings.Username, settings.Password);
             gitHubClient = new GitHubClient(new ProductHeaderValue("scribs"));
             gitHubClient.Credentials = basicAuth;

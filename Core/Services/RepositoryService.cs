@@ -12,6 +12,8 @@ namespace Scribs.Core.Services {
         public CredentialsHandler CredentialsHandler => new CredentialsHandler((url, usernameFromUrl, types) => credentials);
 
         public RepositoryService(IRepositorySettings settings) {
+            if (String.IsNullOrEmpty(settings.Username))
+                return;
             signature = new Signature(new Identity(settings.Username, settings.Mail), DateTimeOffset.Now);
             credentials = new UsernamePasswordCredentials() {
                 Username = settings.Owner,
