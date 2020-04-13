@@ -19,9 +19,9 @@ namespace Scribs.E2ETest {
         public void LoadGitIndexInFileName() {
             var project = fixture.Services.GetService<GitStorage>().Load(fixture.User.Name, fixture.Project.Name);
             var dave = fixture.Project
-                .Documents.FirstOrDefault(o => o.Name == "notes")?
-                .Documents.FirstOrDefault(o => o.Name == "chars")?
-                .Documents.SingleOrDefault(o => o.Index == 4);
+                .Children.FirstOrDefault(o => o.Name == "notes")?
+                .Children.FirstOrDefault(o => o.Name == "chars")?
+                .Children.SingleOrDefault(o => o.Index == 4);
             Assert.NotNull(dave);
             Assert.Equal("dave", dave.Name);
         }
@@ -30,8 +30,8 @@ namespace Scribs.E2ETest {
         public void LoadGitIndexInUnordedFile() {
             var project = fixture.Services.GetService<GitStorage>().Load(fixture.User.Name, fixture.Project.Name);
             var notes03 = fixture.Project
-                .Documents.FirstOrDefault(o => o.Name == "notes")?
-                .Documents.FirstOrDefault(o => o.Name == "notes03");
+                .Children.FirstOrDefault(o => o.Name == "notes")?
+                .Children.FirstOrDefault(o => o.Name == "notes03");
             Assert.NotNull(notes03);
             Assert.Equal(0, notes03.Index);
         }
@@ -40,7 +40,7 @@ namespace Scribs.E2ETest {
         public void LoadGitIndexInUnnamedFile() {
             var gitStorage = fixture.Services.GetService<GitStorage>();
             var project = gitStorage.Load(fixture.User.Name, fixture.Project.Name);
-            var file03 = project.Documents.FirstOrDefault(o => o.Name == "03");
+            var file03 = project.Children.FirstOrDefault(o => o.Name == "03");
             Assert.Equal(0, file03.Index); // Order alphabetically
             Assert.Equal("03", file03.Name);
         }
@@ -60,9 +60,9 @@ namespace Scribs.E2ETest {
             var storage = fixture.Services.GetService<JsonStorage>();
             var project = storage.Load(fixture.User.Name, fixture.Project.Name);
             var dave = fixture.Project
-                .Documents.FirstOrDefault(o => o.Name == "notes")?
-                .Documents.FirstOrDefault(o => o.Name == "chars")?
-                .Documents.SingleOrDefault(o => o.Index == 4);
+                .Children.FirstOrDefault(o => o.Name == "notes")?
+                .Children.FirstOrDefault(o => o.Name == "chars")?
+                .Children.SingleOrDefault(o => o.Index == 4);
             Assert.Equal("dave", dave.Name);
         }
 
@@ -71,8 +71,8 @@ namespace Scribs.E2ETest {
             var storage = fixture.Services.GetService<JsonStorage>();
             var project = storage.Load(fixture.User.Name, fixture.Project.Name);
             var notes03 = fixture.Project
-                .Documents.FirstOrDefault(o => o.Name == "notes")?
-                .Documents.FirstOrDefault(o => o.Name == "notes03");
+                .Children.FirstOrDefault(o => o.Name == "notes")?
+                .Children.FirstOrDefault(o => o.Name == "notes03");
             Assert.NotNull(notes03);
             Assert.Equal(0, notes03.Index);
         }
@@ -81,7 +81,7 @@ namespace Scribs.E2ETest {
         public void SaveAndLoadJsonIndexInUnnamedFile() {
             var storage = fixture.Services.GetService<JsonStorage>();
             var project = storage.Load(fixture.User.Name, fixture.Project.Name);
-            var file03 = project.Documents.FirstOrDefault(o => o.Name == "03");
+            var file03 = project.Children.FirstOrDefault(o => o.Name == "03");
             Assert.Equal(0, file03.Index);
             Assert.Equal("03", file03.Name);
         }
@@ -91,10 +91,10 @@ namespace Scribs.E2ETest {
             var project = storage.Load(fixture.User.Name, fixture.Project.Name);
             Assert.False(project.IndexNodes);
             Assert.False(project.IndexLeaves);
-            var notes = project.Documents.FirstOrDefault(o => o.Name == "notes");
+            var notes = project.Children.FirstOrDefault(o => o.Name == "notes");
             Assert.True(notes.IndexNodes);
             Assert.False(notes.IndexLeaves);
-            var chars = notes.Documents.FirstOrDefault(o => o.Name == "chars");
+            var chars = notes.Children.FirstOrDefault(o => o.Name == "chars");
             Assert.True(chars.IndexNodes); // Inheritance from notes
             Assert.True(chars.IndexLeaves);
         }

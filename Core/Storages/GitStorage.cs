@@ -47,7 +47,7 @@ namespace Scribs.Core.Storages {
                 repositoryService.Commit(path, message);
         }
 
-        private void EmptyProject(string path) {
+        public void EmptyProject(string path) {
             var gitPath = system.PathCombine(path, ".git");
             foreach (var file in system.GetLeaves(path))
                 system.DeleteLeaf(file);
@@ -55,28 +55,43 @@ namespace Scribs.Core.Storages {
                 system.DeleteNode(directory, true);
         }
 
-        private string GetIndexPrefix(Document document) {
+        public string GetIndexPrefix(Document document) {
             string prefix = document.Index.ToString();
             return prefix.PadLeft(2, '0') + ".";
         }
 
-        private void SaveDirectory(Document directory, string path, bool content) {
-            if (!system.NodeExists(path))
-                system.CreateNode(system.PathCombine(Root, path));
-            if (directory.Metadata.Any(o => o.Value != null) || directory.Text != null)
-                WriteDocument(directory, system.PathCombine(Root, path, directoryDocument), content);
-            if (directory.Documents == null)
-                return;
-            foreach (var document in directory.Documents)
-                if (!document.IsLeaf) {
-                    SaveDirectory(document, system.PathCombine(path, (directory.IndexNodes.HasValue && directory.IndexNodes.Value ? GetIndexPrefix(document) : String.Empty) + document.Name), content);
-                } else {
-                    SaveFile(document, path, content, directory.IndexLeaves ?? true);
+        public string GetDocumentPath(Document parent, Document document, string path) {
+            string name = document.Name;
+            if (parent != null) {
+                if (document.IsLeaf && parent.IndexLeaves.HasValue && parent.IndexLeaves.Value == true) {
+                    name = GetIndexPrefix(document) + name;
+                } else if (!document.IsLeaf && parent.IndexNodes.HasValue && parent.IndexNodes.Value == true) {
+                    name = GetIndexPrefix(document) + name;
                 }
+            }
+            if (document.IsLeaf)
+                name += ".md";
+            return Path.Join(path, name);
         }
 
-        private void SaveFile(Document file, string path, bool content, bool saveIndex) {
-            WriteDocument(file, system.PathCombine(path, (saveIndex ? GetIndexPrefix(file) : String.Empty) + file.Name + ".md"), content);
+        private void SaveDirectory(Document directory, string path, bool content) {
+            if (!system.NodeExists(path))
+                system.CreateNode(path);
+            if (directory.Metadata.Any(o => o.Value != null) || directory.Text != null)
+                WriteDocument(directory, system.PathCombine(path, directoryDocument), content);
+            if (directory.Children == null)
+                return;
+            foreach (var child in directory.Children) {
+                if (!child.IsLeaf) {
+                    SaveDirectory(child, GetDocumentPath(directory, child, path), content);
+                } else {
+                    SaveFile(directory, child, path, content);
+                }
+            }
+        }
+
+        private void SaveFile(Document parent, Document file, string path, bool content) {
+            WriteDocument(file, GetDocumentPath(parent, file, path), content);
         }
 
         private void WriteDocument(Document document, string path, bool content) {
@@ -96,7 +111,7 @@ namespace Scribs.Core.Storages {
                 }
                 if (content && document.Text != null)
                     builder.Append(document.Text);
-                system.WriteLeaf(path, builder);
+                system.WriteLeaf(path, builder.ToString());
             }
         }
 
@@ -128,7 +143,7 @@ namespace Scribs.Core.Storages {
             }
             foreach (var file in system.GetLeaves(path).Where(o => o.EndsWith(".md") && !system.GetName(o).StartsWith(".")))
                 documents.Add(LoadFile(user, directory, file, content));
-            directory.Documents = new ObservableCollection<Document>(
+            directory.Children = new ObservableCollection<Document>(
                 documents.OrderBy(o => o.IsLeaf).ThenBy(o => o.Index).ThenBy(o => o.Name));
             return directory;
         }

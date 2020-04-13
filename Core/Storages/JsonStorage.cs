@@ -66,9 +66,9 @@ namespace Scribs.Core.Storages {
         private void SaveDocument(Document document, string path) {
             if (document.Text != null)
                 WriteDocument(document, system.PathCombine(path, document.Key));
-            if (document.Documents == null)
+            if (document.Children == null)
                 return;
-            foreach (var child in document.Documents)
+            foreach (var child in document.Children)
                 SaveDocument(child, path);
         }
 

@@ -11,7 +11,7 @@ namespace Scribs.Core.Entities {
     public class Document: Entity {
         [BsonElement("Documents")]
         [DataMember(EmitDefaultValue = false)]
-        public ObservableCollection<Document> Documents { get; set; }
+        public ObservableCollection<Document> Children { get; set; }
         [BsonElement("Index")]
         [DataMember]
         public int Index { get; set; }
@@ -23,7 +23,7 @@ namespace Scribs.Core.Entities {
         public bool? IndexLeaves { get; set; }
         public string Text { get; set; }
 
-        public bool IsLeaf => Documents == null;
+        public bool IsLeaf => Children == null;
         public Document Parent { get; protected set; }
         public Document Project { get; protected set; }
         public User User { get; private set; }
@@ -50,16 +50,16 @@ namespace Scribs.Core.Entities {
                 document.Text = text;
             if (index.HasValue)
                 document.Index = index.Value;
-            if (Documents == null)
-                Documents = new ObservableCollection<Document>();
-            Documents.Add(document);
+            if (Children == null)
+                Children = new ObservableCollection<Document>();
+            Children.Add(document);
             return document;
         }
 
         public static void BuildProject(Document project, User user) {
             project.Project = project;
             project.User = user;
-            foreach (var child in project.Documents) {
+            foreach (var child in project.Children) {
                 child.SetParent(project, true);
             }
         }
@@ -86,14 +86,14 @@ namespace Scribs.Core.Entities {
                     [Project.Key] = Project
                 };
             Project.AllDocuments.Add(Key, this);
-            if (recurrence && Documents != null)
-                foreach (var child in Documents)
+            if (recurrence && Children != null)
+                foreach (var child in Children)
                     child.SetParent(this, true);
         }
 
         public void OrderDocument(Document document, int index) {
-            var oldIndex = Documents.IndexOf(document);
-            Documents.Move(oldIndex, index);
+            var oldIndex = Children.IndexOf(document);
+            Children.Move(oldIndex, index);
         }
 
         public bool NoMetadata { get; set; } = false;
@@ -107,11 +107,11 @@ namespace Scribs.Core.Entities {
                 return false;
             if (!NoMetadata && !other.NoMetadata && (Key != other.Key || Index != other.Index))
                 return false;
-            if (Documents?.Count != other.Documents?.Count)
+            if (Children?.Count != other.Children?.Count)
                 return false;
-            if (Documents != null) 
-                foreach (var document in Documents) {
-                    var otherDocument = other.Documents?.SingleOrDefault(o => o.Name == document.Name);
+            if (Children != null) 
+                foreach (var document in Children) {
+                    var otherDocument = other.Children?.SingleOrDefault(o => o.Name == document.Name);
                     if (otherDocument == null || !document.Equals(otherDocument))
                         return false;
                 }
