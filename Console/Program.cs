@@ -11,8 +11,6 @@ using Scribs.Core.Storages;
 
 namespace Scribs.Console {
     class Program {
-        private static Stream ms;
-
         static void Main(string[] args) {
             var configurationBuilder = new ConfigurationBuilder().SetBasePath(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location)).AddJsonFile("appsettings.json");
             var configuration = configurationBuilder.Build();

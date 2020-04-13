@@ -15,6 +15,12 @@ namespace Scribs.Core.Entities {
         [BsonElement("Index")]
         [DataMember]
         public int Index { get; set; }
+        [BsonElement("IndexNodes")]
+        [DataMember]
+        public bool? IndexNodes { get; set; }
+        [BsonElement("IndexLeaves")]
+        [DataMember]
+        public bool? IndexLeaves { get; set; }
         public string Text { get; set; }
 
         public bool IsLeaf => Documents == null;
@@ -22,6 +28,7 @@ namespace Scribs.Core.Entities {
         public Document Project { get; protected set; }
         public User User { get; private set; }
         public string Path => System.IO.Path.Join(Parent != null ? Parent.Path : User.Path, Name);
+        public bool Disconnect { get; set; } = false;
 
         // Project
         public IDictionary<string, Document> AllDocuments { get; set; }
@@ -37,10 +44,12 @@ namespace Scribs.Core.Entities {
             SetParent(parent, false);
         }
 
-        public Document CreateDocument(string name, string text = null) {
-            var document = new Document(name, User, this) {
-                Text = text
-            };
+        public Document CreateDocument(string name, string text = null, int? index = null) {
+            var document = new Document(name, User, this);
+            if (text != null)
+                document.Text = text;
+            if (index.HasValue)
+                document.Index = index.Value;
             if (Documents == null)
                 Documents = new ObservableCollection<Document>();
             Documents.Add(document);
@@ -58,9 +67,18 @@ namespace Scribs.Core.Entities {
         private void SetParent(Document parent, bool recurrence) {
             if (parent == null) {
                 Project = this;
+                if (!IndexNodes.HasValue)
+                    IndexNodes = false;
+                if (!IndexLeaves.HasValue)
+                    IndexLeaves = true;
                 return;
+
             }
             Parent = parent;
+            if (!IndexNodes.HasValue)
+                IndexNodes = parent.IndexNodes;
+            if (!IndexLeaves.HasValue)
+                IndexLeaves = parent.IndexLeaves;
             Project = parent.Project;
             User = parent.User;
             if (Project.AllDocuments == null)
@@ -83,7 +101,9 @@ namespace Scribs.Core.Entities {
             var other = obj as Document;
             if (Name != other.Name ||
                 User.Name != other.User.Name ||
-                Text != other.Text)
+                Text != other.Text ||
+                IndexNodes != other.IndexNodes ||
+                IndexLeaves != other.IndexLeaves)
                 return false;
             if (!NoMetadata && !other.NoMetadata && (Key != other.Key || Index != other.Index))
                 return false;
@@ -98,6 +118,10 @@ namespace Scribs.Core.Entities {
             return true;
         }
 
+        public override int GetHashCode() {
+            return base.GetHashCode();
+        }
+
         public IDictionary<string, string> Metadata {
             get {
                 var metadata = new Dictionary<string, string> {
@@ -105,6 +129,10 @@ namespace Scribs.Core.Entities {
                 };
                 if (Repo != null)
                     metadata.Add("repo", Repo);
+                if (!IsLeaf) {
+                    metadata.Add("index.nodes", IndexNodes.ToString());
+                    metadata.Add("index.leaves", IndexLeaves.ToString());
+                }
                 return metadata;
             }
         }

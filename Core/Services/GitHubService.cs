@@ -18,7 +18,7 @@ namespace Scribs.Core.Services {
 
         public void Create(Document project) => Create(GetRepoName(project));
 
-        public void Delete(string repoName) {
+        private void Delete(string repoName) {
             try {
                 var repo = gitHubClient.Repository.Get(gitHubClient.Credentials.Login, repoName).Result;
                 gitHubClient.Repository.Delete(repo.Id).Wait();
@@ -26,7 +26,9 @@ namespace Scribs.Core.Services {
         }
 
         public void Delete(Document project) => Delete(GetRepoName(project));
+
         public bool Exists(string repoName) => gitHubClient.Repository.Get(gitHubClient.Credentials.Login, repoName) != null;
+
         public bool Exists(Document project) => Exists(GetRepoName(project));
     }
 

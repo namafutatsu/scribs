@@ -17,6 +17,6 @@ namespace Scribs.Core {
         [BsonElement("Name")]
         [JsonProperty("Name")]
         [DataMember]
-        public string Name { get; protected set; }
+        public string Name { get; set; }
     }
 }
