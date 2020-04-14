@@ -101,8 +101,10 @@ namespace Scribs.E2ETest {
             notes.CreateDocument("notes03", "Vivamus eu tempus diam. Cras aliquet volutpat egestas. Curabitur euismod dictum velit non varius. Fusce et congue leo. In hac habitasse platea dictumst. Fusce ac ipsum diam. Nullam nec vulputate justo. Aliquam ex metus, tincidunt ac lobortis facilisis, commodo et leo.\n\nDonec eget dolor et purus blandit vestibulum eu sit amet purus.");
             notes.CreateDocument("notes04", "Duis porta elit justo, ac euismod sem rutrum nec. In efficitur fermentum velit, nec laoreet tellus rutrum nec. Suspendisse in mauris vehicula sapien posuere dictum ut ut justo. Fusce at arcu nisl. Mauris ut mi a sem maximus pretium. Etiam bibendum eu tortor eget feugiat. Nullam lorem augue, ornare vitae erat at, vulputate hendrerit eros. Quisque blandit eros metus, vel malesuada libero luctus id. Vestibulum in lorem lorem. Ut in leo commodo, facilisis tortor sit amet, cursus arcu. Pellentesque dapibus ex sed consectetur pulvinar. Proin vel nulla ac turpis hendrerit tempor. Quisque purus mauris, rhoncus in elementum et, accumsan ac sem. Maecenas pretium, augue vel efficitur tincidunt, erat odio tempus dolor, ut faucibus urna velit sed odio. Quisque sagittis sed dui sed luctus. Proin consectetur a augue a consequat.");
             var places = notes.CreateDocument("places", null, 1);
+            places.IndexNodes = false;
             places.CreateDocument("places01", "In efficitur fermentum velit.");
             var times = notes.CreateDocument("times", null, 2);
+            times.IndexNodes = false;
             times.CreateDocument("times01", "Quisque bibendum bibendum diam");
             var chars = notes.CreateDocument("chars", null, 3);
             chars.IndexLeaves = true;

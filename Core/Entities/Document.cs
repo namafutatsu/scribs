@@ -1,9 +1,11 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Runtime.Serialization;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
+using Octokit;
 
 namespace Scribs.Core.Entities {
 
@@ -70,9 +72,8 @@ namespace Scribs.Core.Entities {
                 if (!IndexNodes.HasValue)
                     IndexNodes = false;
                 if (!IndexLeaves.HasValue)
-                    IndexLeaves = true;
+                    IndexLeaves = false;
                 return;
-
             }
             Parent = parent;
             if (!IndexNodes.HasValue)
@@ -97,6 +98,7 @@ namespace Scribs.Core.Entities {
         }
 
         public bool NoMetadata { get; set; } = false;
+
         public override bool Equals(object obj) {
             var other = obj as Document;
             if (Name != other.Name ||
@@ -105,7 +107,11 @@ namespace Scribs.Core.Entities {
                 IndexNodes != other.IndexNodes ||
                 IndexLeaves != other.IndexLeaves)
                 return false;
-            if (!NoMetadata && !other.NoMetadata && (Key != other.Key || Index != other.Index))
+            if (!NoMetadata &&
+                !other.NoMetadata &&
+                Metadatas.Count(m => m.Get(this) != null) > 1 &&
+                Metadatas.Count(m => m.Get(other) != null) > 1 &&
+                (Key != other.Key || Index != other.Index))
                 return false;
             if (Children?.Count != other.Children?.Count)
                 return false;
@@ -122,19 +128,44 @@ namespace Scribs.Core.Entities {
             return base.GetHashCode();
         }
 
-        public IDictionary<string, string> Metadata {
+        private static List<Metadata> metadatas;
+        public static List<Metadata> Metadatas {
             get {
-                var metadata = new Dictionary<string, string> {
-                    ["id"] = Key
+                if (metadatas == null)
+                    metadatas = new List<Metadata> {
+                    new Metadata("id", Utils.CreateGuid, d => d.Key, (d, m) => d.Key = m),
+                    new Metadata("repo", () => null, d => String.IsNullOrEmpty(d.Repo) ? null : d.Repo, (d, m) => d.Repo = m),
+                    new Metadata("index.nodes", () => false.ToString(),
+                        d => d.IndexNodes.HasValue && d.IndexNodes.Value ? true.ToString() : null,
+                        (d, m) => {
+                            if (m != null)
+                                d.IndexNodes = bool.Parse(m);
+                        }
+                    ),
+                    new Metadata("index.leaves", () => false.ToString(),
+                        d => d.IndexLeaves.HasValue && d.IndexLeaves.Value ? true.ToString() : null,
+                        (d, m) => {
+                            if (m != null)
+                                d.IndexLeaves = bool.Parse(m);
+                        }
+                    )
                 };
-                if (Repo != null)
-                    metadata.Add("repo", Repo);
-                if (!IsLeaf) {
-                    metadata.Add("index.nodes", IndexNodes.ToString());
-                    metadata.Add("index.leaves", IndexLeaves.ToString());
-                }
-                return metadata;
+                return metadatas;
             }
+        }
+    }
+
+    public class Metadata {
+        public string Id { get; }
+        public Func<string> Default { get; }
+        public Func<Document, string> Get { get; }
+        public Action<Document, string> Set { get; }
+
+        public Metadata(string id, Func<string> @default, Func<Document, string> get, Action<Document, string> set) {
+            Id = id;
+            Default = @default;
+            Get = get;
+            Set = set;
         }
     }
 }

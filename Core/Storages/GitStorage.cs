@@ -9,7 +9,7 @@ using Scribs.Core.Services;
 
 namespace Scribs.Core.Storages {
     public class GitStorage: ILocalStorage {
-        private const string directoryDocument = ".dir.md";
+        private const string directoryDocumentName = ".dir.md";
         private SystemService system;
         private GitHubService gitHubService;
         public RepositoryService repositoryService;
@@ -74,19 +74,20 @@ namespace Scribs.Core.Storages {
             return Path.Join(path, name);
         }
 
+        private bool NeedsDirectoryDocument(Document directory) => Document.Metadatas.Count(o => o.Get(directory) != null) > 1 || directory.Text != null;
+
         private void SaveDirectory(Document directory, string path, bool content) {
             if (!system.NodeExists(path))
                 system.CreateNode(path);
-            if (directory.Metadata.Any(o => o.Value != null) || directory.Text != null)
-                WriteDocument(directory, system.PathCombine(path, directoryDocument), content);
-            if (directory.Children == null)
+            if (NeedsDirectoryDocument(directory))
+                WriteDocument(directory, system.PathCombine(path, directoryDocumentName), content);
+            if (directory.IsLeaf)
                 return;
             foreach (var child in directory.Children) {
-                if (!child.IsLeaf) {
+                if (!child.IsLeaf)
                     SaveDirectory(child, GetDocumentPath(directory, child, path), content);
-                } else {
+                else
                     SaveFile(directory, child, path, content);
-                }
             }
         }
 
@@ -96,12 +97,12 @@ namespace Scribs.Core.Storages {
 
         private void WriteDocument(Document document, string path, bool content) {
             var metadataLines = new List<string>();
-            foreach (var metadata in document.Metadata) {
-                //if (metadata.Key == "id" && document.Text == null)
-                //    continue;
-                metadataLines.Add($"{metadata.Key}: {metadata.Value}");
+            foreach (var metadata in Document.Metadatas) {
+                var value = metadata.Get(document);
+                if (value != null && value != metadata.Default())
+                    metadataLines.Add($"{metadata.Id}: {value}");
             }
-            if (metadataLines.Any() || (content && document.Text != null)) {
+            if (metadataLines.Count > 1 || (content && document.Text != null)) {
                 var builder = new StringBuilder();
                 if (metadataLines.Any()) {
                     builder.AppendLine("---");
@@ -167,11 +168,13 @@ namespace Scribs.Core.Storages {
                 if (content)
                     ReadDocument(document, path);
             } else {
-                var hidden = system.GetLeaves(path, directoryDocument).SingleOrDefault();
-                if (hidden != null) {
-                    ReadMetadata(document, hidden);
+                var directoryDocument = system.GetLeaves(path, directoryDocumentName).SingleOrDefault();
+                if (directoryDocument != null) {
+                    ReadMetadata(document, directoryDocument);
                     if (content)
-                        ReadDocument(document, hidden);
+                        ReadDocument(document, directoryDocument);
+                } else {
+                    SetMetadata(document);
                 }
             }
             return document;
@@ -185,28 +188,25 @@ namespace Scribs.Core.Storages {
             using (var reader = system.ReadLeaf(path)) {
                 if (reader.ReadLine().StartsWith("---")) {
                     string line = reader.ReadLine();
+                    var metadatas = new Dictionary<string, string>();
                     while (!line.StartsWith("---")) {
-                        var metadata = line.Split(":").Select(o => o.Trim());
-                        string key = metadata.First().ToLower();
-                        string value = metadata.Last();
-                        switch (key) {
-                            case "id":
-                                document.Key = value;
-                                break;
-                            case "repo":
-                                document.Repo = value;
-                                break;
-                            case "index.nodes":
-                                document.IndexNodes = bool.Parse(value);
-                                break;
-                            case "index.leaves":
-                                document.IndexLeaves = bool.Parse(value);
-                                break;
-                            default:
-                                throw new NotImplementedException();
-                        }
+                        var parse = line.Split(":").Select(o => o.Trim());
+                        string key = parse.First().ToLower();
+                        string value = parse.Last();
+                        metadatas.Add(key, value);
                         line = reader.ReadLine();
                     }
+                    SetMetadata(document, metadatas);
+                }
+            }
+        }
+
+        private void SetMetadata(Document document, Dictionary<string, string> metadatas = null) {
+            foreach (var metadata in Document.Metadatas) {
+                if (metadatas == null || !metadatas.ContainsKey(metadata.Id)) {
+                    metadata.Set(document, metadata.Default());
+                } else {
+                    metadata.Set(document, metadatas[metadata.Id]);
                 }
             }
         }
