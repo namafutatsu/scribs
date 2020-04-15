@@ -63,9 +63,9 @@ namespace Scribs.Core.Storages {
         public string GetDocumentPath(Document parent, Document document, string path) {
             string name = document.Name;
             if (parent != null) {
-                if (document.IsLeaf && parent.IndexLeaves.HasValue && parent.IndexLeaves.Value == true) {
+                if (document.IsLeaf && parent.IndexLeaves) {
                     name = GetIndexPrefix(document) + name;
-                } else if (!document.IsLeaf && parent.IndexNodes.HasValue && parent.IndexNodes.Value == true) {
+                } else if (!document.IsLeaf && parent.IndexNodes) {
                     name = GetIndexPrefix(document) + name;
                 }
             }
@@ -74,7 +74,7 @@ namespace Scribs.Core.Storages {
             return Path.Join(path, name);
         }
 
-        private bool NeedsDirectoryDocument(Document directory) => Document.Metadatas.Count(o => o.Get(directory) != null) > 1 || directory.Text != null;
+        public bool NeedsDirectoryDocument(Document directory) => Document.Metadatas.Count(o => o.Get(directory) != null) > 1 || directory.Text != null;
 
         private void SaveDirectory(Document directory, string path, bool content) {
             if (!system.NodeExists(path))
@@ -181,18 +181,20 @@ namespace Scribs.Core.Storages {
         }
 
         private Document LoadFile(User user, Document parent, string path, bool content) {
-            return LoadDocument(user, parent, path, content, true, parent.IndexLeaves ?? true);
+            return LoadDocument(user, parent, path, content, true, parent.IndexLeaves);
         }
 
-        private void ReadMetadata(Document document, string path) {
+        public void ReadMetadata(Document document, string path) {
             using (var reader = system.ReadLeaf(path)) {
                 if (reader.ReadLine().StartsWith("---")) {
                     string line = reader.ReadLine();
                     var metadatas = new Dictionary<string, string>();
                     while (!line.StartsWith("---")) {
-                        var parse = line.Split(":").Select(o => o.Trim());
-                        string key = parse.First().ToLower();
-                        string value = parse.Last();
+                        if (!line.Contains(':'))
+                            continue;
+                        int index = line.IndexOf(':');
+                        string key = line.Substring(0, index).Trim().ToLower();
+                        string value = line.Substring(index + 1).Trim();
                         metadatas.Add(key, value);
                         line = reader.ReadLine();
                     }
@@ -201,17 +203,17 @@ namespace Scribs.Core.Storages {
             }
         }
 
-        private void SetMetadata(Document document, Dictionary<string, string> metadatas = null) {
+        public void SetMetadata(Document document, Dictionary<string, string> metadatas = null) {
             foreach (var metadata in Document.Metadatas) {
                 if (metadatas == null || !metadatas.ContainsKey(metadata.Id)) {
-                    metadata.Set(document, metadata.Default());
+                    //metadata.Set(document, metadata.Default());
                 } else {
                     metadata.Set(document, metadatas[metadata.Id]);
                 }
             }
         }
 
-        private void ReadDocument(Document document, string path) {
+        public void ReadDocument(Document document, string path) {
             using (var reader = system.ReadLeaf(path)) {
                 if (reader.ReadLine().StartsWith("---")) {
                     string line = reader.ReadLine();

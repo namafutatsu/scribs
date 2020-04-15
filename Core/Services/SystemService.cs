@@ -30,25 +30,28 @@ namespace Scribs.Core.Services {
             }
         }
         public virtual LeafReader ReadLeaf(string path) => new LeafReader(path);
+    }
 
-        public class LeafReader : IDisposable {
-            private StreamReader reader;
+    public class LeafReader : IDisposable {
+        private StreamReader reader;
 
-            public LeafReader(string path) {
+        public LeafReader(string path) {
+            if (path != null)
                 reader = new StreamReader(path);
-            }
+        }
 
-            public string ReadLine() => reader.ReadLine();
-            public string ReadToEnd() => reader.ReadToEnd();
-            public void Reset() {
-                reader.DiscardBufferedData();
-                reader.BaseStream.Seek(0, SeekOrigin.Begin);
-            }
+        public virtual string ReadLine() => reader.ReadLine();
+        public virtual string ReadToEnd() => reader.ReadToEnd();
+        public void Reset() {
+            reader.DiscardBufferedData();
+            reader.BaseStream.Seek(0, SeekOrigin.Begin);
+        }
 
-            public void Dispose() {
-                reader.Close();
-                reader.Dispose();
-            }
+        public void Dispose() {
+            if (reader == null)
+                return;
+            reader.Close();
+            reader.Dispose();
         }
     }
 }

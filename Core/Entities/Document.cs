@@ -19,10 +19,10 @@ namespace Scribs.Core.Entities {
         public int Index { get; set; }
         [BsonElement("IndexNodes")]
         [DataMember]
-        public bool? IndexNodes { get; set; }
+        public bool IndexNodes { get; set; } = false;
         [BsonElement("IndexLeaves")]
         [DataMember]
-        public bool? IndexLeaves { get; set; }
+        public bool IndexLeaves { get; set; } = false;
         public string Text { get; set; }
 
         public bool IsLeaf => Children == null;
@@ -69,17 +69,9 @@ namespace Scribs.Core.Entities {
         private void SetParent(Document parent, bool recurrence) {
             if (parent == null) {
                 Project = this;
-                if (!IndexNodes.HasValue)
-                    IndexNodes = false;
-                if (!IndexLeaves.HasValue)
-                    IndexLeaves = false;
                 return;
             }
             Parent = parent;
-            if (!IndexNodes.HasValue)
-                IndexNodes = parent.IndexNodes;
-            if (!IndexLeaves.HasValue)
-                IndexLeaves = parent.IndexLeaves;
             Project = parent.Project;
             User = parent.User;
             if (Project.AllDocuments == null)
@@ -136,14 +128,14 @@ namespace Scribs.Core.Entities {
                     new Metadata("id", Utils.CreateGuid, d => d.Key, (d, m) => d.Key = m),
                     new Metadata("repo", () => null, d => String.IsNullOrEmpty(d.Repo) ? null : d.Repo, (d, m) => d.Repo = m),
                     new Metadata("index.nodes", () => false.ToString(),
-                        d => d.IndexNodes.HasValue && d.IndexNodes.Value ? true.ToString() : null,
+                        d => d.IndexNodes ? true.ToString() : null,
                         (d, m) => {
                             if (m != null)
                                 d.IndexNodes = bool.Parse(m);
                         }
                     ),
                     new Metadata("index.leaves", () => false.ToString(),
-                        d => d.IndexLeaves.HasValue && d.IndexLeaves.Value ? true.ToString() : null,
+                        d => d.IndexLeaves ? true.ToString() : null,
                         (d, m) => {
                             if (m != null)
                                 d.IndexLeaves = bool.Parse(m);

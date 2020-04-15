@@ -95,7 +95,7 @@ namespace Scribs.E2ETest {
             Assert.True(notes.IndexNodes);
             Assert.False(notes.IndexLeaves);
             var chars = notes.Children.FirstOrDefault(o => o.Name == "chars");
-            Assert.True(chars.IndexNodes); // Inheritance from notes
+            Assert.False(chars.IndexNodes); // No inheritance from notes
             Assert.True(chars.IndexLeaves);
         }
 
