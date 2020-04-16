@@ -139,7 +139,7 @@ namespace Scribs.Core.Storages {
         public ObservableCollection<Document> OrderDocuments(IEnumerable<Document> documents) =>
             new ObservableCollection<Document>(documents.OrderBy(o => o.Index).ThenBy(o => o.IsLeaf).ThenBy(o => o.Name));
 
-        public ObservableCollection<Document> LoadChildren(Document directory, User user, string path, bool content) {
+        public virtual ObservableCollection<Document> GetChildren(Document directory, User user, string path, bool content) {
             var documents = new List<Document>();
             foreach (var subdirectory in GetNodes(path))
                 documents.Add(LoadDirectory(user, directory, subdirectory, content));
@@ -170,7 +170,7 @@ namespace Scribs.Core.Storages {
             return document;
         }
 
-        private Document LoadDirectory(User user, Document parent, string path, bool content) {
+        public Document LoadDirectory(User user, Document parent, string path, bool content) {
             if (!System.NodeExists(path))
                 System.CreateNode(path);
             var directory = GetDocument(user, parent, path, false, parent?.IndexNodes ?? false);
@@ -182,7 +182,7 @@ namespace Scribs.Core.Storages {
             } else {
                 SetMetadata(directory);
             }
-            directory.Children = LoadChildren(directory, user, path, content);
+            directory.Children = GetChildren(directory, user, path, content);
             return directory;
         }
 

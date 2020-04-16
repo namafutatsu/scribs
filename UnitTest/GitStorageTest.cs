@@ -14,25 +14,34 @@ using Scribs.Core.Entities;
 namespace Scribs.UnitTest {
 
     public class MoqSystemConfiguration : IDisposable {
-        public ConfigurableServer Server { get; }
+        private ConfigurableServer server;
+        public ConfigurableServer Server {
+            get {
+                if (server == null)
+                    server = new ConfigurableServer(sc => ServiceDescriptors.ForEach(o => sc.Replace(o)));
+                return server;
+            }
+        }
         public Mock<SystemService> Moq { get; }
         public IServiceProvider Services => Server.Services;
         public SystemService System => Services.GetService<SystemService>();
+        public List<ServiceDescriptor> ServiceDescriptors { get; } = new List<ServiceDescriptor>();
 
         public MoqSystemConfiguration(params Action<Mock<SystemService>>[] setups) {
             var gitStorageSettings = new Mock<GitStorageSettings>();
             gitStorageSettings.Setup(m => m.Local).Returns(true);
             gitStorageSettings.Setup(m => m.Root).Returns(Path.Combine("root", "git"));
+            ServiceDescriptors.Add(new ServiceDescriptor(typeof(GitStorageSettings), gitStorageSettings.Object));
             Moq = new Mock<SystemService>();
             Moq.Setup(m => m.WriteLeaf(It.IsAny<string>(), It.IsAny<string>())).Callback(() => { });
             Moq.Setup(m => m.DeleteNode(It.IsAny<string>(), It.IsAny<bool>())).Callback(() => { });
             Moq.Setup(m => m.DeleteLeaf(It.IsAny<string>())).Callback(() => { });
-            foreach (var setup in setups)
-                setup(Moq);
-            Server = new ConfigurableServer(sc => sc
-                .Replace(new ServiceDescriptor(typeof(GitStorageSettings), gitStorageSettings.Object))
-                .Replace(new ServiceDescriptor(typeof(SystemService), Moq.Object))
-            );
+            Moq.Setup(m => m.NodeExists(It.IsAny<string>())).Returns(true);
+            Moq.Setup(m => m.GetName(It.IsAny<string>())).CallBase();
+            ServiceDescriptors.Add(new ServiceDescriptor(typeof(SystemService), Moq.Object));
+            if (setups != null)
+                foreach (var setup in setups)
+                    setup(Moq);
         }
 
         public void Dispose() {
@@ -72,13 +81,9 @@ namespace Scribs.UnitTest {
             text = "Lorem ipsum";
             repo = "http://git";
             var moq = new Mock<LeafReader>(null);
-            moq.SetupSequence(m => m.ReadLine())
-                .Returns("---")
-                .Returns("id: " + id)
-                .Returns("repo: " + repo)
-                .Returns("index.leaves: true")
-                .Returns("---")
-                .Returns("---")
+            var sequence = moq.SetupSequence(m => m.ReadLine());
+            for (int i = 0; i < 2; i++)
+                sequence = sequence.Returns("---")
                 .Returns("id: " + id)
                 .Returns("repo: " + repo)
                 .Returns("index.leaves: true")
@@ -553,7 +558,6 @@ namespace Scribs.UnitTest {
             }
         }
 
-
         [Fact]
         public void LoadFile() {
             var user = new User("Kevin");
@@ -567,14 +571,42 @@ namespace Scribs.UnitTest {
                 Assert.Equal(3, leaf.Index);
                 Assert.Equal(id, leaf.Key);
                 Assert.Equal(text, leaf.Text);
+                Assert.True(leaf.IsLeaf);
             }
         }
 
-        // LoadDirectory
-        // LoadChildren
-            //Assert.NotNull(project.Children);
-            //Assert.Single(project.Children);
-            //var leaf = project.Children.Single();
-        // SetParent
+        [Fact]
+        public void LoadDirectory() {
+            var user = new User("Kevin");
+            var project = new Document("name", null);
+            string path = Path.Join("path", project.Name, "directory");
+            Func<string, string> getPath = o => Path.Combine(path, o);
+            project.IndexNodes = true;
+            var setupReading = SetupMetadataReading(out string id, out string text, out string repo);
+            Action<Mock<SystemService>> setupSystem = m => {
+                m.Setup(o => o.GetName(It.IsAny<string>())).Returns("03.directory");
+                m.Setup(m => m.GetLeaves(It.Is<string>(s => s == path), It.Is<string>(o => o == GitStorage.DirectoryDocumentName)))
+                    .Returns(new string[] { Path.Combine(path, GitStorage.DirectoryDocumentName) });
+            };
+            using (var configuration = new MoqSystemConfiguration(setupReading, setupSystem)) {
+                var gitStorage = new Mock<GitStorage>(new GitStorageSettings { Local = false }, null, null, configuration.Moq.Object);
+                gitStorage.Setup(o => o.GetChildren(It.IsAny<Document>(), It.Is<User>(o => o == user), path, true)).Returns(new ObservableCollection<Document> {
+                    new Document("node1", user),
+                    new Document("node2", user),
+                    new Document("leaf1", user),
+                    new Document("leaf2", user)
+                });
+                configuration.ServiceDescriptors.Add(new ServiceDescriptor(typeof(GitStorage), gitStorage.Object));
+                var directory = configuration.Services.GetService<GitStorage>().LoadDirectory(user, project, path, true);
+                configuration.Moq.Verify(m => m.ReadLeaf(It.Is<string>(o => o == Path.Combine(path, ".dir.md"))), Times.Exactly(2)); // Metadata + Text
+                Assert.Equal("directory", directory.Name);
+                Assert.Equal(3, directory.Index);
+                Assert.Equal(id, directory.Key);
+                Assert.Equal(text, directory.Text);
+                Assert.False(directory.IsLeaf);
+                Assert.NotNull(directory.Children);
+                Assert.Equal(4, directory.Children.Count);
+            }
+        }
     }
 }
