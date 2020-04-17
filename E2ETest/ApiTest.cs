@@ -2,7 +2,7 @@ using Newtonsoft.Json;
 using Xunit;
 using Scribs.Core.Entities;
 
-namespace Scribs.E2ETest {
+namespace Scribs.IntegrationTest {
 
     [Collection("E2E")]
     public class ApiTest : IClassFixture<Fixture> {

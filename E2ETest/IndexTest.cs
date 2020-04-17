@@ -5,7 +5,7 @@ using Xunit;
 using Scribs.Core.Storages;
 using Scribs.Core;
 
-namespace Scribs.E2ETest {
+namespace Scribs.IntegrationTest {
 
     [Collection("E2E")]
     public class IndexTest : IClassFixture<Fixture> {

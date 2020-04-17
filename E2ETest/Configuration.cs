@@ -7,7 +7,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Scribs.API;
 
-namespace Scribs.E2ETest {
+namespace Scribs.IntegrationTest {
 
     public class ConfigurableStartup : Startup {
         private readonly Action<IServiceCollection> configureAction;

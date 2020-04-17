@@ -2,7 +2,7 @@ using Xunit;
 using Scribs.Core.Entities;
 using Scribs.Core.Services;
 
-namespace Scribs.E2ETest {
+namespace Scribs.IntegrationTest {
 
     [Collection("E2E")]
     public class MongoTest : IClassFixture<Fixture> {

@@ -10,7 +10,7 @@ using Scribs.Core.Entities;
 using Scribs.Core.Services;
 using Scribs.Core.Storages;
 
-namespace Scribs.E2ETest {
+namespace Scribs.IntegrationTest {
 
     [CollectionDefinition("E2E")]
     public class DatabaseCollection : ICollectionFixture<Fixture> {
