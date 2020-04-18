@@ -14,12 +14,13 @@ namespace Scribs.IntegrationTest {
             this.fixture = fixture;
         }
 
-        private void StorageLoad<S>() where S : ILocalStorage {
-            Assert.True(Document.Equals(fixture.Project,
-                fixture.Services.GetService<S>().Load(fixture.UserName, fixture.Project.Name)));
+        private void StorageLoad<S>() where S : IStorage {
+            var project = fixture.Services.GetService<S>().Load(fixture.UserName, fixture.Project.Name);
+            Assert.True(Document.Equals(fixture.Project, project));
+            Assert.Equal(fixture.User.Name, project.UserName);
         }
 
-        private void StorageSaveThenLoad<S>() where S : ILocalStorage {
+        private void StorageSaveThenLoad<S>() where S : IStorage {
             var project = fixture.Services.GetService<JsonStorage>().Load(fixture.UserName, fixture.Project.Name);
             project.Disconnect = true;
             project.Name = "StorageSaveThenLoad" + typeof(S).ToString();
@@ -41,7 +42,7 @@ namespace Scribs.IntegrationTest {
         public void JsonStorageSaveThenLoad() => StorageSaveThenLoad<JsonStorage>();
 
         [Fact]
-        public void CrossStorage() {
+        public void CrossStorageJsonToGit() {
             var jsonStorage = fixture.Services.GetService<JsonStorage>();
             var gitStorage = fixture.Services.GetService<GitStorage>();
             var jsonProject = jsonStorage.Load(fixture.User.Name, fixture.Project.Name);
@@ -55,5 +56,11 @@ namespace Scribs.IntegrationTest {
             gitProject.Name = fixture.Project.Name;
             Assert.True(gitProject.Equals(fixture.Project));
         }
+
+        [Fact]
+        public void MongoStorageLoad() => StorageLoad<MongoStorage>();
+
+        [Fact]
+        public void MongoStorageSaveThenLoad() => StorageSaveThenLoad<MongoStorage>();
     }
 }

@@ -74,7 +74,7 @@ namespace Scribs.Core.Storages {
             return Path.Join(path, name);
         }
 
-        public bool NeedsDirectoryDocument(Document directory) => Document.Metadatas.Count(o => o.Get(directory) != null) > 1 || directory.Text != null;
+        public bool NeedsDirectoryDocument(Document directory) => Document.Metadatas.Count(o => o.Get(directory) != null) > 1 || directory.Content != null;
 
         private void SaveDirectory(Document directory, string path, bool content) {
             if (!System.NodeExists(path))
@@ -102,7 +102,7 @@ namespace Scribs.Core.Storages {
                 if (value != null && value != metadata.Default())
                     metadataLines.Add($"{metadata.Id}: {value}");
             }
-            if (metadataLines.Count > 1 || (content && document.Text != null)) {
+            if (metadataLines.Count > 1 || (content && document.Content != null)) {
                 var builder = new StringBuilder();
                 if (metadataLines.Any()) {
                     builder.AppendLine("---");
@@ -110,8 +110,8 @@ namespace Scribs.Core.Storages {
                         builder.AppendLine(line);
                     builder.AppendLine("---");
                 }
-                if (content && document.Text != null)
-                    builder.Append(document.Text);
+                if (content && document.Content != null)
+                    builder.Append(document.Content);
                 System.WriteLeaf(path, builder.ToString());
             }
         }
@@ -235,7 +235,7 @@ namespace Scribs.Core.Storages {
                 }
                 var text = reader.ReadToEnd();
                 if (!String.IsNullOrEmpty(text))
-                    document.Text = text;
+                    document.Content = text;
             }
         }
     }

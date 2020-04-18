@@ -2,21 +2,16 @@
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 using Newtonsoft.Json;
-using Scribs.Core.Entities;
 
 namespace Scribs.Core {
 
     [DataContract]
     //[KnownType(typeof(Document))]
     public abstract class Entity {
-        [BsonId, BsonRepresentation(BsonType.ObjectId), BsonElement("_id")]
-        [JsonProperty("Key")]
-        [DataMember]
-        public string Key { get; set; }
+        [BsonId, BsonRepresentation(BsonType.ObjectId), BsonElement("_id"), DataMember, JsonProperty("Id")]
+        public string Id { get; set; }
 
-        [BsonElement("Name")]
-        [JsonProperty("Name")]
-        [DataMember]
+        [BsonElement("Name"), DataMember, JsonProperty]
         public string Name { get; set; }
     }
 }

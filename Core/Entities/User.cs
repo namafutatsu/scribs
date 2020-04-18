@@ -12,9 +12,10 @@ namespace Scribs.Core.Entities {
         [BsonElement("Password")]
         public string Password { get; set; }
         public string Path => System.IO.Path.Join("users", Name);
+        public string test { get; set; }
 
         public User(string name) {
-            Key = Utils.CreateGuid();
+            Id = Utils.CreateGuid();
             Name = name;
         }
 

@@ -15,13 +15,18 @@ namespace Scribs.Console {
             var configurationBuilder = new ConfigurationBuilder().SetBasePath(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location)).AddJsonFile("appsettings.json");
             var configuration = configurationBuilder.Build();
             var services = new ServiceCollection().Configure(configuration).AddServices().AddServices().BuildServiceProvider();
-            var gdrtf = services.GetFactory<User>().GetByName("gdrtf");
-            gdrtf.Mail = "test@test.test";
-            services.GetFactory<User>().Update(gdrtf);
-            var project = services.GetService<GitStorage>().Load(gdrtf.Name, "test");
-            services.GetService<JsonStorage>().Save(project);
-            project = services.GetService<JsonStorage>().Load(gdrtf.Name, "test");
-            services.GetFactory<Document>().Create(project);
+
+            var user = new User("test");
+            user.test = "lkjhiukg";
+            services.GetFactory<User>().Create(user);
+
+            //var gdrtf = services.GetFactory<User>().GetByName("gdrtf");
+            //gdrtf.Mail = "test@test.test";
+            //services.GetFactory<User>().Update(gdrtf);
+            //var project = services.GetService<GitStorage>().Load(gdrtf.Name, "test");
+            //services.GetService<JsonStorage>().Save(project);
+            //project = services.GetService<JsonStorage>().Load(gdrtf.Name, "test");
+            //services.GetFactory<Document>().Create(project);
 
 
             //var deserializer = new DataContractJsonSerializer(typeof(Document));

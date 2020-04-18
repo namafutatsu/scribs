@@ -10,19 +10,16 @@ namespace Scribs.Core.Entities {
 
     [DataContract]
     public class Document: Entity {
-        [BsonElement("Documents")]
-        [DataMember(EmitDefaultValue = false)]
+        [BsonElement, DataMember(EmitDefaultValue = false)]
         public ObservableCollection<Document> Children { get; set; }
-        [BsonElement("Index")]
-        [DataMember]
+        [BsonElement, DataMember]
         public int Index { get; set; }
-        [BsonElement("IndexNodes")]
-        [DataMember]
+        [BsonElement, DataMember]
         public bool IndexNodes { get; set; } = false;
-        [BsonElement("IndexLeaves")]
-        [DataMember]
+        [BsonElement, DataMember]
         public bool IndexLeaves { get; set; } = false;
-        public string Text { get; set; }
+
+        public string Content { get; set; }
 
         public bool IsLeaf => Children == null;
         public Document Parent { get; protected set; }
@@ -33,14 +30,16 @@ namespace Scribs.Core.Entities {
 
         // Project
         public IDictionary<string, Document> AllDocuments { get; set; }
-        [BsonElement("Repo")]
-        [DataMember(EmitDefaultValue = false)]
+        [BsonElement, DataMember]
+        public string UserName { get; set; }
+        [BsonElement, DataMember(EmitDefaultValue = false)]
         public string Repo { get; set; }
 
         public Document(string name, User user, Document parent = null, string key = null) {
-            Key = key ?? Utils.CreateGuid();
+            Id = key ?? Utils.CreateGuid();
             NoMetadata = key == null;
             Name = name;
+            UserName = user?.Name;
             User = user;
             SetParent(parent, false);
         }
@@ -48,7 +47,7 @@ namespace Scribs.Core.Entities {
         public Document CreateDocument(string name, string text = null, int? index = null) {
             var document = new Document(name, User, this);
             if (text != null)
-                document.Text = text;
+                document.Content = text;
             if (index.HasValue)
                 document.Index = index.Value;
             if (Children == null)
@@ -75,9 +74,9 @@ namespace Scribs.Core.Entities {
             User = parent.User;
             if (Project.AllDocuments == null)
                 Project.AllDocuments = new Dictionary<string, Document> {
-                    [Project.Key] = Project
+                    [Project.Id] = Project
                 };
-            Project.AllDocuments.Add(Key, this);
+            Project.AllDocuments.Add(Id, this);
             if (recurrence && Children != null)
                 foreach (var child in Children)
                     child.SetParent(this, true);
@@ -94,15 +93,16 @@ namespace Scribs.Core.Entities {
             var other = obj as Document;
             if (Name != other.Name ||
                 User.Name != other.User.Name ||
-                Text != other.Text ||
+                Content != other.Content ||
                 IndexNodes != other.IndexNodes ||
-                IndexLeaves != other.IndexLeaves)
+                IndexLeaves != other.IndexLeaves ||
+                UserName != other.UserName)
                 return false;
             if (!NoMetadata &&
                 !other.NoMetadata &&
                 Metadatas.Count(m => m.Get(this) != null) > 1 &&
                 Metadatas.Count(m => m.Get(other) != null) > 1 &&
-                (Key != other.Key || Index != other.Index))
+                (Id != other.Id || Index != other.Index))
                 return false;
             if (Children?.Count != other.Children?.Count)
                 return false;
@@ -124,7 +124,7 @@ namespace Scribs.Core.Entities {
             get {
                 if (metadatas == null)
                     metadatas = new List<Metadata> {
-                    new Metadata("id", Utils.CreateGuid, d => d.Key, (d, m) => d.Key = m),
+                    new Metadata("id", Utils.CreateGuid, d => d.Id, (d, m) => d.Id = m),
                     new Metadata("repo", () => null, d => String.IsNullOrEmpty(d.Repo) ? null : d.Repo, (d, m) => d.Repo = m),
                     new Metadata("index.nodes", () => false.ToString(),
                         d => d.IndexNodes ? true.ToString() : null,

@@ -34,6 +34,7 @@ namespace Scribs.IntegrationTest {
             FillProject(Project);
             SaveProject<GitStorage>(Project);
             SaveProject<JsonStorage>(Project);
+            SaveProject<MongoStorage>(Project);
             CommitRepo(Project);
         }
 
@@ -88,7 +89,7 @@ namespace Scribs.IntegrationTest {
         }
 
         private void FillProject(Document project) {
-            project.Text = "Lorem ipsum dolor sit amet";
+            project.Content = "Lorem ipsum dolor sit amet";
             //project.IndexLeaves = false;
             project.CreateDocument("01", "Donec at lobortis libero, at fringilla tellus. Vestibulum eget tortor orci. Donec fermentum risus neque, a volutpat risus elementum rutrum. Cras dapibus est ligula. Suspendisse vitae tincidunt eros. Nulla sollicitudin nisl sed nunc dignissim cursus. Pellentesque nibh lacus, ultrices ut felis a, pharetra lobortis orci. Ut in euismod tortor. Aenean sagittis, odio laoreet semper tempus, ante libero tempor sem, eget faucibus augue nunc eget lorem. Phasellus vulputate sodales mi volutpat euismod. Nulla cursus tellus nunc, ac pretium sem faucibus semper. Sed tristique lectus purus, nec congue elit pretium et. Nulla vestibulum nec lectus a scelerisque.");
             project.CreateDocument("02", "Vestibulum viverra nunc dictum sem sollicitudin, vel suscipit elit lacinia. Nullam ex purus, luctus eu odio nec, rhoncus gravida arcu. Donec eu rutrum odio. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Etiam viverra nibh ac felis pulvinar dictum. Maecenas ex velit, euismod ac blandit eget, viverra et nulla. Mauris tempor ante nec diam luctus tempor. Ut vitae felis vel orci dapibus commodo placerat ornare turpis. Aenean bibendum sollicitudin felis, sit amet imperdiet nunc porta ac. Quisque risus est, commodo tempor interdum et, pretium in velit. Integer id sollicitudin augue, vitae maximus eros. Etiam eu leo venenatis, rutrum sapien a, mollis libero. Integer eget tellus imperdiet dolor tincidunt iaculis ut ut neque. Curabitur sollicitudin dolor nec lectus tristique convallis. Suspendisse tincidunt, urna non rutrum venenatis, odio mauris lacinia tellus, suscipit facilisis felis orci at enim.");
@@ -114,7 +115,7 @@ namespace Scribs.IntegrationTest {
             chars.CreateDocument("dave", "Nunc mi justo, lobortis vel neque nec, tincidunt blandit leo. Fusce hendrerit ante sed fermentum convallis. Nam ut elit ligula. Duis non porta dui, sed convallis tellus. Ut efficitur vel nunc quis vestibulum. Aenean nec enim vel odio commodo tempor. Nam et quam et magna fermentum tempus. Mauris sagittis massa sed odio malesuada, in consequat orci elementum. Curabitur sit amet turpis vel arcu auctor pharetra. In ut libero nibh. Duis id eros egestas, dapibus mauris quis, fringilla ligula.", 4);
         }
 
-        private void SaveProject<S>(Document project) where S: ILocalStorage {
+        private void SaveProject<S>(Document project) where S: IStorage {
             Services.GetService<S>().Save(project);
         }
 

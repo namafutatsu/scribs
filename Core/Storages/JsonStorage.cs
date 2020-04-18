@@ -16,8 +16,6 @@ namespace Scribs.Core.Storages {
                 Root = settings.Root;
         }
 
-        public object JsonConvert { get; private set; }
-
         public Document Load(string userName, string name) => Load(userName, name, true);
         public void Save(Document project) => Save(project, true);
 
@@ -47,10 +45,10 @@ namespace Scribs.Core.Storages {
         }
 
         private void ReadDocument(string path, Document document) {
-            if (!system.LeafExists(system.PathCombine(path, document.Key)))
+            if (!system.LeafExists(system.PathCombine(path, document.Id)))
                 return;
-            using (var reader = system.ReadLeaf(system.PathCombine(path, document.Key)))
-                document.Text = reader.ReadToEnd();
+            using (var reader = system.ReadLeaf(system.PathCombine(path, document.Id)))
+                document.Content = reader.ReadToEnd();
         }
 
         public void Save(Document project, bool content) {
@@ -64,8 +62,8 @@ namespace Scribs.Core.Storages {
         }
 
         private void SaveDocument(Document document, string path) {
-            if (document.Text != null)
-                WriteDocument(document, system.PathCombine(path, document.Key));
+            if (document.Content != null)
+                WriteDocument(document, system.PathCombine(path, document.Id));
             if (document.Children == null)
                 return;
             foreach (var child in document.Children)
@@ -73,7 +71,7 @@ namespace Scribs.Core.Storages {
         }
 
         private void WriteDocument(Document document, string path) {
-            system.WriteLeaf(path, document.Text);
+            system.WriteLeaf(path, document.Content);
         }
 
         private void CreateJson(Document project, string path) {

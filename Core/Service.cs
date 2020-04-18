@@ -35,10 +35,13 @@ namespace Scribs.Core.Services {
             return serviceCollection
                 .AddSingleton<SystemService>()
                 .AddSingleton<MongoService>()
+                .AddSingleton<Factories>()
                 .AddSingleton<GitHubService>()
                 .AddSingleton<RepositoryService>()
                 .AddSingleton<GitStorage>()
                 .AddSingleton<JsonStorage>()
+                .AddSingleton<MongoStorage>()
+                // todo virer ?
                 .AddSingleton<Factory<User>>()
                 .AddSingleton<Factory<Document>>();
         }

@@ -100,7 +100,7 @@ namespace Scribs.UnitTest {
             var setup = SetupMetadataReading(out string id, out string text, out string repo);
             using (var configuration = new MoqSystemConfiguration(setup)) {
                 configuration.Services.GetService<GitStorage>().ReadMetadata(project, null);
-                Assert.Equal(id, project.Key);
+                Assert.Equal(id, project.Id);
                 Assert.Equal(repo, project.Repo);
                 Assert.True(project.IndexLeaves);
                 Assert.False(project.IndexNodes);
@@ -115,7 +115,7 @@ namespace Scribs.UnitTest {
             using (var configuration = new MoqSystemConfiguration(setup)) {
                 var storage = configuration.Services.GetService<GitStorage>();
                 storage.ReadMetadata(project, null);
-                Assert.Equal(id, project.Key);
+                Assert.Equal(id, project.Id);
                 Assert.Equal(repo, project.Repo);
                 Assert.True(project.IndexLeaves);
                 Assert.False(project.IndexNodes);
@@ -131,7 +131,7 @@ namespace Scribs.UnitTest {
             var setup = SetupMetadataReading(out string id, out string text, out string repo);
             using (var configuration = new MoqSystemConfiguration(setup)) {
                 configuration.Services.GetService<GitStorage>().ReadDocument(project, null);
-                Assert.Equal(text, project.Text);
+                Assert.Equal(text, project.Content);
             }
         }
 
@@ -144,7 +144,7 @@ namespace Scribs.UnitTest {
             using (var configuration = new MoqSystemConfiguration(setup)) {
                 var storage = configuration.Services.GetService<GitStorage>();
                 storage.ReadMetadata(document, null);
-                Assert.Equal(id, document.Key);
+                Assert.Equal(id, document.Id);
                 Assert.True(document.IndexLeaves);
                 Assert.False(document.IndexNodes);
                 storage.SetMetadata(document);
@@ -162,13 +162,13 @@ namespace Scribs.UnitTest {
             var leaf = new Document("leaf", user);
             leaf.Index = 3;
             leaf.Repo = "http://git";
-            leaf.Text = "Lorem ipsum";
+            leaf.Content = "Lorem ipsum";
             using (var configuration = new MoqSystemConfiguration(null)) {
                 var storage = configuration.Services.GetService<GitStorage>();
                 storage.WriteDocument(leaf, storage.GetDocumentPath(project, leaf, Path.Combine(path, project.Name)), true);
                 configuration.Moq.Verify(m => m.WriteLeaf(
                     It.Is<string>(o => o == Path.Combine(path, project.Name, leaf.Name + ".md")),
-                    It.Is<string>(o => o == $"---\r\nid: {leaf.Key}\r\nrepo: {leaf.Repo}\r\n---\r\n{leaf.Text}")),
+                    It.Is<string>(o => o == $"---\r\nid: {leaf.Id}\r\nrepo: {leaf.Repo}\r\n---\r\n{leaf.Content}")),
                     Times.Exactly(1));
             }
         }
@@ -183,13 +183,13 @@ namespace Scribs.UnitTest {
             var leaf = new Document("leaf", user);
             leaf.Index = 3;
             leaf.Repo = "http://git";
-            leaf.Text = "Lorem ipsum";
+            leaf.Content = "Lorem ipsum";
             using (var configuration = new MoqSystemConfiguration(null)) {
                 var storage = configuration.Services.GetService<GitStorage>();
                 storage.WriteDocument(leaf, storage.GetDocumentPath(project, leaf, Path.Combine(path, project.Name)), true);
                 configuration.Moq.Verify(m => m.WriteLeaf(
                     It.Is<string>(o => o == Path.Combine(path, project.Name, "03." + leaf.Name + ".md")),
-                    It.Is<string>(o => o == $"---\r\nid: {leaf.Key}\r\nrepo: {leaf.Repo}\r\n---\r\n{leaf.Text}")),
+                    It.Is<string>(o => o == $"---\r\nid: {leaf.Id}\r\nrepo: {leaf.Repo}\r\n---\r\n{leaf.Content}")),
                     Times.Exactly(1));
             }
         }
@@ -203,13 +203,13 @@ namespace Scribs.UnitTest {
             project.IndexLeaves = true;
             var leaf = new Document("leaf", user);
             leaf.Index = 3;
-            leaf.Text = "Lorem ipsum";
+            leaf.Content = "Lorem ipsum";
             using (var configuration = new MoqSystemConfiguration(null)) {
                 var storage = configuration.Services.GetService<GitStorage>();
                 storage.WriteDocument(leaf, storage.GetDocumentPath(project, leaf, Path.Combine(path, project.Name)), true);
                 configuration.Moq.Verify(m => m.WriteLeaf(
                     It.Is<string>(o => o == Path.Combine(path, project.Name, "03." + leaf.Name + ".md")),
-                    It.Is<string>(o => o == $"---\r\nid: {leaf.Key}\r\n---\r\n{leaf.Text}")),
+                    It.Is<string>(o => o == $"---\r\nid: {leaf.Id}\r\n---\r\n{leaf.Content}")),
                     Times.Exactly(1));
             }
         }
@@ -226,7 +226,7 @@ namespace Scribs.UnitTest {
             node.Repo = "http://git";
             node.IndexLeaves = true;
             node.IndexNodes = false;
-            node.Text = "Lorem ipsum";
+            node.Content = "Lorem ipsum";
             using (var configuration = new MoqSystemConfiguration(null)) {
                 var storage = configuration.Services.GetService<GitStorage>();
                 string directoryDocumentPath = Path.Combine(path, project.Name, node.Name, GitStorage.DirectoryDocumentName);
@@ -234,7 +234,7 @@ namespace Scribs.UnitTest {
                 //configuration.Moq.Verify(m => m.CreateNode(It.Is<string>(o => o == Path.Combine(path, project.Name, node.Name))), Times.Exactly(1));
                 configuration.Moq.Verify(m => m.WriteLeaf(
                     It.Is<string>(o => o == directoryDocumentPath),
-                    It.Is<string>(o => o == $"---\r\nid: {node.Key}\r\nrepo: {node.Repo}\r\nindex.leaves: True\r\n---\r\n{node.Text}")),
+                    It.Is<string>(o => o == $"---\r\nid: {node.Id}\r\nrepo: {node.Repo}\r\nindex.leaves: True\r\n---\r\n{node.Content}")),
                     Times.Once);
             }
         }
@@ -248,7 +248,7 @@ namespace Scribs.UnitTest {
             var node = new Document("node", user);
             node.Children = new ObservableCollection<Document>();
             node.Index = 3;
-            node.Text = "Lorem ipsum";
+            node.Content = "Lorem ipsum";
             using (var configuration = new MoqSystemConfiguration(null)) {
                 var storage = configuration.Services.GetService<GitStorage>();
                 string directoryDocumentPath = Path.Combine(path, project.Name, node.Name, GitStorage.DirectoryDocumentName);
@@ -256,7 +256,7 @@ namespace Scribs.UnitTest {
                 //configuration.Moq.Verify(m => m.CreateNode(It.Is<string>(o => o == Path.Combine(path, project.Name, node.Name))), Times.Exactly(1));
                 configuration.Moq.Verify(m => m.WriteLeaf(
                     It.Is<string>(o => o == Path.Combine(path, project.Name, node.Name, ".dir.md")),
-                    It.Is<string>(o => o == $"---\r\nid: {node.Key}\r\n---\r\n{node.Text}")),
+                    It.Is<string>(o => o == $"---\r\nid: {node.Id}\r\n---\r\n{node.Content}")),
                     Times.Exactly(1));
             }
         }
@@ -293,7 +293,7 @@ namespace Scribs.UnitTest {
         [Fact]
         public void GetMetadataSimpleProjectWithText() {
             var document = new Document("name", null);
-            document.Text = "Text";
+            document.Content = "Text";
             var metadatas = Document.Metadatas.Where(o => o.Get(document) != null);
             Assert.Single(metadatas);
             Assert.Equal("id", metadatas.Single().Id);
@@ -529,30 +529,30 @@ namespace Scribs.UnitTest {
         [Fact]
         public void GetOrder() {
             var documents = new List<Document> {
-                new Document("A", null) { Key = "1", Index = 0, Children = new ObservableCollection<Document>() },
-                new Document("B", null) { Key = "2", Index = 0, Children = new ObservableCollection<Document>() },
-                new Document("A", null) { Key = "3", Index = 0 },
-                new Document("B", null) { Key = "4", Index = 0 },
-                new Document("C", null) { Key = "5", Index = 1, Children = new ObservableCollection<Document>() },
-                new Document("C", null) { Key = "6", Index = 1 },
-                new Document("C", null) { Key = "7", Index = 2, Children = new ObservableCollection<Document>() },
-                new Document("D", null) { Key = "8", Index = 2, Children = new ObservableCollection<Document>() },
-                new Document("C", null) { Key = "9", Index = 3, Children = new ObservableCollection<Document>() }
+                new Document("A", null) { Id = "1", Index = 0, Children = new ObservableCollection<Document>() },
+                new Document("B", null) { Id = "2", Index = 0, Children = new ObservableCollection<Document>() },
+                new Document("A", null) { Id = "3", Index = 0 },
+                new Document("B", null) { Id = "4", Index = 0 },
+                new Document("C", null) { Id = "5", Index = 1, Children = new ObservableCollection<Document>() },
+                new Document("C", null) { Id = "6", Index = 1 },
+                new Document("C", null) { Id = "7", Index = 2, Children = new ObservableCollection<Document>() },
+                new Document("D", null) { Id = "8", Index = 2, Children = new ObservableCollection<Document>() },
+                new Document("C", null) { Id = "9", Index = 3, Children = new ObservableCollection<Document>() }
             };
             using (var configuration = new MoqSystemConfiguration(null)) {
                 var storage = configuration.Services.GetService<GitStorage>();
                 foreach (var order in Permutate(documents)) {
                     int i = 1;
                     Assert.Collection(storage.OrderDocuments(documents),
-                        l => Assert.Equal(i++, int.Parse(l.Key)),
-                        l => Assert.Equal(i++, int.Parse(l.Key)),
-                        l => Assert.Equal(i++, int.Parse(l.Key)),
-                        l => Assert.Equal(i++, int.Parse(l.Key)),
-                        l => Assert.Equal(i++, int.Parse(l.Key)),
-                        l => Assert.Equal(i++, int.Parse(l.Key)),
-                        l => Assert.Equal(i++, int.Parse(l.Key)),
-                        l => Assert.Equal(i++, int.Parse(l.Key)),
-                        l => Assert.Equal(i++, int.Parse(l.Key))
+                        l => Assert.Equal(i++, int.Parse(l.Id)),
+                        l => Assert.Equal(i++, int.Parse(l.Id)),
+                        l => Assert.Equal(i++, int.Parse(l.Id)),
+                        l => Assert.Equal(i++, int.Parse(l.Id)),
+                        l => Assert.Equal(i++, int.Parse(l.Id)),
+                        l => Assert.Equal(i++, int.Parse(l.Id)),
+                        l => Assert.Equal(i++, int.Parse(l.Id)),
+                        l => Assert.Equal(i++, int.Parse(l.Id)),
+                        l => Assert.Equal(i++, int.Parse(l.Id))
                     );
                 }
             }
@@ -569,8 +569,8 @@ namespace Scribs.UnitTest {
                 var leaf = configuration.Services.GetService<GitStorage>().LoadFile(user, project, null, true);
                 Assert.Equal("leaf", leaf.Name);
                 Assert.Equal(3, leaf.Index);
-                Assert.Equal(id, leaf.Key);
-                Assert.Equal(text, leaf.Text);
+                Assert.Equal(id, leaf.Id);
+                Assert.Equal(text, leaf.Content);
                 Assert.True(leaf.IsLeaf);
             }
         }
@@ -601,8 +601,8 @@ namespace Scribs.UnitTest {
                 configuration.Moq.Verify(m => m.ReadLeaf(It.Is<string>(o => o == Path.Combine(path, ".dir.md"))), Times.Exactly(2)); // Metadata + Text
                 Assert.Equal("directory", directory.Name);
                 Assert.Equal(3, directory.Index);
-                Assert.Equal(id, directory.Key);
-                Assert.Equal(text, directory.Text);
+                Assert.Equal(id, directory.Id);
+                Assert.Equal(text, directory.Content);
                 Assert.False(directory.IsLeaf);
                 Assert.NotNull(directory.Children);
                 Assert.Equal(4, directory.Children.Count);

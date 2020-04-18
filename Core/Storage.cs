@@ -2,10 +2,13 @@
 
 namespace Scribs.Core {
 
-    public interface ILocalStorage {
-        public string Root { get; }
+    public interface IStorage {
         public void Save(Document project);
         public Document Load(string userName, string name);
+    }
+
+    public interface ILocalStorage : IStorage {
+        public string Root { get; }
     }
 
     public interface IStorageSettings {
