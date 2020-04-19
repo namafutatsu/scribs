@@ -29,6 +29,21 @@ namespace Scribs.IntegrationTest {
             Assert.True(Document.Equals(project, storage.Load(fixture.UserName, project.Name)));
         }
 
+        private void CrossStorage<S, D>() where S : IStorage where D : IStorage {
+            var sourceStorage = fixture.Services.GetService<S>();
+            var destinationStorage = fixture.Services.GetService<D>();
+            var sourceProject = sourceStorage.Load(fixture.User.Name, fixture.Project.Name);
+            Assert.False(sourceProject.NoMetadata);
+            sourceProject.Name = "CrossStorage" + typeof(S).ToString() + typeof(D).ToString();
+            sourceProject.Disconnect = true;
+            destinationStorage.Save(sourceProject);
+            var destinationProject = destinationStorage.Load(fixture.User.Name, sourceProject.Name);
+            Assert.False(destinationProject.NoMetadata);
+            Assert.True(destinationProject.Equals(sourceProject));
+            destinationProject.Name = fixture.Project.Name;
+            Assert.True(destinationProject.Equals(fixture.Project));
+        }
+
         [Fact]
         public void GitStorageLoad() => StorageLoad<GitStorage>();
 
@@ -42,22 +57,12 @@ namespace Scribs.IntegrationTest {
         public void JsonStorageSaveThenLoad() => StorageSaveThenLoad<JsonStorage>();
 
         [Fact]
-        public void CrossStorageJsonToGit() {
-            var jsonStorage = fixture.Services.GetService<JsonStorage>();
-            var gitStorage = fixture.Services.GetService<GitStorage>();
-            var jsonProject = jsonStorage.Load(fixture.User.Name, fixture.Project.Name);
-            Assert.False(jsonProject.NoMetadata);
-            jsonProject.Name = "CrossStorage";
-            jsonProject.Disconnect = true;
-            gitStorage.Save(jsonProject);
-            var gitProject = gitStorage.Load(fixture.User.Name, jsonProject.Name);
-            Assert.False(gitProject.NoMetadata);
-            Assert.True(gitProject.Equals(jsonProject));
-            gitProject.Name = fixture.Project.Name;
-            Assert.True(gitProject.Equals(fixture.Project));
-        }
+        public void CrossStorageJsonToGit() => CrossStorage<JsonStorage, GitStorage>();
 
         [Fact]
         public void MongoStorageLoad() => StorageLoad<MongoStorage>();
+
+        [Fact]
+        public void CrossStorageMongoToGit() => CrossStorage<MongoStorage, GitStorage>();
     }
 }
