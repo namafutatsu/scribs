@@ -7,8 +7,8 @@ using Scribs.Core;
 
 namespace Scribs.IntegrationTest {
 
-    [Collection("E2E")]
-    public class IndexTest : IClassFixture<Fixture> {
+    [Collection("Integration")]
+    public class IndexTest {
         Fixture fixture;
 
         public IndexTest(Fixture fixture) {

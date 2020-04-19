@@ -20,11 +20,11 @@ namespace Scribs.Core.Storages {
         public void Save(Document project) => Save(project, true);
 
         public Document Load(string userName, string name, bool content = true) {
-            var user = User.GetByName(userName);
-            string path = system.PathCombine(Root, user.Path, name);
+            var user = new User(userName);
+            string path = Path.Combine(Root, user.Path, name);
             if (!system.NodeExists(path))
                 system.CreateNode(path);
-            var project = ReadJson(system.PathCombine(path, jsonDocument));
+            var project = ReadJson(Path.Combine(path, jsonDocument));
             Document.BuildProject(project, user);
             if (content)
                 foreach (var document in project.AllDocuments.Values)
@@ -45,25 +45,25 @@ namespace Scribs.Core.Storages {
         }
 
         private void ReadDocument(string path, Document document) {
-            if (!system.LeafExists(system.PathCombine(path, document.Id)))
+            if (!system.LeafExists(Path.Combine(path, document.Id)))
                 return;
-            using (var reader = system.ReadLeaf(system.PathCombine(path, document.Id)))
+            using (var reader = system.ReadLeaf(Path.Combine(path, document.Id)))
                 document.Content = reader.ReadToEnd();
         }
 
         public void Save(Document project, bool content) {
-            string path = system.PathCombine(Root, project.User.Path, project.Name);
+            string path = Path.Combine(Root, project.User.Path, project.Name);
             if (system.NodeExists(path))
                 system.DeleteNode(path, true);
             system.CreateNode(path);
-            CreateJson(project, system.PathCombine(path, jsonDocument));
+            CreateJson(project, Path.Combine(path, jsonDocument));
             if (content)
                 SaveDocument(project, path);
         }
 
         private void SaveDocument(Document document, string path) {
             if (document.Content != null)
-                WriteDocument(document, system.PathCombine(path, document.Id));
+                WriteDocument(document, Path.Combine(path, document.Id));
             if (document.Children == null)
                 return;
             foreach (var child in document.Children)

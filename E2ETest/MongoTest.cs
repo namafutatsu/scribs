@@ -4,8 +4,8 @@ using Scribs.Core.Services;
 
 namespace Scribs.IntegrationTest {
 
-    [Collection("E2E")]
-    public class MongoTest : IClassFixture<Fixture> {
+    [Collection("Integration")]
+    public class MongoTest {
         Fixture fixture;
 
         public MongoTest(Fixture fixture) {

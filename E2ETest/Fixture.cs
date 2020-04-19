@@ -12,7 +12,7 @@ using Scribs.Core.Storages;
 
 namespace Scribs.IntegrationTest {
 
-    [CollectionDefinition("E2E")]
+    [CollectionDefinition("Integration")]
     public class DatabaseCollection : ICollectionFixture<Fixture> {
     }
 
@@ -121,7 +121,8 @@ namespace Scribs.IntegrationTest {
 
         public void ClearData() {
             DeleteGitHubRepo(Project);
-            DeleteEntity<User>(UserName);
+            Services.GetService<MongoService>().DropDatabase();
+            //DeleteEntity<User>(UserName);
             foreach (var storage in new List<ILocalStorage> {
                 Services.GetService<GitStorage>(),
                 Services.GetService<JsonStorage>()

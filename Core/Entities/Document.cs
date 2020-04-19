@@ -8,7 +8,7 @@ using MongoDB.Bson.Serialization.Attributes;
 
 namespace Scribs.Core.Entities {
 
-    [DataContract]
+    [DataContract, BsonIgnoreExtraElements]
     public class Document: Entity {
         [BsonElement, DataMember(EmitDefaultValue = false)]
         public ObservableCollection<Document> Children { get; set; }
@@ -18,17 +18,23 @@ namespace Scribs.Core.Entities {
         public bool IndexNodes { get; set; } = false;
         [BsonElement, DataMember]
         public bool IndexLeaves { get; set; } = false;
-
+        [BsonIgnore]
         public string Content { get; set; }
-
-        public bool IsLeaf => Children == null;
+        [BsonIgnore]
         public Document Parent { get; protected set; }
+        [BsonIgnore]
         public Document Project { get; protected set; }
+        [BsonIgnore]
         public User User { get; private set; }
         public string Path => System.IO.Path.Join(Parent != null ? Parent.Path : User.Path, Name);
+        public bool IsLeaf => Children == null;
+        [BsonIgnore]
         public bool Disconnect { get; set; } = false;
+        [BsonIgnore]
+        public bool NoMetadata { get; set; } = false;
 
         // Project
+        [BsonIgnore]
         public IDictionary<string, Document> AllDocuments { get; set; }
         [BsonElement, DataMember]
         public string UserName { get; set; }
@@ -86,8 +92,6 @@ namespace Scribs.Core.Entities {
             var oldIndex = Children.IndexOf(document);
             Children.Move(oldIndex, index);
         }
-
-        public bool NoMetadata { get; set; } = false;
 
         public override bool Equals(object obj) {
             var other = obj as Document;

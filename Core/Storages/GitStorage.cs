@@ -27,7 +27,7 @@ namespace Scribs.Core.Storages {
         public void Save(Document project) => Save(project, null);
 
         public void Save(Document project, string message = null) {
-            var path = System.PathCombine(Root, project.User.Path, project.Name);
+            var path = Path.Combine(Root, project.User.Path, project.Name);
             if (project.Disconnect) {
                 if (!System.NodeExists(path))
                     System.CreateNode(path);
@@ -40,7 +40,7 @@ namespace Scribs.Core.Storages {
                     repositoryService.Clone(gitHubService.GetRepoName(project), path);
             }
             EmptyProject(path);
-            SaveDirectory(project, System.PathCombine(Root, project.Path), true);
+            SaveDirectory(project, Path.Combine(Root, project.Path), true);
             if (message == null)
                 message = DateTime.Now.ToString();
             if (!project.Disconnect)
@@ -48,7 +48,7 @@ namespace Scribs.Core.Storages {
         }
 
         public void EmptyProject(string path) {
-            var gitPath = System.PathCombine(path, ".git");
+            var gitPath = Path.Combine(path, ".git");
             foreach (var file in System.GetLeaves(path))
                 System.DeleteLeaf(file);
             foreach (var directory in System.GetNodes(path).Where(o => o != gitPath))
@@ -80,7 +80,7 @@ namespace Scribs.Core.Storages {
             if (!System.NodeExists(path))
                 System.CreateNode(path);
             if (NeedsDirectoryDocument(directory))
-                WriteDocument(directory, System.PathCombine(path, DirectoryDocumentName), content);
+                WriteDocument(directory, Path.Combine(path, DirectoryDocumentName), content);
             if (directory.IsLeaf)
                 return;
             foreach (var child in directory.Children) {
@@ -117,8 +117,8 @@ namespace Scribs.Core.Storages {
         }
 
         public Document Load(string userName, string name, bool content = true) {
-            var user = User.GetByName(userName);
-            string path = System.PathCombine(Root, user.Path, name);
+            var user = new User(userName);
+            string path = Path.Combine(Root, user.Path, name);
             bool disconnect = false;
             try {
                 repositoryService.Pull(path);

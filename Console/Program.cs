@@ -17,7 +17,6 @@ namespace Scribs.Console {
             var services = new ServiceCollection().Configure(configuration).AddServices().AddServices().BuildServiceProvider();
 
             var user = new User("test");
-            user.test = "lkjhiukg";
             services.GetFactory<User>().Create(user);
 
             //var gdrtf = services.GetFactory<User>().GetByName("gdrtf");

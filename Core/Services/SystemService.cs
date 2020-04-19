@@ -1,12 +1,9 @@
 ﻿using System;
 using System.IO;
-using System.Text;
 
 namespace Scribs.Core.Services {
 
     public class SystemService {
-        public string PathCombine(params string[] paths) => Path.Combine(paths);
-        public string PathJoin(params string[] paths) => Path.Join(paths);
         public virtual string GetName(string path) => Path.GetFileName(path);
         public virtual bool NodeExists(string path) => Directory.Exists(path);
         public virtual void CreateNode(string path) => Directory.CreateDirectory(path);

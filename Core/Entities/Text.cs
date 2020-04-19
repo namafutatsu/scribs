@@ -11,10 +11,12 @@ namespace Scribs.Core.Entities {
         [BsonElement]
         public string Content { get; set; }
 
-        public Text(string userId, string projectId, string content) {
+        public Text(string userId, string projectId, Document document) {
+            Id = document.Id;
+            Name = document.Name;
             UserId = userId;
             ProjectId = projectId;
-            Content = content;
+            Content = document.Content;
         }
     }
 }

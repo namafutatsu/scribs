@@ -20,15 +20,19 @@ namespace Scribs.Core.Storages {
             return user;
         }
 
-        private Document GetProject(string name, User user) {
-            var project = factories.Get<Document>().GetByName(name);
+        private Document GetProject(Func<Factory<Document>, Document> get, User user) {
+            var project = get(factories.Get<Document>());
             if (project == null)
                 return null;
             if (project.UserName != user.Name)
-                throw new Exception($"Project {project.Id} not belonging to user {user.Id}");
+                throw new Exception($"Project {project.Id} named {project.Name} not belonging to user {user.Id}");
             Document.BuildProject(project, user);
             return project;
         }
+
+        private Document GetProjectById(string id, User user) => GetProject(o => o.Get(id), user);
+
+        private Document GetProjectByName(string name, User user) => GetProject(o => o.GetByName(name), user);
 
         private Text GetText(string id, User user, Document project) {
             var text = factories.Get<Text>().Get(id);
@@ -44,13 +48,15 @@ namespace Scribs.Core.Storages {
 
         public Document Load(string userName, string name, bool content = true) {
             var user = GetUser(userName);
-            var project = GetProject(name, user);
+            var project = GetProjectByName(name, user);
             if (project == null) {
                 throw new Exception($"Project {name} not found");
             }
             if (content) {
-                foreach (var kvp in project.AllDocuments)
-                    kvp.Value.Content = GetText(kvp.Key, user, project).Content;
+                foreach (var kvp in project.AllDocuments) {
+                    var text = GetText(kvp.Key, user, project);
+                    kvp.Value.Content = text.Content;
+                };
             }
             return project;
         }
@@ -60,22 +66,22 @@ namespace Scribs.Core.Storages {
         }
 
         private void UpdateProject(Document project) {
-            factories.Get<Document>().Update(project.Id, project); // todo virer id
+            factories.Get<Document>().Update(project);
         }
 
-        private void CreateText(User user, Document project, string content) {
-            var text = new Text(user.Id, project.Id, content);
+        private void CreateText(User user, Document project, Document document) {
+            var text = new Text(user.Id, project.Id, document);
             factories.Get<Text>().Create(text);
         }
 
         private void UpdateText(Text text, string content) {
             text.Content = content;
-            factories.Get<Text>().Update(text.Id, text); // todo virer id
+            factories.Get<Text>().Update(text);
         }
 
         public void Save(Document project, bool content) {
             var user = GetUser(project.UserName);
-            var saved = GetProject(project.Name, user);
+            var saved = GetProjectByName(project.Name, user) ?? GetProjectById(project.Id, user);
             if (saved == null)
                 CreateProject(project);
             else
@@ -84,7 +90,7 @@ namespace Scribs.Core.Storages {
                 foreach (var kvp in project.AllDocuments) {
                     var text = GetText(kvp.Key, user, project);
                     if (text == null)
-                        CreateText(user, project, kvp.Value.Content);
+                        CreateText(user, project, kvp.Value);
                     else
                         UpdateText(text, kvp.Value.Content);
                 }

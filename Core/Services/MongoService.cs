@@ -44,19 +44,25 @@ namespace Scribs.Core.Services {
     }
 
     public class MongoService {
-        string collection;
+        MongoClient client;
         IMongoDatabase database;
 
         public MongoService(IMongoSettings settings) {
             if (settings?.ConnectionString != null) {
-                var client = new MongoClient(settings.ConnectionString);
-                database = client.GetDatabase(settings.DatabaseName);
+                client = new MongoClient(settings.ConnectionString);
+                //try {
+                    database = client.GetDatabase(settings.DatabaseName);
+                //} catch {
+                //    database = client.crea
+                //}
             }
         }
 
         public IMongoCollection<E> GetCollection<E>(string collection) {
             return database.GetCollection<E>(collection);
         }
+
+        public void DropDatabase() => client.DropDatabase(database.DatabaseNamespace.DatabaseName);
     }
 
     public class MongoSettings : IMongoSettings {

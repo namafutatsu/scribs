@@ -4,8 +4,8 @@ using Scribs.Core.Entities;
 
 namespace Scribs.IntegrationTest {
 
-    [Collection("E2E")]
-    public class ApiTest : IClassFixture<Fixture> {
+    [Collection("Integration")]
+    public class ApiTest {
         Fixture fixture;
 
         public ApiTest(Fixture fixture) {

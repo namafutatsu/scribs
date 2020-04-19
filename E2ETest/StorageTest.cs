@@ -6,8 +6,8 @@ using Scribs.Core;
 
 namespace Scribs.IntegrationTest {
 
-    [Collection("E2E")]
-    public class StorageTest : IClassFixture<Fixture> {
+    [Collection("Integration")]
+    public class StorageTest {
         Fixture fixture;
 
         public StorageTest(Fixture fixture) {
@@ -59,8 +59,5 @@ namespace Scribs.IntegrationTest {
 
         [Fact]
         public void MongoStorageLoad() => StorageLoad<MongoStorage>();
-
-        [Fact]
-        public void MongoStorageSaveThenLoad() => StorageSaveThenLoad<MongoStorage>();
     }
 }
