@@ -1,7 +1,7 @@
 using Newtonsoft.Json;
 using Xunit;
 using Scribs.Core.Entities;
-using Scribs.API.Models;
+using Scribs.Core.Models;
 using System.Net.Http;
 using System.Net;
 

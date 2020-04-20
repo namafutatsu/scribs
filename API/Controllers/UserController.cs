@@ -4,8 +4,8 @@ using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Scribs.API.Models;
 using Scribs.Core.Entities;
+using Scribs.Core.Models;
 using Scribs.Core.Services;
 
 namespace Scribs.API.Controllers {
@@ -51,7 +51,7 @@ namespace Scribs.API.Controllers {
             if (userModel.Password != user.Password) {
                 return Problem("Incorrect password");
             }
-            var token = JwtManager.GenerateToken(user.Id);
+            var token = AuthService.GenerateToken(user.Id);
             return Ok(token);
         }
 

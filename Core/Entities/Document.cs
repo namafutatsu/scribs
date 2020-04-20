@@ -41,6 +41,8 @@ namespace Scribs.Core.Entities {
         [BsonElement, DataMember(EmitDefaultValue = false)]
         public string Repo { get; set; }
 
+        public Document() { }
+
         public Document(string name, User user, Document parent = null, string key = null) {
             Id = key ?? Utils.CreateGuid();
             NoMetadata = key == null;

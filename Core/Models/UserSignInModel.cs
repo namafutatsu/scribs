@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace Scribs.API.Models {
+namespace Scribs.Core.Models {
     public class UserSignInModel {
         [Required(ErrorMessage = "Login is required")]
         public string Name { get; set; }

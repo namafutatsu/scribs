@@ -33,6 +33,7 @@ namespace Scribs.Core.Services {
 
         public static IServiceCollection AddServices(this IServiceCollection serviceCollection) {
             return serviceCollection
+                .AddSingleton(MapperUtils.GetMapper())
                 .AddSingleton<SystemService>()
                 .AddSingleton<MongoService>()
                 .AddSingleton<Factories>()
@@ -43,7 +44,8 @@ namespace Scribs.Core.Services {
                 .AddSingleton<MongoStorage>()
                 // todo virer ?
                 .AddSingleton<Factory<User>>()
-                .AddSingleton<Factory<Document>>();
+                .AddSingleton<Factory<Document>>()
+                .AddSingleton<AuthService>();
         }
     }
 }

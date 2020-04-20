@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Scribs.API.Models {
+namespace Scribs.Core.Models {
     public class UserRegistrationModel {
         [Required(ErrorMessage = "First name is required")]
         public string FirstName { get; set; }
