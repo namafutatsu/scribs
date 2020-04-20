@@ -4,6 +4,8 @@ using Scribs.Core.Services;
 
 namespace Scribs.Core.Storages {
     public class MongoStorage : IStorage {
+        // todo many loading and saving
+
         private Factories factories;
 
         public MongoStorage(Factories factories) {
@@ -44,7 +46,6 @@ namespace Scribs.Core.Storages {
                 throw new Exception($"Text {text.Id} not belonging to project {project.Id}");
             return text;
         }
-
 
         public Document Load(string userName, string name, bool content = true) {
             var user = GetUser(userName);

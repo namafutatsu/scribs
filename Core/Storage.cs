@@ -1,10 +1,13 @@
-﻿using Scribs.Core.Entities;
+﻿using System.Threading.Tasks;
+using Scribs.Core.Entities;
 
 namespace Scribs.Core {
 
     public interface IStorage {
         public void Save(Document project);
         public Document Load(string userName, string name);
+        //public Task SaveAsync(Document project);
+        //public Task<Document> LoadAsync(string userName, string name);
     }
 
     public interface ILocalStorage : IStorage {
