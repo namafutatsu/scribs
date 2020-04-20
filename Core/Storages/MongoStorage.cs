@@ -56,7 +56,7 @@ namespace Scribs.Core.Storages {
             if (content) {
                 foreach (var kvp in project.AllDocuments) {
                     var text = GetText(kvp.Key, user, project);
-                    kvp.Value.Content = text.Content;
+                    kvp.Value.Content = text?.Content;
                 };
             }
             return project;

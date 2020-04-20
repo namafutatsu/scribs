@@ -6,17 +6,15 @@ namespace Scribs.Core.Entities {
 
     [DataContract]
     public class User: Entity {
-        [BsonElement]
+        [BsonElement, DataMember]
         public string FirstName { get; set; }
-        [BsonElement]
+        [BsonElement, DataMember]
         public string LastName { get; set; }
-        [BsonElement]
+        [BsonElement, DataMember]
         public string Mail { get; set; }
-        [BsonElement]
+        [BsonElement, DataMember]
         public string Password { get; set; }
-        [BsonElement]
-        public string ConfirmPassword { get; set; }
-        [BsonElement]
+        [BsonElement, DataMember]
         public string Secret { get; set; }
         public string Path => System.IO.Path.Join("users", Name);
 

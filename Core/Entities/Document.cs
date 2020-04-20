@@ -30,7 +30,7 @@ namespace Scribs.Core.Entities {
         public bool Disconnect { get; set; } = false;
         [BsonIgnore]
         public bool NoMetadata { get; set; } = false;
-        public string Path => System.IO.Path.Join(Parent != null ? Parent.Path : User.Path, Name);
+        public string Path => System.IO.Path.Join(Parent != null ? Parent.Path : User?.Path, Name);
         public bool IsLeaf => Children == null;
 
         // Project
