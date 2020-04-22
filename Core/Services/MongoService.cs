@@ -9,49 +9,56 @@ using MongoDB.Driver;
 namespace Scribs.Core.Services {
 
     public class Factories {
-        MongoService mongoService;
+        MongoService mongo;
+        ClockService clock;
 
-        public Factories(MongoService mongoService) {
-            this.mongoService = mongoService;
+        public Factories(MongoService mongo, ClockService clock) {
+            this.mongo = mongo;
+            this.clock = clock;
         }
 
         public Factory<E> Get<E>() where E: Entity {
-            return new Factory<E>(mongoService);
+            return new Factory<E>(mongo, clock);
         }
     }
 
     public class Factory<E> where E: Entity {
         private IMongoCollection<E> collection;
+        private ClockService clock;
 
-        public Factory(MongoService mongoService) {
-            if (mongoService != null) {
-                collection = mongoService.GetCollection<E>(typeof(E).Name);
+        public Factory(MongoService mongo, ClockService clock) {
+            if (mongo != null) {
+                collection = mongo.GetCollection<E>(typeof(E).Name);
             }
+            this.clock = clock;
         }
 
-        public virtual void Create(E entity) {
-            collection.InsertOne(entity);
+        public virtual void Create(E entity) => CreateAsync(entity).Wait();
+
+        public virtual E Get(string id) => GetAsync(id).Result;
+
+        public virtual E GetByName(string name) => GetByNameAsync(name).Result;
+
+        public void Update(string id, E entity) => UpdateAsync(id, entity).Wait();
+
+        public void Update(E entity) => UpdateAsync(entity).Wait();
+
+        public void Remove(E entity) => RemoveAsync(entity).Wait();
+
+        public void Remove(string id) => RemoveAsync(id).Wait();
+
+        public virtual Task CreateAsync(E entity) {
+            entity.CTime = entity.MTime = clock.GetNow();
+            return collection.InsertOneAsync(entity);
+
         }
-
-        public virtual E Get(string id) => collection.Find<E>(o => o.Id == id).FirstOrDefault();
-
-        public virtual E GetByName(string name) => collection.Find<E>(o => o.Name == name).FirstOrDefault();
-
-        public List<E> Get() => collection.Find(o => true).ToList();
-
-        public void Update(string id, E entity) => collection.ReplaceOne(o => o.Id == id, entity);
-
-        public void Update(E entity) => Update(entity.Id, entity);
-
-        public void Remove(E entity) => collection.DeleteOne(o => o.Id == entity.Id);
-
-        public void Remove(string id) => collection.DeleteOne(o => o.Id == id);
-
-        public virtual Task CreateAsync(E entity) => collection.InsertOneAsync(entity);
 
         public virtual async Task<E> GetAsync(Expression<Func<E, bool>> get) {
             using (var cursor = await collection.FindAsync(get, new FindOptions<E, E> { Limit = 1 })) {
-                return await cursor.SingleOrDefaultAsync();
+                var entity = await cursor.SingleOrDefaultAsync();
+                if (entity.DTime.HasValue)
+                    return null;
+                return entity;
             }
         }
 
@@ -59,13 +66,28 @@ namespace Scribs.Core.Services {
 
         public virtual Task<E> GetByNameAsync(string name) => GetAsync(o => o.Name == name);
 
-        public Task UpdateAsync(string id, E entity) => collection.ReplaceOneAsync(o => o.Id == id, entity);
+        public Task UpdateAsync(string id, E entity) {
+            entity.MTime = clock.GetNow();
+            return collection.ReplaceOneAsync(o => o.Id == id, entity);
+        }
 
-        public Task UpdateAsync(E entity) => UpdateAsync(entity.Id, entity);
+        public Task UpdateAsync(E entity) {
+            entity.MTime = clock.GetNow();
+            return UpdateAsync(entity.Id, entity);
+        }
 
-        public Task RemoveAsync(E entity) => collection.DeleteOneAsync(o => o.Id == entity.Id);
+        public Task RemoveAsync(E entity) {
+            entity.DTime = clock.GetNow();
+            return UpdateAsync(entity.Id, entity);
+        }
 
-        public Task RemoveAsync(string id) => collection.DeleteOneAsync(o => o.Id == id);
+        public async Task RemoveAsync(string id) {
+            var entity = await GetAsync(id);
+            if (entity != null) {
+                entity.DTime = clock.GetNow();
+                await UpdateAsync(entity.Id, entity);
+            }
+        }
     }
 
     public class MongoService {

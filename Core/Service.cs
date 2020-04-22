@@ -35,6 +35,7 @@ namespace Scribs.Core.Services {
             return serviceCollection
                 .AddSingleton(MapperUtils.GetMapper())
                 .AddSingleton<SystemService>()
+                .AddSingleton<ClockService>()
                 .AddSingleton<MongoService>()
                 .AddSingleton<Factories>()
                 .AddSingleton<GitHubService>()

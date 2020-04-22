@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 using Scribs.Core.Entities;
 using Scribs.Core.Services;
 
@@ -15,8 +16,8 @@ namespace Scribs.Core.Storages {
         public Document Load(string userName, string name) => Load(userName, name, true);
         public void Save(Document project) => Save(project, true);
 
-        private User GetUser(string name) {
-            var user = factories.Get<User>().GetByName(name);
+        private async Task<User> GetUser(string name) {
+            var user = await factories.Get<User>().GetByNameAsync(name);
             if (user == null)
                 throw new Exception($"User {name} not found");
             return user;
@@ -32,7 +33,7 @@ namespace Scribs.Core.Storages {
             return project;
         }
 
-        private Document GetProjectById(string id, User user) => GetProject(o => o.Get(id), user);
+        private Task<Document> GetProjectById(string id, User user) => GetProject(o => o.Get(id), user);
 
         private Document GetProjectByName(string name, User user) => GetProject(o => o.GetByName(name), user);
 
