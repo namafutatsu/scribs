@@ -5,7 +5,7 @@ using Scribs.Core.Services;
 
 namespace Scribs.Core.Storages {
     public class MongoStorage : IStorage {
-        // todo many loading and saving
+        // todo mass loading and saving
 
         private Factories factories;
 
@@ -13,18 +13,18 @@ namespace Scribs.Core.Storages {
             this.factories = factories;
         }
 
-        public Document Load(string userName, string name) => Load(userName, name, true);
-        public void Save(Document project) => Save(project, true);
+        public Document Load(string userName, string name) => LoadAsync(userName, name, true).Result;
+        public void Save(Document project) => SaveAsync(project, true).Wait();
 
-        private async Task<User> GetUser(string name) {
+        private async Task<User> GetUserAsync(string name) {
             var user = await factories.Get<User>().GetByNameAsync(name);
             if (user == null)
                 throw new Exception($"User {name} not found");
             return user;
         }
 
-        private Document GetProject(Func<Factory<Document>, Document> get, User user) {
-            var project = get(factories.Get<Document>());
+        private async Task<Document> GetProjectAsync(Func<Factory<Document>, Task<Document>> get, User user) {
+            var project = await get(factories.Get<Document>());
             if (project == null)
                 return null;
             if (project.UserName != user.Name)
@@ -33,12 +33,12 @@ namespace Scribs.Core.Storages {
             return project;
         }
 
-        private Task<Document> GetProjectById(string id, User user) => GetProject(o => o.Get(id), user);
+        private Task<Document> GetProjectByIdAsync(string id, User user) => GetProjectAsync(o => o.GetAsync(id), user);
 
-        private Document GetProjectByName(string name, User user) => GetProject(o => o.GetByName(name), user);
+        private Task<Document> GetProjectByNameAsync(string name, User user) => GetProjectAsync(o => o.GetByNameAsync(name), user);
 
-        private Text GetText(string id, User user, Document project) {
-            var text = factories.Get<Text>().Get(id);
+        private async Task<Text> GetTextAsync(string id, User user, Document project) {
+            var text = await factories.Get<Text>().GetAsync(id);
             if (text == null)
                 return null;
             if (text.UserId != user.Id)
@@ -48,53 +48,49 @@ namespace Scribs.Core.Storages {
             return text;
         }
 
-        public Document Load(string userName, string name, bool content = true) {
-            var user = GetUser(userName);
-            var project = GetProjectByName(name, user);
+        public async Task<Document> LoadAsync(string userName, string name, bool content = true) {
+            var user = await GetUserAsync(userName);
+            var project = await GetProjectByNameAsync(name, user);
             if (project == null) {
                 throw new Exception($"Project {name} not found");
             }
             if (content) {
                 foreach (var kvp in project.AllDocuments) {
-                    var text = GetText(kvp.Key, user, project);
+                    var text = await GetTextAsync(kvp.Key, user, project);
                     kvp.Value.Content = text?.Content;
                 };
             }
             return project;
         }
 
-        private void CreateProject(Document project) {
-            factories.Get<Document>().Create(project);
-        }
+        private Task CreateProjectAsync(Document project) => factories.Get<Document>().CreateAsync(project);
 
-        private void UpdateProject(Document project) {
-            factories.Get<Document>().Update(project);
-        }
+        private Task UpdateProjectAsync(Document project)  => factories.Get<Document>().UpdateAsync(project);
 
-        private void CreateText(User user, Document project, Document document) {
+        private Task CreateTextAsync(User user, Document project, Document document) {
             var text = new Text(user.Id, project.Id, document);
-            factories.Get<Text>().Create(text);
+            return factories.Get<Text>().CreateAsync(text);
         }
 
-        private void UpdateText(Text text, string content) {
+        private Task UpdateTextAsync(Text text, string content) {
             text.Content = content;
-            factories.Get<Text>().Update(text);
+            return factories.Get<Text>().UpdateAsync(text);
         }
 
-        public void Save(Document project, bool content) {
-            var user = GetUser(project.UserName);
-            var saved = GetProjectByName(project.Name, user) ?? GetProjectById(project.Id, user);
+        public async Task SaveAsync(Document project, bool content) {
+            var user = await GetUserAsync(project.UserName);
+            var saved = await GetProjectByNameAsync(project.Name, user) ?? await GetProjectByIdAsync(project.Id, user);
             if (saved == null)
-                CreateProject(project);
+                await CreateProjectAsync(project);
             else
-                UpdateProject(project);
+                await UpdateProjectAsync(project);
             if (content) {
                 foreach (var kvp in project.AllDocuments) {
-                    var text = GetText(kvp.Key, user, project);
+                    var text = await GetTextAsync(kvp.Key, user, project);
                     if (text == null)
-                        CreateText(user, project, kvp.Value);
+                        await CreateTextAsync(user, project, kvp.Value);
                     else
-                        UpdateText(text, kvp.Value.Content);
+                        await UpdateTextAsync(text, kvp.Value.Content);
                 }
             }
         }

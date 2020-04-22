@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
@@ -33,20 +32,6 @@ namespace Scribs.Core.Services {
             this.clock = clock;
         }
 
-        public virtual void Create(E entity) => CreateAsync(entity).Wait();
-
-        public virtual E Get(string id) => GetAsync(id).Result;
-
-        public virtual E GetByName(string name) => GetByNameAsync(name).Result;
-
-        public void Update(string id, E entity) => UpdateAsync(id, entity).Wait();
-
-        public void Update(E entity) => UpdateAsync(entity).Wait();
-
-        public void Remove(E entity) => RemoveAsync(entity).Wait();
-
-        public void Remove(string id) => RemoveAsync(id).Wait();
-
         public virtual Task CreateAsync(E entity) {
             entity.CTime = entity.MTime = clock.GetNow();
             return collection.InsertOneAsync(entity);
@@ -56,7 +41,7 @@ namespace Scribs.Core.Services {
         public virtual async Task<E> GetAsync(Expression<Func<E, bool>> get) {
             using (var cursor = await collection.FindAsync(get, new FindOptions<E, E> { Limit = 1 })) {
                 var entity = await cursor.SingleOrDefaultAsync();
-                if (entity.DTime.HasValue)
+                if (entity != null && entity.DTime.HasValue)
                     return null;
                 return entity;
             }

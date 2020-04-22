@@ -14,8 +14,8 @@ namespace Scribs.UnitTest {
         [Fact]
         public async Task GetUserMail() {
             string mail = "user@mail.com";
-            var userFactory = new Mock<Factory<User>>(null);
-            userFactory.Setup(m => m.GetByName(It.Is<string>(o => o == userName))).Returns(new User(userName) { Mail = mail });
+            var userFactory = new Mock<Factory<User>>(null, null);
+            userFactory.Setup(m => m.GetByNameAsync(It.Is<string>(o => o == userName))).ReturnsAsync(new User(userName) { Mail = mail });
             var serviceDescriptor = new ServiceDescriptor(typeof(Factory<User>), userFactory.Object);
             using (var server = new ConfigurableServer(sc => sc.Replace(serviceDescriptor))) {
                 using (var client = server.CreateClient()) {

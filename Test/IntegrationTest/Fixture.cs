@@ -9,6 +9,7 @@ using Scribs.Core;
 using Scribs.Core.Entities;
 using Scribs.Core.Services;
 using Scribs.Core.Storages;
+using System.Threading.Tasks;
 
 namespace Scribs.IntegrationTest {
 
@@ -34,6 +35,7 @@ namespace Scribs.IntegrationTest {
             FillProject(Project);
             SaveProject<GitStorage>(Project);
             SaveProject<JsonStorage>(Project);
+            Services.GetService<MongoStorage>().SaveAsync(Project, true).Wait();
             SaveProject<MongoStorage>(Project);
             CommitRepo(Project);
         }
@@ -58,16 +60,16 @@ namespace Scribs.IntegrationTest {
             Password = "azerty",
         };
 
-        private void SaveEntity<E>(E entity) where E : Entity {
+        private Task SaveEntity<E>(E entity) where E : Entity {
             var factory = Services.GetFactory<E>();
-            factory.Create(entity);
+            return factory.CreateAsync(entity);
         }
 
-        private void DeleteEntity<E>(string name) where E : Entity {
+        private async Task DeleteEntity<E>(string name) where E : Entity {
             var factory = Services.GetFactory<E>();
-            E entity = factory.GetByName(name);
+            E entity = await factory.GetByNameAsync(name);
             if (entity != null) {
-                factory.Remove(entity);
+                await factory.RemoveAsync(entity);
             }
         }
 

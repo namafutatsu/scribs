@@ -70,13 +70,13 @@ namespace Scribs.API.Controllers {
         }
 
         [HttpGet("{id}", Name = "Get")]
-        public User Get(string id) {
-            return factory.Get(id);
+        public Task<User> Get(string id) {
+            return factory.GetAsync(id);
         }
 
         [HttpGet("{name}", Name = "GetByName")]
-        public User GetByName(string name) {
-            return factory.GetByName(name);
+        public Task<User> GetByName(string name) {
+            return factory.GetByNameAsync(name);
         }
 
         public bool IsPasswordValid(string password) {

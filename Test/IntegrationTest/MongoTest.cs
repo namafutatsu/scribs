@@ -1,6 +1,7 @@
 using Xunit;
 using Scribs.Core.Entities;
 using Scribs.Core.Services;
+using System.Threading.Tasks;
 
 namespace Scribs.IntegrationTest {
 
@@ -13,8 +14,8 @@ namespace Scribs.IntegrationTest {
         }
 
         [Fact]
-        public void DbGet() {
-            var user = fixture.Services.GetFactory<User>().GetByName(fixture.UserName);
+        public async Task DbGet() {
+            var user = await fixture.Services.GetFactory<User>().GetByNameAsync(fixture.UserName);
             Assert.Equal(fixture.UserMail, user.Mail);
         }
     }

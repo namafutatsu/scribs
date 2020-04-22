@@ -146,7 +146,7 @@ namespace Scribs.IntegrationTest {
                 string token = AuthService.GenerateToken(fixture.User.Id);
                 client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
                 var service = fixture.Services.GetService<Factory<Document>>();
-                var oldProject = service.GetByName(fixture.Project.Name);
+                var oldProject = await service.GetByNameAsync(fixture.Project.Name);
                 oldProject.Name = "PostProject";
                 var model = fixture.Services.GetService<IMapper>().Map<DocumentModel>(oldProject);
                 model.Id = null;
@@ -154,7 +154,7 @@ namespace Scribs.IntegrationTest {
                 var contentData = new StringContent(data, System.Text.Encoding.UTF8, "application/json");
                 var response = await client.PostAsync($"api/project/post", contentData);
                 var project = JsonConvert.DeserializeObject<DocumentModel>(await response.Content.ReadAsStringAsync());
-                var newProject = service.Get(project.Id);
+                var newProject = await service.GetAsync(project.Id);
                 Assert.Equal(oldProject.Name, newProject.Name);
                 Assert.Null(newProject.Content);
             }
@@ -166,7 +166,7 @@ namespace Scribs.IntegrationTest {
                 string token = AuthService.GenerateToken(fixture.User.Id);
                 client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
                 var service = fixture.Services.GetService<Factory<Document>>();
-                var oldProject = service.GetByName(fixture.Project.Name);
+                var oldProject = await service.GetByNameAsync(fixture.Project.Name);
                 oldProject.Name = "UpdateProject.Old";
                 var mapper = fixture.Services.GetService<IMapper>();
                 var model = fixture.Services.GetService<IMapper>().Map<DocumentModel>(oldProject);
@@ -175,12 +175,12 @@ namespace Scribs.IntegrationTest {
                 var contentData = new StringContent(data, System.Text.Encoding.UTF8, "application/json");
                 var response = await client.PostAsync($"api/project/post", contentData);
                 var project = JsonConvert.DeserializeObject<DocumentModel>(await response.Content.ReadAsStringAsync());
-                var newProject = service.Get(project.Id);
+                var newProject = await service.GetAsync(project.Id);
                 newProject.Name = "UpdateProject.New";
                 data = JsonConvert.SerializeObject(mapper.Map<DocumentModel>(newProject));
                 contentData = new StringContent(data, System.Text.Encoding.UTF8, "application/json");
                 response = await client.PostAsync($"api/project/post", contentData);
-                Assert.Equal(newProject.Name, service.Get(project.Id).Name);
+                Assert.Equal(newProject.Name, (await service.GetAsync(project.Id)).Name);
             }
         }
     }

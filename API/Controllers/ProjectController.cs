@@ -37,7 +37,7 @@ namespace Scribs.API.Controllers {
             var user = await auth.Identify(User);
             var project = mapper.Map<Document>(model);
             project.UserName = user.Name;
-            storage.Save(project, false);
+            await storage.SaveAsync(project, false);
             return Ok(project);
         }
     }
