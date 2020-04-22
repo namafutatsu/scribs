@@ -8,7 +8,3 @@ Tmp/
 node_modules/
 *.csproj.user
 *.scssc
-
-#specific directories
-/Web/Shared/RouteService/Quotas/
-/Programs/Walle/AgentIVR/InstallUtil\.InstallLog

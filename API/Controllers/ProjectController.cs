@@ -38,7 +38,7 @@ namespace Scribs.API.Controllers {
             var project = mapper.Map<Document>(model);
             project.UserName = user.Name;
             storage.Save(project, false);
-            return Ok();
+            return Ok(project);
         }
     }
 }
