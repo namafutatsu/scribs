@@ -50,6 +50,10 @@ namespace Scribs.Core.Storages {
 
         public async Task<Document> LoadAsync(string userName, string name, bool content = true) {
             var user = await GetUserAsync(userName);
+            return await LoadAsync(user, name, content);
+        }
+
+        public async Task<Document> LoadAsync(User user, string name, bool content = true) {
             var project = await GetProjectByNameAsync(name, user);
             if (project == null) {
                 throw new Exception($"Project {name} not found");

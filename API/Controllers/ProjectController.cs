@@ -26,10 +26,11 @@ namespace Scribs.API.Controllers {
         [HttpPost]
         public async Task<ActionResult> Get(DocumentModel model) {
             var user = await auth.Identify(User);
-            var project = storage.Load(user.Name, model.Name);
+            var project = await storage.LoadAsync(user, model.Name, false);
             if (project == null)
                 return Problem($"Project {model.Name} not found for user {user.Name}");
-            return Ok(mapper.Map<DocumentModel>(project));
+            var result = mapper.Map<DocumentModel>(project);
+            return Ok(result);
         }
 
         [HttpPost]
