@@ -1,7 +1,9 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Scribs.Core;
 using Scribs.Core.Entities;
 using Scribs.Core.Services;
 
@@ -27,23 +29,28 @@ namespace Scribs.API.Controllers {
             var text = await factory.GetAsync(model.Id);
             if (text == null || text.UserId != user.Id)
                 return Problem($"Project {model.Id} not found for user {user.Name}");
-            return Ok(mapper.Map<TextModel>(text));
+            return Ok(mapper.Map<TextModel>(text).Content);
         }
 
         [HttpPost]
         public async Task<ActionResult> Post(TextModel model) {
             var user = await auth.Identify(User);
+            bool noId = String.IsNullOrEmpty(model.Id);
             var text = mapper.Map<Text>(model);
-            await factory.CreateAsync(text);
-            return Ok();
-        }
-
-        [HttpPost]
-        public async Task<ActionResult> Update(TextModel model) {
-            var user = await auth.Identify(User);
-            var text = mapper.Map<Text>(model);
-            await factory.UpdateAsync(text);
-            return Ok();
+            text.UserId = user.Id; // todo check if it's the right id alre
+            if (noId) {
+                model.Id = Utils.CreateGuid();
+                await factory.CreateAsync(text);
+            } else {
+                var saved = await factory.GetAsync(text.Id);
+                if (saved == null) {
+                    await factory.CreateAsync(text);
+                } else {
+                    await factory.UpdateAsync(text);
+                    return Ok(saved);
+                }
+            }
+            return Ok(text.Id);
         }
     }
 }

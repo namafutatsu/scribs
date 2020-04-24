@@ -27,7 +27,7 @@ namespace Scribs.Core.Storages {
             var project = ReadJson(Path.Combine(path, jsonDocument));
             Document.BuildProject(project, user);
             if (content)
-                foreach (var document in project.AllDocuments.Values)
+                foreach (var document in project.ProjectDocuments.Values)
                     ReadDocument(path, document);
             return project;
         }

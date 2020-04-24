@@ -1,4 +1,5 @@
-﻿using System.Collections.ObjectModel;
+﻿using System.Collections.Generic;
+using System.Collections.ObjectModel;
 
 namespace Scribs.Core.Models {
     public class DocumentModel {
@@ -7,7 +8,7 @@ namespace Scribs.Core.Models {
         public int Index { get; set; }
         public bool IndexNodes { get; set; }
         public bool IndexLeaves { get; set; }
-        public string Content { get; set; }
         public ObservableCollection<DocumentModel> Children { get; set; }
+        public bool IsLeaf { get; set; }
     }
 }

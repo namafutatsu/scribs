@@ -46,6 +46,7 @@ namespace Scribs.Core.Services {
                 // todo virer ?
                 .AddSingleton<Factory<User>>()
                 .AddSingleton<Factory<Document>>()
+                .AddSingleton<Factory<Text>>()
                 .AddSingleton<AuthService>();
         }
     }

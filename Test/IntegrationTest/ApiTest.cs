@@ -8,6 +8,8 @@ using Xunit;
 using Scribs.Core.Entities;
 using Scribs.Core.Models;
 using Scribs.Core.Services;
+using Scribs.Core;
+using System;
 
 namespace Scribs.IntegrationTest {
 
@@ -133,10 +135,12 @@ namespace Scribs.IntegrationTest {
                 });
                 var contentData = new StringContent(data, System.Text.Encoding.UTF8, "application/json");
                 var response = await client.PostAsync($"api/project/get", contentData);
-                var project = JsonConvert.DeserializeObject<DocumentModel>(await response.Content.ReadAsStringAsync());
+                var workspace = JsonConvert.DeserializeObject<WorkspaceModel>(await response.Content.ReadAsStringAsync());
+                var project = workspace.Project;
                 Assert.Equal(fixture.Project.Id, project.Id);
-                Assert.Equal(fixture.Project.Content, project.Content);
                 Assert.Equal(fixture.Project.Children.Count, project.Children.Count);
+                Assert.Contains(project.Id, workspace.Texts);
+                Assert.Equal(fixture.Project.Content, workspace.Texts[project.Id]);
             }
         }
 
@@ -153,8 +157,8 @@ namespace Scribs.IntegrationTest {
                 string data = JsonConvert.SerializeObject(model);
                 var contentData = new StringContent(data, System.Text.Encoding.UTF8, "application/json");
                 var response = await client.PostAsync($"api/project/post", contentData);
-                var project = JsonConvert.DeserializeObject<DocumentModel>(await response.Content.ReadAsStringAsync());
-                var newProject = await service.GetAsync(project.Id);
+                string id = await response.Content.ReadAsStringAsync();
+                var newProject = await service.GetAsync(id);
                 Assert.Equal(oldProject.Name, newProject.Name);
                 Assert.Null(newProject.Content);
             }
@@ -174,13 +178,50 @@ namespace Scribs.IntegrationTest {
                 string data = JsonConvert.SerializeObject(model);
                 var contentData = new StringContent(data, System.Text.Encoding.UTF8, "application/json");
                 var response = await client.PostAsync($"api/project/post", contentData);
-                var project = JsonConvert.DeserializeObject<DocumentModel>(await response.Content.ReadAsStringAsync());
-                var newProject = await service.GetAsync(project.Id);
+                string id = await response.Content.ReadAsStringAsync();
+                var newProject = await service.GetAsync(id);
                 newProject.Name = "UpdateProject.New";
                 data = JsonConvert.SerializeObject(mapper.Map<DocumentModel>(newProject));
                 contentData = new StringContent(data, System.Text.Encoding.UTF8, "application/json");
                 response = await client.PostAsync($"api/project/post", contentData);
-                Assert.Equal(newProject.Name, (await service.GetAsync(project.Id)).Name);
+                Assert.Equal(newProject.Name, (await service.GetAsync(id)).Name);
+            }
+        }
+
+        [Fact]
+        public async void GetText() {
+            using (var client = fixture.Server.CreateClient()) {
+                string token = AuthService.GenerateToken(fixture.User.Id);
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+                string data = JsonConvert.SerializeObject(new TextModel {
+                    Id = fixture.Project.Id,
+                });
+                var contentData = new StringContent(data, System.Text.Encoding.UTF8, "application/json");
+                var response = await client.PostAsync($"api/text/get", contentData);
+                string content = await response.Content.ReadAsStringAsync();
+                Assert.Equal(fixture.Project.Content, content);
+            }
+        }
+
+        [Fact]
+        public async void PostText() {
+            using (var client = fixture.Server.CreateClient()) {
+                string token = AuthService.GenerateToken(fixture.User.Id);
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+                string content = Guid.NewGuid().ToString();
+                string id = Utils.CreateGuid();
+                string data = JsonConvert.SerializeObject(new TextModel {
+                    Id = id,
+                    ProjectId = fixture.Project.Id,
+                    Content = content
+                });
+                var contentData = new StringContent(data, System.Text.Encoding.UTF8, "application/json");
+                var response = await client.PostAsync($"api/text/post", contentData);
+                var text = await fixture.Services.GetService<Factory<Text>>().GetAsync(id);
+                Assert.NotNull(text);
+                Assert.Equal(fixture.Project.Id, text.ProjectId);
+                Assert.Equal(fixture.User.Id, text.UserId);
+                Assert.Equal(content, text.Content);
             }
         }
     }

@@ -59,7 +59,7 @@ namespace Scribs.Core.Storages {
                 throw new Exception($"Project {name} not found");
             }
             if (content) {
-                foreach (var kvp in project.AllDocuments) {
+                foreach (var kvp in project.ProjectDocuments) {
                     var text = await GetTextAsync(kvp.Key, user, project);
                     kvp.Value.Content = text?.Content;
                 };
@@ -89,7 +89,7 @@ namespace Scribs.Core.Storages {
             else
                 await UpdateProjectAsync(project);
             if (content) {
-                foreach (var kvp in project.AllDocuments) {
+                foreach (var kvp in project.ProjectDocuments) {
                     var text = await GetTextAsync(kvp.Key, user, project);
                     if (text == null)
                         await CreateTextAsync(user, project, kvp.Value);

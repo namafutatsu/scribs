@@ -1,8 +1,11 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
+using Microsoft.VisualBasic;
 using MongoDB.Bson;
 using MongoDB.Driver;
+using MongoDB.Driver.Core.Operations;
 
 namespace Scribs.Core.Services {
 
@@ -34,7 +37,6 @@ namespace Scribs.Core.Services {
         public virtual Task CreateAsync(E entity) {
             entity.CTime = entity.MTime = clock.GetNow();
             return collection.InsertOneAsync(entity);
-
         }
 
         public virtual async Task<E> GetAsync(Expression<Func<E, bool>> get) {
@@ -49,6 +51,14 @@ namespace Scribs.Core.Services {
         public virtual Task<E> GetAsync(string id) => GetAsync(o => o.Id == id);
 
         public virtual Task<E> GetByNameAsync(string name) => GetAsync(o => o.Name == name);
+
+        public virtual async Task<IList<E>> GetAsync(IEnumerable<string> ids) {
+            var definition = new FilterDefinitionBuilder<E>();
+            var filter = definition.In(x => x.Id, ids);
+            using (var cursor = await collection.FindAsync(filter)) {
+                return cursor.ToList();
+            }
+        }
 
         public Task UpdateAsync(string id, E entity) {
             entity.MTime = clock.GetNow();

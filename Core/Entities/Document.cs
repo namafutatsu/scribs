@@ -35,7 +35,7 @@ namespace Scribs.Core.Entities {
 
         // Project
         [BsonIgnore]
-        public IDictionary<string, Document> AllDocuments { get; set; }
+        public IDictionary<string, Document> ProjectDocuments { get; set; }
         [BsonElement, DataMember]
         public string UserName { get; set; }
         [BsonElement, DataMember(EmitDefaultValue = false)]
@@ -80,11 +80,11 @@ namespace Scribs.Core.Entities {
             Parent = parent;
             Project = parent.Project;
             User = parent.User;
-            if (Project.AllDocuments == null)
-                Project.AllDocuments = new Dictionary<string, Document> {
+            if (Project.ProjectDocuments == null)
+                Project.ProjectDocuments = new Dictionary<string, Document> {
                     [Project.Id] = Project
                 };
-            Project.AllDocuments.Add(Id, this);
+            Project.ProjectDocuments.Add(Id, this);
             if (recurrence && Children != null)
                 foreach (var child in Children)
                     child.SetParent(this, true);

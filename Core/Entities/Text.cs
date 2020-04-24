@@ -1,5 +1,6 @@
 ﻿using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
+using Scribs.Core.Services;
 
 namespace Scribs.Core.Entities {
 
@@ -17,6 +18,9 @@ namespace Scribs.Core.Entities {
             UserId = userId;
             ProjectId = projectId;
             Content = document.Content;
+        }
+
+        public Text() {
         }
     }
 }
