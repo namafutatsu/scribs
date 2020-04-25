@@ -49,7 +49,7 @@ namespace Scribs.API.Controllers {
         public async Task<ActionResult> Post(DocumentModel model) {
             var user = await auth.Identify(User);
             if (string.IsNullOrEmpty(model.Id))
-                model.Id = Utils.CreateGuid();
+                model.Id = Utils.CreateId();
             var project = mapper.Map<Document>(model);
             project.UserName = user.Name;
             await storage.SaveAsync(project, false);

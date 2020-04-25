@@ -19,6 +19,7 @@ namespace Scribs.IntegrationTest {
 
     public class Fixture: IDisposable {
         public string UserName => "Kenny";
+        public string Password => "azerty";
         public string UserMail => $"{UserName}@scribs.io";
         public string ProjectName => "Test";
         public ConfigurableServer Server;
@@ -41,7 +42,7 @@ namespace Scribs.IntegrationTest {
         }
 
         private ConfigurableServer CreateServer() {
-            string path = Path.Combine(Path.GetTempPath(), "Scribs", Utils.CreateGuid());
+            string path = Path.Combine(Path.GetTempPath(), "Scribs", Utils.CreateId());
             if (!Directory.Exists(path))
                 Directory.CreateDirectory(path);
             var gitStorageSettings = new Mock<GitStorageSettings>();
@@ -57,7 +58,7 @@ namespace Scribs.IntegrationTest {
 
         private User CreateUser(string userName) => new User(userName) {
             Mail = UserMail,
-            Password = "azerty",
+            Password = Password,
         };
 
         private Task SaveEntity<E>(E entity) where E : Entity {

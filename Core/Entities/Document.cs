@@ -44,7 +44,7 @@ namespace Scribs.Core.Entities {
         public Document() { }
 
         public Document(string name, User user, Document parent = null, string key = null) {
-            Id = key ?? Utils.CreateGuid();
+            Id = key ?? Utils.CreateId();
             NoMetadata = key == null;
             Name = name;
             UserName = user?.Name;
@@ -130,7 +130,7 @@ namespace Scribs.Core.Entities {
             get {
                 if (metadatas == null)
                     metadatas = new List<Metadata> {
-                    new Metadata("id", Utils.CreateGuid, d => d.Id, (d, m) => d.Id = m),
+                    new Metadata("id", Utils.CreateId, d => d.Id, (d, m) => d.Id = m),
                     new Metadata("repo", () => null, d => String.IsNullOrEmpty(d.Repo) ? null : d.Repo, (d, m) => d.Repo = m),
                     new Metadata("index.nodes", () => false.ToString(),
                         d => d.IndexNodes ? true.ToString() : null,

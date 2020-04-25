@@ -27,8 +27,10 @@ namespace Scribs.API.Controllers {
         public async Task<ActionResult> Get(TextModel model) {
             var user = await auth.Identify(User);
             var text = await factory.GetAsync(model.Id);
-            if (text == null || text.UserId != user.Id)
-                return Problem($"Project {model.Id} not found for user {user.Name}");
+            if (text == null)
+                return NotFound();
+            if (text.UserId != user.Id)
+                return Unauthorized();
             return Ok(mapper.Map<TextModel>(text).Content);
         }
 
@@ -37,15 +39,17 @@ namespace Scribs.API.Controllers {
             var user = await auth.Identify(User);
             bool noId = String.IsNullOrEmpty(model.Id);
             var text = mapper.Map<Text>(model);
-            text.UserId = user.Id; // todo check if it's the right id alre
+            text.UserId = user.Id;
             if (noId) {
-                model.Id = Utils.CreateGuid();
+                model.Id = Utils.CreateId();
                 await factory.CreateAsync(text);
             } else {
                 var saved = await factory.GetAsync(text.Id);
                 if (saved == null) {
                     await factory.CreateAsync(text);
                 } else {
+                    if (saved.UserId != model.UserId)
+                        return Unauthorized();
                     await factory.UpdateAsync(text);
                     return Ok(saved);
                 }

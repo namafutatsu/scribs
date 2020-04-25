@@ -165,7 +165,7 @@ namespace Scribs.Core.Storages {
 
         public Document GetDocument(User user, Document parent, string path, bool isLeaf, bool loadIndex) {
             string name = GetDocumentName(path, isLeaf, loadIndex, out int index);
-            var document = new Document(name, user, parent, Utils.CreateGuid());
+            var document = new Document(name, user, parent, Utils.CreateId());
             document.Index = index;
             return document;
         }

@@ -77,7 +77,7 @@ namespace Scribs.UnitTest {
         }
 
         private Action<Mock<SystemService>> SetupMetadataReading(out string id, out string text, out string repo) {
-            id = Core.Utils.CreateGuid();
+            id = Core.Utils.CreateId();
             text = "Lorem ipsum";
             repo = "http://git";
             var moq = new Mock<LeafReader>(null);

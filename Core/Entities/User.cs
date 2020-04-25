@@ -19,7 +19,7 @@ namespace Scribs.Core.Entities {
         public string Path => System.IO.Path.Join("users", Name);
 
         public User(string name) {
-            Id = Utils.CreateGuid();
+            Id = Utils.CreateId();
             Name = name;
         }
     }

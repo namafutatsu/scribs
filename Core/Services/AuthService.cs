@@ -19,7 +19,7 @@ namespace Scribs.Core.Services {
         public async Task<User> Identify(ClaimsPrincipal principal) {
             var user = await factory.GetAsync(principal.Identity.Name);
             if (user == null)
-                throw new Exception("User not found");
+                throw new UnauthorizedAccessException("User not found");
             return user;
         }
         public static string GenerateToken(string id) {
