@@ -4,7 +4,6 @@ using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.FileProviders;
 using Scribs.Core.Entities;
 using Scribs.Core.Models;
 using Scribs.Core.Services;
@@ -39,7 +38,7 @@ namespace Scribs.API.Controllers {
         }
 
         [HttpPost]
-        public async Task<IActionResult> SignIn(UserSignInModel userModel) {
+        public async Task<IActionResult> Login(UserSignInModel userModel) {
             if (!ModelState.IsValid)
                 return BadRequest("Model state issue");
             var user = await factory.GetByNameAsync(userModel.Name);
@@ -48,7 +47,8 @@ namespace Scribs.API.Controllers {
             if (userModel.Password != user.Password)
                 return BadRequest("Incorrect password");
             var token = AuthService.GenerateToken(user.Id);
-            return Ok(token);
+            userModel.Token = token;
+            return Ok(userModel);
         }
 
         private async Task<User> Identify(ClaimsPrincipal principal) {

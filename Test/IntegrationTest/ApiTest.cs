@@ -10,6 +10,7 @@ using Scribs.Core.Entities;
 using Scribs.Core.Models;
 using Scribs.Core.Services;
 using Scribs.Core;
+using System.Threading.Tasks;
 
 namespace Scribs.IntegrationTest {
 
@@ -22,17 +23,17 @@ namespace Scribs.IntegrationTest {
         }
 
         [Fact]
-        public void ApiGet() {
+        public async Task ApiGet() {
             using (var client = fixture.Server.CreateClient()) {
                 var response = client.GetAsync($"api/user/getbyname/{fixture.UserName}").Result;
-                var json = response.Content.ReadAsStringAsync().Result;
+                var json = await response.Content.ReadAsStringAsync();
                 var user = JsonConvert.DeserializeObject<User>(json);
                 Assert.Equal(fixture.UserMail, user.Mail);
             }
         }
 
         [Fact]
-        public async void RegisterUser() {
+        public async Task RegisterUser() {
             using (var client = fixture.Server.CreateClient()) {
                 string data = JsonConvert.SerializeObject(new UserRegistrationModel {
                     FirstName = "First",
@@ -49,7 +50,7 @@ namespace Scribs.IntegrationTest {
         }
 
         [Fact]
-        public async void RegisterDuplicateUser() {
+        public async Task RegisterDuplicateUser() {
             using (var client = fixture.Server.CreateClient()) {
                 string data = JsonConvert.SerializeObject(new UserRegistrationModel {
                     FirstName = "First",
@@ -77,7 +78,7 @@ namespace Scribs.IntegrationTest {
         }
 
         [Fact]
-        public async void RegisterUserWrongMail() {
+        public async Task RegisterUserWrongMail() {
             using (var client = fixture.Server.CreateClient()) {
                 string data = JsonConvert.SerializeObject(new UserRegistrationModel {
                     FirstName = "First",
@@ -94,7 +95,7 @@ namespace Scribs.IntegrationTest {
         }
 
         [Fact]
-        public async void RegisterUserNoName() {
+        public async Task RegisterUserNoName() {
             using (var client = fixture.Server.CreateClient()) {
                 string data = JsonConvert.SerializeObject(new UserRegistrationModel {
                     FirstName = "First",
@@ -110,7 +111,7 @@ namespace Scribs.IntegrationTest {
         }
 
         [Fact]
-        public async void RegisterUserWrongPassword() {
+        public async Task RegisterUserWrongPassword() {
             using (var client = fixture.Server.CreateClient()) {
                 string data = JsonConvert.SerializeObject(new UserRegistrationModel {
                     Name = "Name",
@@ -127,72 +128,73 @@ namespace Scribs.IntegrationTest {
         }
 
         [Fact]
-        public async void SignIn() {
+        public async Task SignIn() {
             using (var client = fixture.Server.CreateClient()) {
                 string data = JsonConvert.SerializeObject(new UserSignInModel {
                     Name = fixture.UserName,
                     Password = fixture.Password
                 });
                 var contentData = new StringContent(data, System.Text.Encoding.UTF8, "application/json");
-                var response = await client.PostAsync($"api/user/signin", contentData);
+                var response = await client.PostAsync($"api/user/login", contentData);
                 Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-                string token = await response.Content.ReadAsStringAsync();
+                string json = await response.Content.ReadAsStringAsync();
+                string token = JsonConvert.DeserializeObject<UserSignInModel>(json).Token;
                 Assert.NotNull(token);
             }
         }
 
         [Fact]
-        public async void SignInNoName() {
+        public async Task SignInNoName() {
             using (var client = fixture.Server.CreateClient()) {
                 string data = JsonConvert.SerializeObject(new UserSignInModel {
                     Password = fixture.Password
                 });
                 var contentData = new StringContent(data, System.Text.Encoding.UTF8, "application/json");
-                var response = await client.PostAsync($"api/user/signin", contentData);
+                var response = await client.PostAsync($"api/user/login", contentData);
                 Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
             }
         }
 
         [Fact]
-        public async void SignInWrongName() {
+        public async Task SignInWrongName() {
             using (var client = fixture.Server.CreateClient()) {
                 string data = JsonConvert.SerializeObject(new UserSignInModel {
                     Name = fixture.UserName + "_",
                     Password = fixture.Password
                 });
                 var contentData = new StringContent(data, System.Text.Encoding.UTF8, "application/json");
-                var response = await client.PostAsync($"api/user/signin", contentData);
+                var response = await client.PostAsync($"api/user/login", contentData);
                 Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
             }
         }
 
         [Fact]
-        public async void SignInNoPassword() {
+        public async Task SignInNoPassword() {
             using (var client = fixture.Server.CreateClient()) {
                 string data = JsonConvert.SerializeObject(new UserSignInModel {
                     Name = fixture.UserName
                 });
                 var contentData = new StringContent(data, System.Text.Encoding.UTF8, "application/json");
-                var response = await client.PostAsync($"api/user/signin", contentData);
+                var response = await client.PostAsync($"api/user/login", contentData);
                 Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
             }
         }
 
         [Fact]
-        public async void SignInWrongPassword() {
+        public async Task SignInWrongPassword() {
             using (var client = fixture.Server.CreateClient()) {
                 string data = JsonConvert.SerializeObject(new UserSignInModel {
                     Name = fixture.UserName,
                     Password = fixture.Password + "_"
                 });
                 var contentData = new StringContent(data, System.Text.Encoding.UTF8, "application/json");
-                var response = await client.PostAsync($"api/user/signin", contentData);
+                var response = await client.PostAsync($"api/user/login", contentData);
                 Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
             }
         }
 
         [Fact]
-        public async void GetProject() {
+        public async Task GetProject() {
             using (var client = fixture.Server.CreateClient()) {
                 string token = AuthService.GenerateToken(fixture.User.Id);
                 client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
@@ -211,7 +213,7 @@ namespace Scribs.IntegrationTest {
         }
 
         [Fact]
-        public async void GetProjectUnauthorized() {
+        public async Task GetProjectUnauthorized() {
             using (var client = fixture.Server.CreateClient()) {
                 string token = AuthService.GenerateToken(Utils.CreateId());
                 client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
@@ -224,7 +226,7 @@ namespace Scribs.IntegrationTest {
         }
 
         [Fact]
-        public async void PostProject() {
+        public async Task PostProject() {
             using (var client = fixture.Server.CreateClient()) {
                 string token = AuthService.GenerateToken(fixture.User.Id);
                 client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
@@ -244,7 +246,7 @@ namespace Scribs.IntegrationTest {
         }
 
         [Fact]
-        public async void PostProjectUnauthorized() {
+        public async Task PostProjectUnauthorized() {
             using (var client = fixture.Server.CreateClient()) {
                 string token = AuthService.GenerateToken(Utils.CreateId());
                 client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
@@ -260,7 +262,7 @@ namespace Scribs.IntegrationTest {
         }
 
         [Fact]
-        public async void UpdateProject() {
+        public async Task UpdateProject() {
             using (var client = fixture.Server.CreateClient()) {
                 string token = AuthService.GenerateToken(fixture.User.Id);
                 client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
@@ -284,7 +286,7 @@ namespace Scribs.IntegrationTest {
         }
 
         [Fact]
-        public async void UpdateProjectUnauthorized() {
+        public async Task UpdateProjectUnauthorized() {
             using (var client = fixture.Server.CreateClient()) {
                 string token = AuthService.GenerateToken(Utils.CreateId());
                 client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
@@ -301,7 +303,7 @@ namespace Scribs.IntegrationTest {
         }
 
         [Fact]
-        public async void GetText() {
+        public async Task GetText() {
             using (var client = fixture.Server.CreateClient()) {
                 string token = AuthService.GenerateToken(fixture.User.Id);
                 client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
@@ -316,7 +318,7 @@ namespace Scribs.IntegrationTest {
         }
 
         [Fact]
-        public async void GetTextUnauthorized() {
+        public async Task GetTextUnauthorized() {
             using (var client = fixture.Server.CreateClient()) {
                 string token = AuthService.GenerateToken(Utils.CreateId());
                 client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
@@ -329,7 +331,7 @@ namespace Scribs.IntegrationTest {
         }
 
         [Fact]
-        public async void PostText() {
+        public async Task PostText() {
             using (var client = fixture.Server.CreateClient()) {
                 string token = AuthService.GenerateToken(fixture.User.Id);
                 client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
@@ -352,7 +354,7 @@ namespace Scribs.IntegrationTest {
         }
 
         [Fact]
-        public async void PostTextUnauthorized() {
+        public async Task PostTextUnauthorized() {
             using (var client = fixture.Server.CreateClient()) {
                 string token = AuthService.GenerateToken(Utils.CreateId());
                 client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
@@ -369,7 +371,7 @@ namespace Scribs.IntegrationTest {
         }
 
         [Fact]
-        public async void UpdateText() {
+        public async Task UpdateText() {
             using (var client = fixture.Server.CreateClient()) {
                 string token = AuthService.GenerateToken(fixture.User.Id);
                 client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
@@ -396,7 +398,7 @@ namespace Scribs.IntegrationTest {
         }
 
         [Fact]
-        public async void GetTextFromOtherUser() {
+        public async Task GetTextFromOtherUser() {
             using (var client = fixture.Server.CreateClient()) {
                 var hacker = new User("GetTextFromOtherUser");
                 await fixture.Services.GetFactory<User>().CreateAsync(hacker);
@@ -412,7 +414,7 @@ namespace Scribs.IntegrationTest {
         }
 
         [Fact]
-        public async void UpdateTextFromOtherUser() {
+        public async Task UpdateTextFromOtherUser() {
             using (var client = fixture.Server.CreateClient()) {
                 var hacker = new User("UpdateTextFromOtherUser");
                 await fixture.Services.GetFactory<User>().CreateAsync(hacker);

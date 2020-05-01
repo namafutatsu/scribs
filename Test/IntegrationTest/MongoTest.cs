@@ -1,7 +1,7 @@
+using System.Threading.Tasks;
 using Xunit;
 using Scribs.Core.Entities;
 using Scribs.Core.Services;
-using System.Threading.Tasks;
 
 namespace Scribs.IntegrationTest {
 

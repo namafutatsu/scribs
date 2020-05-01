@@ -6,9 +6,9 @@ using System.Threading.Tasks;
 
 namespace Scribs.Core.Models {
     public class UserRegistrationModel {
-        [Required(ErrorMessage = "First name is required")]
+        //[Required(ErrorMessage = "First name is required")]
         public string FirstName { get; set; }
-        [Required(ErrorMessage = "Last name is required")]
+        //[Required(ErrorMessage = "Last name is required")]
         public string LastName { get; set; }
         [Required(ErrorMessage = "Login is required")]
         public string Name { get; set; }

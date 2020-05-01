@@ -10,6 +10,9 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.IdentityModel.Logging;
 using Scribs.Core.Services;
+using Microsoft.AspNetCore.Diagnostics;
+using Microsoft.AspNetCore.Http;
+using Newtonsoft.Json;
 
 namespace Scribs.API {
     public class Startup {
@@ -27,7 +30,7 @@ namespace Scribs.API {
                     options.Authority = "*";
                     options.Audience = "*"; 
                     options.TokenValidationParameters = new TokenValidationParameters {
-                        ClockSkew = TimeSpan.FromMinutes(5),
+                        //ClockSkew = TimeSpan.FromMinutes(5),
                         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(AuthService.SECRET)),
                         RequireSignedTokens = true,
                         RequireExpirationTime = true,
@@ -53,6 +56,7 @@ namespace Scribs.API {
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env) {
+            app.UseCors(builder => builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
             if (env.IsDevelopment()) {
                 app.UseDeveloperExceptionPage();
             }

@@ -1,0 +1,22 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Projects</ion-title>
+  </ion-toolbar>
+</ion-header>
+ 
+<ion-content padding>
+  Welcome to Scribs
+ 
+  <ul *ngIf="workspaces">
+    <li *ngFor="let workspace of workspaces">
+      {{workspace.project.name}}
+    </li>
+  </ul>
+
+  <p>{{ data }}</p>
+ 
+  <ion-button expand="full" (click)="loadProjects()">Load Special Info</ion-button>
+  <ion-button expand="full" (click)="logout()">Logout</ion-button>
+  <ion-button expand="full" (click)="clearToken()">Clear JWT</ion-button>
+ 
+</ion-content>

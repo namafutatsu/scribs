@@ -28,6 +28,33 @@ namespace Scribs.API.Controllers {
             this.factories = factories;
         }
 
+        [HttpGet]
+        // todo
+        public async Task<ActionResult> GetList() {
+            var user = await auth.Identify(User);
+            var list = new List<WorkspaceModel> {
+                new WorkspaceModel {
+                    Project = new DocumentModel {
+                        Id = Utils.CreateId(),
+                        Name = "Project 1"
+                    }
+                },
+                new WorkspaceModel {
+                    Project = new DocumentModel {
+                        Id = Utils.CreateId(),
+                        Name = "Project 2"
+                    }
+                },
+                new WorkspaceModel {
+                    Project = new DocumentModel {
+                        Id = Utils.CreateId(),
+                        Name = "Project 3"
+                    }
+                }
+            };
+            return Ok(list);
+        }
+
         [HttpPost]
         public async Task<ActionResult> Get(DocumentModel model) {
             var user = await auth.Identify(User);

@@ -22,15 +22,16 @@ namespace Scribs.Core.Services {
                 throw new UnauthorizedAccessException("User not found");
             return user;
         }
+
         public static string GenerateToken(string id) {
             var secret = SECRET;
-            var securityKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(secret));
+            var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secret));
             var issuer = "*";
             var audience = "*";
             var tokenHandler = new JwtSecurityTokenHandler();
             var tokenDescriptor = new SecurityTokenDescriptor {
                 Subject = new ClaimsIdentity(new Claim[] { new Claim(ClaimTypes.NameIdentifier, id) }),
-                Expires = DateTime.UtcNow.AddDays(7),
+                Expires = DateTime.UtcNow.AddDays(30),
                 Issuer = issuer,
                 Audience = audience,
                 SigningCredentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256Signature)
