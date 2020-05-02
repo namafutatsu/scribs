@@ -29,30 +29,11 @@ namespace Scribs.API.Controllers {
         }
 
         [HttpGet]
-        // todo
         public async Task<ActionResult> GetList() {
             var user = await auth.Identify(User);
-            var list = new List<WorkspaceModel> {
-                new WorkspaceModel {
-                    Project = new DocumentModel {
-                        Id = Utils.CreateId(),
-                        Name = "Project 1"
-                    }
-                },
-                new WorkspaceModel {
-                    Project = new DocumentModel {
-                        Id = Utils.CreateId(),
-                        Name = "Project 2"
-                    }
-                },
-                new WorkspaceModel {
-                    Project = new DocumentModel {
-                        Id = Utils.CreateId(),
-                        Name = "Project 3"
-                    }
-                }
-            };
-            return Ok(list);
+            var projects = await factories.Get<Document>().GetAsync(o => o.UserName == user.Name);
+            var result = projects.Select(o => mapper.Map<DocumentModel>(o));
+            return Ok(result);
         }
 
         [HttpPost]

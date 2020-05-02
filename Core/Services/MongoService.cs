@@ -2,10 +2,8 @@
 using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
-using Microsoft.VisualBasic;
 using MongoDB.Bson;
 using MongoDB.Driver;
-using MongoDB.Driver.Core.Operations;
 
 namespace Scribs.Core.Services {
 
@@ -39,7 +37,11 @@ namespace Scribs.Core.Services {
             return collection.InsertOneAsync(entity);
         }
 
-        public virtual async Task<E> GetAsync(Expression<Func<E, bool>> get) {
+        public virtual async Task<IEnumerable<E>> GetAsync(Expression<Func<E, bool>> get) {
+            return (await collection.FindAsync(get)).ToEnumerable();
+        }
+
+        public virtual async Task<E> GetSingleAsync(Expression<Func<E, bool>> get) {
             using (var cursor = await collection.FindAsync(get, new FindOptions<E, E> { Limit = 1 })) {
                 var entity = await cursor.SingleOrDefaultAsync();
                 if (entity != null && entity.DTime.HasValue)
@@ -48,9 +50,9 @@ namespace Scribs.Core.Services {
             }
         }
 
-        public virtual Task<E> GetAsync(string id) => GetAsync(o => o.Id == id);
+        public virtual Task<E> GetAsync(string id) => GetSingleAsync(o => o.Id == id);
 
-        public virtual Task<E> GetByNameAsync(string name) => GetAsync(o => o.Name == name);
+        public virtual Task<E> GetByNameAsync(string name) => GetSingleAsync(o => o.Name == name);
 
         public virtual async Task<IList<E>> GetAsync(IEnumerable<string> ids) {
             var definition = new FilterDefinitionBuilder<E>();

@@ -11,6 +11,9 @@ using Scribs.Core.Models;
 using Scribs.Core.Services;
 using Scribs.Core;
 using System.Threading.Tasks;
+using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Scribs.IntegrationTest {
 
@@ -209,6 +212,17 @@ namespace Scribs.IntegrationTest {
                 Assert.Equal(fixture.Project.Children.Count, project.Children.Count);
                 Assert.Contains(project.Id, workspace.Texts);
                 Assert.Equal(fixture.Project.Content, workspace.Texts[project.Id]);
+            }
+        }
+
+        [Fact]
+        public async Task GetProjects() {
+            using (var client = fixture.Server.CreateClient()) {
+                string token = AuthService.GenerateToken(fixture.User.Id);
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+                var response = await client.GetAsync($"api/project/getlist");
+                var projects = JsonConvert.DeserializeObject<IEnumerable<DocumentModel>>(await response.Content.ReadAsStringAsync());
+                Assert.Single(projects.Where(o => o.Id == fixture.Project.Id));
             }
         }
 
