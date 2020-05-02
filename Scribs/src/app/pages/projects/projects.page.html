@@ -7,13 +7,11 @@
 <ion-content padding>
   Welcome to Scribs
  
-  <ul *ngIf="workspaces">
-    <li *ngFor="let workspace of workspaces">
-      {{workspace.project.name}}
+  <ul *ngIf="projects">
+    <li *ngFor="let project of projects">
+      {{project.name}}
     </li>
   </ul>
-
-  <p>{{ data }}</p>
  
   <ion-button expand="full" (click)="loadProjects()">Load Special Info</ion-button>
   <ion-button expand="full" (click)="logout()">Logout</ion-button>

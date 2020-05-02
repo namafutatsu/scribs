@@ -3,16 +3,16 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { JwtHelperService } from '@auth0/angular-jwt';
 import { Storage } from '@ionic/storage';
-import { environment } from '../../environments/environment';
 import { tap, catchError } from 'rxjs/operators';
 import { BehaviorSubject } from 'rxjs';
- 
-const TOKEN_KEY = 'access_token';
- 
+
+import { environment } from '../../environments/environment';
+
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
+  TOKEN_KEY = 'access_token';
  
   url = environment.url;
   token = null;
@@ -27,16 +27,17 @@ export class AuthService {
   }
  
   checkToken() {
-    this.storage.get(TOKEN_KEY).then(token => {
+    this.storage.get(this.TOKEN_KEY).then(token => {
       if (token) {
         let decoded = this.helper.decodeToken(token);
         let isExpired = this.helper.isTokenExpired(token);
  
         if (!isExpired) {
+          this.token = token;
           this.user = decoded;
           this.authenticationState.next(true);
         } else {
-          this.storage.remove(TOKEN_KEY);
+          this.storage.remove(this.TOKEN_KEY);
         }
       }
     });
@@ -56,7 +57,7 @@ export class AuthService {
       .pipe(
         tap(res => {
           this.token = res['token'];
-          this.storage.set(TOKEN_KEY, this.token);
+          this.storage.set(this.TOKEN_KEY, this.token);
           this.user = this.helper.decodeToken(this.token);
           this.authenticationState.next(true);
         }),
@@ -68,7 +69,7 @@ export class AuthService {
   }
  
   logout() {
-    this.storage.remove(TOKEN_KEY).then(() => {
+    this.storage.remove(this.TOKEN_KEY).then(() => {
       this.authenticationState.next(false);
     });
   }
@@ -79,7 +80,7 @@ export class AuthService {
       .set('Content-Type', 'application/json')
       .set('Authorization', 'Bearer ' + this.token),
       params: new HttpParams()
-     }).pipe(
+    }).pipe(
       catchError(e => {
         let status = e.status;
         if (status === 401) {

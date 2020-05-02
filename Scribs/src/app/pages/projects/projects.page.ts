@@ -3,6 +3,7 @@ import { Component, OnInit } from '@angular/core';
 import { Storage } from '@ionic/storage';
 
 import { AuthService } from 'src/app/services/auth.service';
+import { ProjectService } from 'src/app/services/project.service';
 
 @Component({
   selector: 'app-projects',
@@ -10,16 +11,17 @@ import { AuthService } from 'src/app/services/auth.service';
   styleUrls: ['./projects.page.scss'],
 })
 export class ProjectsPage implements OnInit {
-  workspaces = null;
+  projects = null;
  
-  constructor(private authService: AuthService, private storage: Storage, private toastController: ToastController) { }
+  constructor(private authService: AuthService, private projectService: ProjectService,
+    private storage: Storage, private toastController: ToastController) { }
  
   ngOnInit() {
   }
  
   loadProjects() {
-    this.authService.getProjects().subscribe(res => {
-      this.workspaces = res;
+    this.projectService.getList().subscribe(res => {
+      this.projects = res;
     });
   }
  
