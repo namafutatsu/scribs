@@ -22,6 +22,9 @@ export class LoginPage implements OnInit {
  
   onSubmit() {
     this.loading = true;
-    this.authService.login(this.credentialsForm.value).subscribe(() => this.loading = false);
+    this.authService.login(this.credentialsForm.value).subscribe(
+      () => this.loading = false,
+      () => this.loading = false
+    );
   }
 }

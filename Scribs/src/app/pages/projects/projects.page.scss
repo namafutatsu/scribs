@@ -2,3 +2,16 @@ ion-card {
   margin: 20px auto;
   max-width: 300px;
 }
+
+ion-spinner {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    margin: auto;
+    // width: 50px !important;
+    // height: 50px !important;
+    transform: scale(3);
+  }
+  

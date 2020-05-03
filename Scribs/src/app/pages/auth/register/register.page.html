@@ -26,7 +26,10 @@
           <ion-input type="password" formControlName="confirmPassword"></ion-input>
         </ion-item>
     
-        <ion-button expand="block" type="submit" [disabled]="!credentialsForm.valid || loading">Register</ion-button>
+        <ion-button *ngIf="!loading" expand="block" type="submit" [disabled]="!credentialsForm.valid || loading">Register</ion-button>
+        <ion-button *ngIf="loading" expand="block" type="button" [disabled]="loading">
+          <ion-spinner name="crescent"></ion-spinner>
+        </ion-button>
         <ion-button expand="block" type="button" color="secondary" [disabled]="loading" [routerLink]="['/login']">Login</ion-button>
     
       </form>

@@ -32,15 +32,3 @@ ion-card-header {
 ion-card-title {
   color: var(--ion-toolbar-color);
 }
-
-ion-spinner {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  height: 100%;
-  margin: auto;
-  // width: 50px !important;
-  // height: 50px !important;
-  transform: scale(3);
-}

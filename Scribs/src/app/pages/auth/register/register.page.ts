@@ -24,8 +24,12 @@ export class RegisterPage implements OnInit {
  
   onSubmit() {
     this.loading = true;
-    this.authService.register(this.credentialsForm.value).subscribe(res => {
-      this.authService.login(this.credentialsForm.value).subscribe(() => this.loading = false);
-    });
+    this.authService.register(this.credentialsForm.value).subscribe(() => {
+      this.authService.login(this.credentialsForm.value).subscribe(
+        () => this.loading = false,
+        () => this.loading = false
+      );
+    },
+    () => this.loading = false);
   }
 }
