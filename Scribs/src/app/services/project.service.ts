@@ -11,6 +11,4 @@ export class ProjectService extends AuthorizedService {
   public getList() {
       return this.get('getlist');
   }
-
-  
 }

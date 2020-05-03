@@ -73,24 +73,6 @@ export class AuthService {
       this.authenticationState.next(false);
     });
   }
-
-  public getProjects() {
-    return this.http.get(`${this.url}/api/project/getlist`, {
-      headers: new HttpHeaders()
-      .set('Content-Type', 'application/json')
-      .set('Authorization', 'Bearer ' + this.token),
-      params: new HttpParams()
-    }).pipe(
-      catchError(e => {
-        let status = e.status;
-        if (status === 401) {
-          this.showAlert('You are not authorized for this!');
-          this.logout();
-        }
-        throw new Error(e);
-      })
-    )
-  }
  
   isAuthenticated() {
     return this.authenticationState.value;

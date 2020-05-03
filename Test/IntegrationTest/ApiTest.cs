@@ -252,10 +252,79 @@ namespace Scribs.IntegrationTest {
                 string data = JsonConvert.SerializeObject(model);
                 var contentData = new StringContent(data, System.Text.Encoding.UTF8, "application/json");
                 var response = await client.PostAsync($"api/project/post", contentData);
-                string id = await response.Content.ReadAsStringAsync();
+                string json = await response.Content.ReadAsStringAsync();
+                var id = JsonConvert.DeserializeObject<DocumentModel>(json).Id;
                 var newProject = await service.GetAsync(id);
                 Assert.Equal(oldProject.Name, newProject.Name);
                 Assert.Null(newProject.Content);
+            }
+        }
+
+        [Fact]
+        public async Task PostProjectDouble() {
+            using (var client = fixture.Server.CreateClient()) {
+                string token = AuthService.GenerateToken(fixture.User.Id);
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+                var service = fixture.Services.GetService<Factory<Document>>();
+                var project = await service.GetByNameAsync(fixture.Project.Name);
+                project.Name = fixture.Project.Name;
+                var model = fixture.Services.GetService<IMapper>().Map<DocumentModel>(project);
+                model.Id = null;
+                string data = JsonConvert.SerializeObject(model);
+                var contentData = new StringContent(data, System.Text.Encoding.UTF8, "application/json");
+                var response = await client.PostAsync($"api/project/post", contentData);
+                Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+            }
+        }
+
+        [Fact]
+        public async Task PostProjectDoubleTrim() {
+            using (var client = fixture.Server.CreateClient()) {
+                string token = AuthService.GenerateToken(fixture.User.Id);
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+                var service = fixture.Services.GetService<Factory<Document>>();
+                var project = await service.GetByNameAsync(fixture.Project.Name);
+                project.Name = fixture.Project.Name + " ";
+                var model = fixture.Services.GetService<IMapper>().Map<DocumentModel>(project);
+                model.Id = null;
+                string data = JsonConvert.SerializeObject(model);
+                var contentData = new StringContent(data, System.Text.Encoding.UTF8, "application/json");
+                var response = await client.PostAsync($"api/project/post", contentData);
+                Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+            }
+        }
+
+        [Fact]
+        public async Task PostProjectNoName() {
+            using (var client = fixture.Server.CreateClient()) {
+                string token = AuthService.GenerateToken(fixture.User.Id);
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+                var service = fixture.Services.GetService<Factory<Document>>();
+                var project = await service.GetByNameAsync(fixture.Project.Name);
+                project.Name = String.Empty;
+                var model = fixture.Services.GetService<IMapper>().Map<DocumentModel>(project);
+                model.Id = null;
+                string data = JsonConvert.SerializeObject(model);
+                var contentData = new StringContent(data, System.Text.Encoding.UTF8, "application/json");
+                var response = await client.PostAsync($"api/project/post", contentData);
+                Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+            }
+        }
+
+        [Fact]
+        public async Task PostProjectEmptyName() {
+            using (var client = fixture.Server.CreateClient()) {
+                string token = AuthService.GenerateToken(fixture.User.Id);
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+                var service = fixture.Services.GetService<Factory<Document>>();
+                var project = await service.GetByNameAsync(fixture.Project.Name);
+                project.Name = "   ";
+                var model = fixture.Services.GetService<IMapper>().Map<DocumentModel>(project);
+                model.Id = null;
+                string data = JsonConvert.SerializeObject(model);
+                var contentData = new StringContent(data, System.Text.Encoding.UTF8, "application/json");
+                var response = await client.PostAsync($"api/project/post", contentData);
+                Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
             }
         }
 
@@ -289,7 +358,8 @@ namespace Scribs.IntegrationTest {
                 string data = JsonConvert.SerializeObject(model);
                 var contentData = new StringContent(data, System.Text.Encoding.UTF8, "application/json");
                 var response = await client.PostAsync($"api/project/post", contentData);
-                string id = await response.Content.ReadAsStringAsync();
+                string json = await response.Content.ReadAsStringAsync();
+                var id = JsonConvert.DeserializeObject<DocumentModel>(json).Id;
                 var newProject = await service.GetAsync(id);
                 newProject.Name = "UpdateProject.New";
                 data = JsonConvert.SerializeObject(mapper.Map<DocumentModel>(newProject));

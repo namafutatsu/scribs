@@ -10,7 +10,7 @@
  
 <ion-content *ngIf="projects" class="ion-text-center" padding>
  
-  <ion-card *ngFor="let project of projects" button="true">
+  <ion-card *ngFor="let project of projects" button="true" (click)="goTo(project)">
     <ion-card-header>
       <ion-card-title>{{project.name}}</ion-card-title>
     </ion-card-header>
@@ -28,7 +28,7 @@
   </ion-card>
 
   <form [formGroup]="projectCreationForm" (ngSubmit)="onSubmit()">
-    <ion-card *ngIf="projects" button="true" (click)="onCreate($event)">
+    <ion-card *ngIf="projects" button="true" (click)="onCreateStart($event)">
       <ion-card-header class="creation">
         <ion-card-title *ngIf="!creation" class="creation">
           Create a new project
@@ -44,7 +44,7 @@
               <ion-button *ngIf="loading" expand="default" [disabled]="loading">
                 <ion-spinner name="crescent"></ion-spinner>
               </ion-button>
-              <ion-button *ngIf="!loading" expand="default" (click)="onSubmit($event)">Create</ion-button>
+              <ion-button *ngIf="!loading" expand="default" (click)="onSubmit($event)" [disabled]="projectCreationForm.invalid">Create</ion-button>
             </ion-col>
             <ion-col>
               <ion-button color="secondary" expand="default" (click)="onCancel($event)" [disabled]="loading">Cancel</ion-button>

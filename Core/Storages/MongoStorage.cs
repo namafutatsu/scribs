@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Reflection.Metadata.Ecma335;
 using System.Threading.Tasks;
 using Scribs.Core.Entities;
 using Scribs.Core.Services;
@@ -50,15 +51,16 @@ namespace Scribs.Core.Storages {
 
         public async Task<Document> LoadAsync(string userName, string name, bool content = true) {
             var user = await GetUserAsync(userName);
-            return await LoadAsync(user, name, content);
+            var project = await LoadAsync(user, name, content);
+            if (project == null) {
+                throw new Exception($"Project {name} not found");
+            }
+            return project;
         }
 
         public async Task<Document> LoadAsync(User user, string name, bool content = true) {
             var project = await GetProjectByNameAsync(name, user);
-            if (project == null) {
-                throw new Exception($"Project {name} not found");
-            }
-            if (content) {
+            if (project != null && content) {
                 foreach (var kvp in project.ProjectDocuments) {
                     var text = await GetTextAsync(kvp.Key, user, project);
                     kvp.Value.Content = text?.Content;

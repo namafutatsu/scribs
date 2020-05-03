@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
@@ -56,9 +57,15 @@ namespace Scribs.API.Controllers {
         [HttpPost]
         public async Task<ActionResult> Post(DocumentModel model) {
             var user = await auth.Identify(User);
+            string name = model.Name.Trim();
+            if (String.IsNullOrWhiteSpace(name))
+                return BadRequest($"A name is required");
+            var project = await storage.LoadAsync(user, name, false);
+            if (project != null)
+                return BadRequest($"A project with the name {project.Name} already exists for user {user.Name}");
             if (string.IsNullOrEmpty(model.Id))
                 model.Id = Utils.CreateId();
-            var project = mapper.Map<Document>(model);
+            project = mapper.Map<Document>(model);
             project.UserName = user.Name;
             await storage.SaveAsync(project, false);
             return Ok(project);
