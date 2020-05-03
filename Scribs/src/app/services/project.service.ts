@@ -7,6 +7,7 @@ import { AuthorizedService } from './authorized.service';
 })
 export class ProjectService extends AuthorizedService {
   protected controller = 'Project';
+  
   public getList() {
       return this.get('getlist');
   }

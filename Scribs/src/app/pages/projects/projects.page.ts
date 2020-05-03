@@ -17,8 +17,9 @@ export class ProjectsPage implements OnInit {
     private storage: Storage, private toastController: ToastController) { }
  
   ngOnInit() {
+    this.loadProjects();
   }
- 
+
   loadProjects() {
     this.projectService.getList().subscribe(res => {
       this.projects = res;

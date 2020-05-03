@@ -23,7 +23,10 @@ export abstract class AuthorizedService {
     };
   }
 
-  public get(action: string) {
+  public get(action: string = null) {
+    if (action === null) {
+      action = 'get';
+    }
     return this.http.get(`${environment.url}/api/${this.controller}/${action}`, this.getOptions()).pipe(
       catchError(e => {
         let status = e.status;
