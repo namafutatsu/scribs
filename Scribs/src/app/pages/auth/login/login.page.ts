@@ -8,7 +8,7 @@ import { AuthService } from '../../../services/auth.service';
   styleUrls: ['./login.page.scss'],
 })
 export class LoginPage implements OnInit {
- 
+  loading = false;
   credentialsForm: FormGroup;
  
   constructor(private formBuilder: FormBuilder, private authService: AuthService) { }
@@ -21,6 +21,7 @@ export class LoginPage implements OnInit {
   }
  
   onSubmit() {
-    this.authService.login(this.credentialsForm.value).subscribe();
+    this.loading = true;
+    this.authService.login(this.credentialsForm.value).subscribe(() => this.loading = false);
   }
 }

@@ -3,18 +3,30 @@
     <ion-title>Projects</ion-title>
   </ion-toolbar>
 </ion-header>
+
+<ion-content *ngIf="!projects">
+  <ion-spinner name="crescent"></ion-spinner>
+</ion-content>
  
-<ion-content padding>
-  Welcome to Scribs
+<ion-content *ngIf="projects" class="ion-text-center" padding>
  
-  <ul *ngIf="projects">
-    <li *ngFor="let project of projects">
-      {{project.name}}
-    </li>
-  </ul>
+  <ion-card *ngFor="let project of projects" button="true">
+    <ion-card-header>
+      <ion-card-title>{{project.name}}</ion-card-title>
+    </ion-card-header>
+    <!-- <ion-card-content>
+      todo :
+      nombre de mots
+      nombre de chars
+      nombre de chars avec espace
+      date de création
+      date de dernière modif
+      nombre de sessions
+      todo++ :
+      image en background
+    </ion-card-content> -->
+  </ion-card>
  
-  <ion-button expand="full" (click)="loadProjects()">Load Special Info</ion-button>
-  <ion-button expand="full" (click)="logout()">Logout</ion-button>
-  <ion-button expand="full" (click)="clearToken()">Clear JWT</ion-button>
+  <ion-button expand="default" (click)="logout()">Logout</ion-button>
  
 </ion-content>

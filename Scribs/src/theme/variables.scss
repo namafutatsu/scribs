@@ -97,14 +97,6 @@
   --ion-toolbar-color: #FFFAEB;
 
   --ion-item-background: #E6E1D4;
-
-  ion-card-header {
-    background-color: var(--ion-toolbar-background);
-  }
-
-  ion-card-title {
-    color: var(--ion-toolbar-color);
-  }
 }
 
 @media (prefers-color-scheme: dark) {

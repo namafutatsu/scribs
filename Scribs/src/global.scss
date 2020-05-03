@@ -24,3 +24,23 @@
 @import "~@ionic/angular/css/text-alignment.css";
 @import "~@ionic/angular/css/text-transformation.css";
 @import "~@ionic/angular/css/flex-utils.css";
+
+ion-card-header {
+  background-color: var(--ion-toolbar-background);
+}
+  
+ion-card-title {
+  color: var(--ion-toolbar-color);
+}
+
+ion-spinner {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  margin: auto;
+  // width: 50px !important;
+  // height: 50px !important;
+  transform: scale(3);
+}

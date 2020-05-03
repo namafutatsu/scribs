@@ -23,8 +23,8 @@
           <ion-input type="password" formControlName="password"></ion-input>
         </ion-item>
     
-        <ion-button expand="full" type="submit" [disabled]="!credentialsForm.valid">Login</ion-button>
-        <ion-button expand="full" type="button" color="secondary" [routerLink]="['../register']">Register</ion-button>
+        <ion-button expand="block" type="submit" [disabled]="!credentialsForm.valid || loading">Login</ion-button>
+        <ion-button expand="block" type="button" color="secondary" [disabled]="loading" [routerLink]="['../register']">Register</ion-button>
     
       </form>
     </ion-card-content>

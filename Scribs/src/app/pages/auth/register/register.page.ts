@@ -8,9 +8,10 @@ import { AuthService } from 'src/app/services/auth.service';
   styleUrls: ['./register.page.scss'],
 })
 export class RegisterPage implements OnInit {
+  loading = false;
   credentialsForm: FormGroup;
  
-  constructor(private formBuilder: FormBuilder, private authService: AuthService) { }
+  constructor(private formBuilder: FormBuilder, private authService: AuthService) {}
  
   ngOnInit() {
     this.credentialsForm = this.formBuilder.group({
@@ -22,8 +23,9 @@ export class RegisterPage implements OnInit {
   }
  
   onSubmit() {
+    this.loading = true;
     this.authService.register(this.credentialsForm.value).subscribe(res => {
-      this.authService.login(this.credentialsForm.value).subscribe();
+      this.authService.login(this.credentialsForm.value).subscribe(() => this.loading = false);
     });
   }
 }
