@@ -23,11 +23,21 @@ export abstract class AuthorizedService {
     };
   }
 
-  public get(action: string = null) {
-    if (action === null) {
-      action = 'get';
-    }
+  public get(action: string = 'get') {
     return this.http.get(`${environment.url}/api/${this.controller}/${action}`, this.getOptions()).pipe(
+      catchError(e => {
+        let status = e.status;
+        if (status === 401) {
+          this.showAlert('You are not authorized for this!');
+          this.logout();
+        }
+        throw new Error(e);
+      })
+    )
+  }
+
+  public post(body, action: string = 'post') {
+    return this.http.post(`${environment.url}/api/${this.controller}/${action}`, body, this.getOptions()).pipe(
       catchError(e => {
         let status = e.status;
         if (status === 401) {

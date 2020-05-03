@@ -5,7 +5,7 @@
 </ion-header>
 
 <ion-content *ngIf="!projects">
-  <ion-spinner name="crescent"></ion-spinner>
+  <ion-spinner class="center" name="crescent"></ion-spinner>
 </ion-content>
  
 <ion-content *ngIf="projects" class="ion-text-center" padding>
@@ -26,6 +26,34 @@
       image en background
     </ion-card-content> -->
   </ion-card>
+
+  <form [formGroup]="projectCreationForm" (ngSubmit)="onSubmit()">
+    <ion-card *ngIf="projects" button="true" (click)="onCreate($event)">
+      <ion-card-header class="creation">
+        <ion-card-title *ngIf="!creation" class="creation">
+          Create a new project
+        </ion-card-title>
+        <ion-card-title *ngIf="creation">
+          <ion-input type="name" formControlName="name" placeholder="Enter name" autofocus="true"></ion-input>
+        </ion-card-title>
+      </ion-card-header>
+      <ion-card-content *ngIf="creation">
+        <ion-grid>
+          <ion-row>
+            <ion-col>
+              <ion-button *ngIf="loading" expand="default" [disabled]="loading">
+                <ion-spinner name="crescent"></ion-spinner>
+              </ion-button>
+              <ion-button *ngIf="!loading" expand="default" (click)="onSubmit($event)">Create</ion-button>
+            </ion-col>
+            <ion-col>
+              <ion-button color="secondary" expand="default" (click)="onCancel($event)" [disabled]="loading">Cancel</ion-button>
+            </ion-col>
+          </ion-row>
+        </ion-grid>
+      </ion-card-content>
+    </ion-card>
+  </form>
  
   <ion-button expand="default" (click)="logout()">Logout</ion-button>
  

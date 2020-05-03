@@ -25,6 +25,10 @@ const routes: Routes = [
     path: 'projects',
     loadChildren: () => import('./pages/projects/projects.module').then( m => m.ProjectsPageModule),
     canActivate: [AuthGuardService]
+  },
+  {
+    path: 'workspace/:id',
+    loadChildren: () => import('./pages/workspace/workspace.module').then( m => m.WorkspacePageModule)
   }
 ];
 

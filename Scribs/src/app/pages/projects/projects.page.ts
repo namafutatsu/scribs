@@ -1,9 +1,13 @@
-import { ToastController } from '@ionic/angular';
+
 import { Component, OnInit } from '@angular/core';
+import { FormGroup, FormBuilder, Validators } from '@angular/forms';
+import { Router } from '@angular/router';
+import { ToastController } from '@ionic/angular';
 import { Storage } from '@ionic/storage';
 
 import { AuthService } from 'src/app/services/auth.service';
 import { ProjectService } from 'src/app/services/project.service';
+import { timeout } from 'rxjs/operators';
 
 @Component({
   selector: 'app-projects',
@@ -12,11 +16,18 @@ import { ProjectService } from 'src/app/services/project.service';
 })
 export class ProjectsPage implements OnInit {
   projects = null;
+  creation = false;
+  loading = false;
+  projectCreationForm: FormGroup;
  
-  constructor(private authService: AuthService, private projectService: ProjectService,
-    private storage: Storage, private toastController: ToastController) { }
+  constructor(private formBuilder: FormBuilder, private authService: AuthService, private router: Router,
+    private projectService: ProjectService, private storage: Storage, private toastController: ToastController) { }
  
   ngOnInit() {
+    this.projectCreationForm = this.formBuilder.group({
+      name: [''],//(Enter a name)
+      // password: ['password', [Validators.required, Validators.minLength(6)]]
+    });
     this.loadProjects();
   }
 
@@ -24,6 +35,26 @@ export class ProjectsPage implements OnInit {
     this.projectService.getList().subscribe(res => {
       this.projects = res;
     });
+  }
+
+  onCreate(event) {
+    event.stopPropagation();
+    this.creation = true;
+  }
+ 
+  onSubmit(event) {
+    this.loading = true
+    event.stopPropagation();
+    this.projectService.post(this.projectCreationForm.value).subscribe((res: any) => {
+      this.router.navigate([`/workspace/${res.id}`])
+    }, () => {
+      this.loading = false
+    });
+  }
+ 
+  onCancel(event) {
+    event.stopPropagation();
+    this.creation = false;
   }
  
   logout() {

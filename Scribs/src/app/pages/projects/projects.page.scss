@@ -3,15 +3,20 @@ ion-card {
   max-width: 300px;
 }
 
-ion-spinner {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    height: 100%;
-    margin: auto;
-    // width: 50px !important;
-    // height: 50px !important;
-    transform: scale(3);
-  }
-  
+ion-card .creation {
+  background-color: var(--ion-color-success);
+}
+
+ion-card-content {
+  padding-top: 10px;
+  // color: var(--ion-color-dark-tint);
+}
+
+ion-input {
+  --padding-top: 0px;
+  --padding-bottom: 0px;
+}
+
+#button-content {
+  justify-content: right;
+}
