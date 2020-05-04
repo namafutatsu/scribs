@@ -13,6 +13,7 @@ import { HttpClientModule } from '@angular/common/http';
 import { Storage, IonicStorageModule } from '@ionic/storage';
 import { JwtModule, JWT_OPTIONS } from '@auth0/angular-jwt';
 import { environment } from 'src/environments/environment';
+import { SharedModule } from './components/shared.module';
 
 export function jwtOptionsFactory(storage) {
   return {
@@ -24,9 +25,14 @@ export function jwtOptionsFactory(storage) {
 }
 
 @NgModule({
-  declarations: [AppComponent],
+  declarations: [
+    AppComponent
+  ],
   entryComponents: [],
-  imports: [BrowserModule, IonicModule.forRoot(), AppRoutingModule,
+  imports: [
+    BrowserModule,
+    IonicModule.forRoot(),
+    AppRoutingModule,
     HttpClientModule,
     IonicStorageModule.forRoot(),
     JwtModule.forRoot({
@@ -35,7 +41,8 @@ export function jwtOptionsFactory(storage) {
         useFactory: jwtOptionsFactory,
         deps: [Storage],
       }
-    })
+    }),
+    SharedModule.forRoot()
   ],
   providers: [
     StatusBar,

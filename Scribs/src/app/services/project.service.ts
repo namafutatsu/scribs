@@ -9,6 +9,10 @@ export class ProjectService extends AuthorizedService {
   protected controller = 'Project';
   
   public getList() {
-      return this.get('getlist');
+    return this.get('getlist');
+  }
+
+  public getProject(id: string) {
+    return this.post({ Id: id }, 'get');
   }
 }

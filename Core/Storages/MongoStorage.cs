@@ -51,22 +51,32 @@ namespace Scribs.Core.Storages {
 
         public async Task<Document> LoadAsync(string userName, string name, bool content = true) {
             var user = await GetUserAsync(userName);
-            var project = await LoadAsync(user, name, content);
+            var project = await LoadAsyncByName(user, name, content);
             if (project == null) {
                 throw new Exception($"Project {name} not found");
             }
             return project;
         }
 
-        public async Task<Document> LoadAsync(User user, string name, bool content = true) {
+        public async Task<Document> LoadAsyncByName(User user, string name, bool content = true) {
             var project = await GetProjectByNameAsync(name, user);
-            if (project != null && content) {
-                foreach (var kvp in project.ProjectDocuments) {
-                    var text = await GetTextAsync(kvp.Key, user, project);
-                    kvp.Value.Content = text?.Content;
-                };
-            }
+            if (project != null && content)
+                await LoadContent(project, user);
             return project;
+        }
+
+        public async Task<Document> LoadAsyncById(User user, string id, bool content = true) {
+            var project = await GetProjectByIdAsync(id, user);
+            if (project != null && content)
+                await LoadContent(project, user);
+            return project;
+        }
+
+        private async Task LoadContent(Document project, User user) {
+            foreach (var kvp in project.ProjectDocuments) {
+                var text = await GetTextAsync(kvp.Key, user, project);
+                kvp.Value.Content = text?.Content;
+            };
         }
 
         private Task CreateProjectAsync(Document project) => factories.Get<Document>().CreateAsync(project);

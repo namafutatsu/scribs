@@ -1,9 +1,9 @@
-<ion-header>
-  <ion-toolbar>
-    <ion-title>Workspace</ion-title>
-  </ion-toolbar>
-</ion-header>
+<s-toolbar *ngIf="workspace" [title]="workspace.project.name"></s-toolbar>
 
+<ion-content *ngIf="!workspace">
+  <s-toolbar title=""></s-toolbar>
+  <ion-spinner class="center" name="crescent"></ion-spinner>
+</ion-content>
+  
 <ion-content>
-
 </ion-content>

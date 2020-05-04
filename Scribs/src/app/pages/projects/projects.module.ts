@@ -6,6 +6,7 @@ import { IonicModule } from '@ionic/angular';
 
 import { ProjectsPageRoutingModule } from './projects-routing.module';
 
+import { SharedModule } from 'src/app/components/shared.module';
 import { ProjectsPage } from './projects.page';
 
 @NgModule({
@@ -13,8 +14,9 @@ import { ProjectsPage } from './projects.page';
     CommonModule,
     FormsModule,
     IonicModule,
+    ProjectsPageRoutingModule,
     ReactiveFormsModule,
-    ProjectsPageRoutingModule
+    SharedModule
   ],
   declarations: [ProjectsPage]
 })

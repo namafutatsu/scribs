@@ -18,6 +18,7 @@ export class ProjectsPage implements OnInit {
   creation = false;
   loading = false;
   projectCreationForm: FormGroup;
+  title = "Teeeest";
  
   constructor(private formBuilder: FormBuilder, private authService: AuthService, private router: Router,
     private projectService: ProjectService, private storage: Storage, private toastController: ToastController,
@@ -42,7 +43,7 @@ export class ProjectsPage implements OnInit {
     this.creation = true;
   }
 
-  private showAlert(msg) {
+  showAlert(msg) {
     let alert = this.alertController.create({
       message: msg,
       header: 'Error',

@@ -1,14 +1,10 @@
-<ion-header>
-  <ion-toolbar>
-    <ion-title>Projects</ion-title>
-  </ion-toolbar>
-</ion-header>
+<s-toolbar title="Projects"></s-toolbar>
 
-<ion-content *ngIf="!projects">
+<ion-content *ngIf="!projects || loading">
   <ion-spinner class="center" name="crescent"></ion-spinner>
 </ion-content>
  
-<ion-content *ngIf="projects" class="ion-text-center" padding>
+<ion-content *ngIf="projects && !loading" class="ion-text-center" padding>
  
   <ion-card *ngFor="let project of projects" button="true" (click)="goTo(project)">
     <ion-card-header>
@@ -28,7 +24,7 @@
   </ion-card>
 
   <form [formGroup]="projectCreationForm" (ngSubmit)="onSubmit()">
-    <ion-card *ngIf="projects" button="true" (click)="onCreateStart($event)">
+    <ion-card *ngIf="projects" button="true"  [disabled]="loading" (click)="onCreateStart($event)">
       <ion-card-header class="creation">
         <ion-card-title *ngIf="!creation" class="creation">
           Create a new project

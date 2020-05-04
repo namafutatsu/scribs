@@ -216,6 +216,25 @@ namespace Scribs.IntegrationTest {
         }
 
         [Fact]
+        public async Task GetProjectById() {
+            using (var client = fixture.Server.CreateClient()) {
+                string token = AuthService.GenerateToken(fixture.User.Id);
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+                string data = JsonConvert.SerializeObject(new DocumentModel {
+                    Id = fixture.Project.Id
+                });
+                var contentData = new StringContent(data, System.Text.Encoding.UTF8, "application/json");
+                var response = await client.PostAsync($"api/project/get", contentData);
+                var workspace = JsonConvert.DeserializeObject<WorkspaceModel>(await response.Content.ReadAsStringAsync());
+                var project = workspace.Project;
+                Assert.Equal(fixture.Project.Id, project.Id);
+                Assert.Equal(fixture.Project.Children.Count, project.Children.Count);
+                Assert.Contains(project.Id, workspace.Texts);
+                Assert.Equal(fixture.Project.Content, workspace.Texts[project.Id]);
+            }
+        }
+
+        [Fact]
         public async Task GetProjects() {
             using (var client = fixture.Server.CreateClient()) {
                 string token = AuthService.GenerateToken(fixture.User.Id);
@@ -353,7 +372,7 @@ namespace Scribs.IntegrationTest {
                 var oldProject = await service.GetByNameAsync(fixture.Project.Name);
                 oldProject.Name = "UpdateProject.Old";
                 var mapper = fixture.Services.GetService<IMapper>();
-                var model = fixture.Services.GetService<IMapper>().Map<DocumentModel>(oldProject);
+                var model = mapper.Map<DocumentModel>(oldProject);
                 model.Id = null;
                 string data = JsonConvert.SerializeObject(model);
                 var contentData = new StringContent(data, System.Text.Encoding.UTF8, "application/json");

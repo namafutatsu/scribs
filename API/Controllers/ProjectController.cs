@@ -40,31 +40,35 @@ namespace Scribs.API.Controllers {
         [HttpPost]
         public async Task<ActionResult> Get(DocumentModel model) {
             var user = await auth.Identify(User);
-            var project = await storage.LoadAsync(user, model.Name, false);
+            var project = await storage.LoadAsyncById(user, model.Id, false) ?? await storage.LoadAsyncByName(user, model.Name, false);
             if (project == null)
                 return Problem($"Project {model.Name} not found for user {user.Name}");
             var result = new WorkspaceModel {
                 Project = mapper.Map<DocumentModel>(project),
                 Texts = new Dictionary<string, string>()
             };
-            var textsIds = project.ProjectDocuments.Keys;
-            var texts = await factories.Get<Text>().GetAsync(textsIds.ToList());
-            foreach (var text in texts)
-                result.Texts.Add(text.Id, text.Content);
+            if (project.ProjectDocuments != null) {
+                var textsIds = project.ProjectDocuments.Keys;
+                var texts = await factories.Get<Text>().GetAsync(textsIds.ToList());
+                foreach (var text in texts)
+                    result.Texts.Add(text.Id, text.Content);
+            }
             return Ok(result);
         }
 
         [HttpPost]
         public async Task<ActionResult> Post(DocumentModel model) {
             var user = await auth.Identify(User);
-            string name = model.Name.Trim();
-            if (String.IsNullOrWhiteSpace(name))
-                return BadRequest($"A name is required");
-            var project = await storage.LoadAsync(user, name, false);
-            if (project != null)
-                return BadRequest($"A project with the name {project.Name} already exists for user {user.Name}");
-            if (string.IsNullOrEmpty(model.Id))
+            Document project;
+            if (String.IsNullOrEmpty(model.Id)) {
+                string name = model.Name.Trim();
+                if (String.IsNullOrWhiteSpace(name))
+                    return BadRequest($"A name is required");
+                project = await storage.LoadAsyncByName(user, name, false);
+                if (project != null)
+                    return BadRequest($"A project with the name {project.Name} already exists for user {user.Name}");
                 model.Id = Utils.CreateId();
+            }
             project = mapper.Map<Document>(model);
             project.UserName = user.Name;
             await storage.SaveAsync(project, false);

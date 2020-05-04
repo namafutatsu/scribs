@@ -6,6 +6,7 @@ import { IonicModule } from '@ionic/angular';
 
 import { WorkspacePageRoutingModule } from './workspace-routing.module';
 
+import { SharedModule } from 'src/app/components/shared.module';
 import { WorkspacePage } from './workspace.page';
 
 @NgModule({
@@ -13,6 +14,7 @@ import { WorkspacePage } from './workspace.page';
     CommonModule,
     FormsModule,
     IonicModule,
+    SharedModule,
     WorkspacePageRoutingModule
   ],
   declarations: [WorkspacePage]
