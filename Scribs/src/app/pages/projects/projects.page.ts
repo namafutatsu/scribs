@@ -5,7 +5,6 @@ import { Router } from '@angular/router';
 import { ToastController, AlertController } from '@ionic/angular';
 import { Storage } from '@ionic/storage';
 
-import { AuthService } from 'src/app/services/auth.service';
 import { ProjectService } from 'src/app/services/project.service';
 
 @Component({
@@ -20,7 +19,7 @@ export class ProjectsPage implements OnInit {
   projectCreationForm: FormGroup;
   title = "Teeeest";
  
-  constructor(private formBuilder: FormBuilder, private authService: AuthService, private router: Router,
+  constructor(private formBuilder: FormBuilder, private router: Router,
     private projectService: ProjectService, private storage: Storage, private toastController: ToastController,
     private alertController: AlertController) { }
  
@@ -71,10 +70,6 @@ export class ProjectsPage implements OnInit {
   onCancel(event) {
     event.stopPropagation();
     this.creation = false;
-  }
- 
-  logout() {
-    this.authService.logout();
   }
  
   clearToken() {

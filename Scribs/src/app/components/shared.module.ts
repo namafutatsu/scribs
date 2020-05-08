@@ -4,6 +4,8 @@ import { FormsModule } from '@angular/forms';
 import { IonicModule } from '@ionic/angular';
 
 import { ToolbarComponent } from './toolbar/toolbar.component';
+import { SettingsComponent } from './settings/settings.component';
+import { SidebarComponent } from './sidebar/sidebar.component';
 
 @NgModule({
   imports: [
@@ -12,11 +14,16 @@ import { ToolbarComponent } from './toolbar/toolbar.component';
     IonicModule
   ],
   declarations: [
-    ToolbarComponent
+    ToolbarComponent,
+    SettingsComponent,
+    SidebarComponent
   ],
   exports: [
-    ToolbarComponent
-  ]
+    ToolbarComponent,
+    SettingsComponent,
+    SidebarComponent
+  ],
+  entryComponents: [SettingsComponent],
 })
 export class SharedModule {
   static forRoot(): ModuleWithProviders {

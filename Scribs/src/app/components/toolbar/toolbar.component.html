@@ -1,5 +1,12 @@
 <ion-header>
   <ion-toolbar>
-    <ion-title>{{title}}</ion-title>
+    <ion-row>
+      <ion-col>
+        <ion-title>{{title}}</ion-title>
+      </ion-col>
+      <ion-col>
+        <ion-icon id="settings" name="settings-outline" button="true" (click)="presentModal()"></ion-icon>
+      </ion-col>
+    </ion-row>
   </ion-toolbar>
 </ion-header>

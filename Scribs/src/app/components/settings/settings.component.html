@@ -1,0 +1,30 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Settings</ion-title>
+  </ion-toolbar>
+</ion-header>
+<ion-content>
+  <ion-title class="label">Thème</ion-title>
+  <ion-toggle  slot="end"></ion-toggle>
+  <ion-segment id="themeToggle" (ionChange)="segmentChanged($event)" value="light">
+    <ion-segment-button checked value="light">
+      <ion-icon name="sunny"></ion-icon>
+    </ion-segment-button>
+    <ion-segment-button value="dark">
+      <ion-icon name="moon"></ion-icon>
+    </ion-segment-button>
+  </ion-segment>
+</ion-content>
+<ion-footer >
+  <ion-row>
+    <ion-col size="4">
+      <ion-button expand="block" (click)="save()">Save</ion-button>
+    </ion-col>
+    <ion-col>
+      <ion-button color="secondary" expand="block" (click)="dismiss()">Cancel</ion-button>
+    </ion-col>
+    <ion-col>
+      <ion-button color="secondary" expand="block" (click)="logout()">Logout</ion-button>
+    </ion-col>
+  </ion-row>
+</ion-footer >

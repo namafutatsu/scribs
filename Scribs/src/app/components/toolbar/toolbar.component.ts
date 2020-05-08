@@ -1,4 +1,6 @@
 import { Component, OnInit, Input } from '@angular/core';
+import { ModalController } from '@ionic/angular';
+import { SettingsComponent } from '../settings/settings.component';
 
 @Component({
   selector: 's-toolbar',
@@ -7,9 +9,20 @@ import { Component, OnInit, Input } from '@angular/core';
 })
 export class ToolbarComponent implements OnInit {
   @Input() title: string;
+  settings = false;
   
-  constructor() { }
+  constructor(public modalController: ModalController) { }
 
   ngOnInit() {}
 
+  openSettings() {
+    this.settings = true;
+  }
+
+  async presentModal() {
+    const modal = await this.modalController.create({
+      component: SettingsComponent
+    });
+    return await modal.present();
+  }
 }
