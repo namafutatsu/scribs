@@ -16,6 +16,7 @@ export class SettingsComponent implements OnInit {
 
   ngOnInit() {
     this.storage.get('theme').then((val) => {
+      this.theme = val;
       if (val === 'dark') {
         const toggle: any = document.querySelector('#themeToggle');
         toggle.value = 'dark';

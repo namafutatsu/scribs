@@ -4,6 +4,8 @@
 /** Ionic CSS Variables **/
 :root {
 
+  --light-color: #fffaeb;
+
   --ion-background-color: #fffaeb;
   --ion-background-color-rgb: 255,250,235;
 
@@ -72,7 +74,14 @@
   --ion-color-danger-shade: #ab2f3c;
   --ion-color-danger-tint: #c84957;
 
-  --ion-color-dark: #252323;
+  // --ion-color-dark: #252323;
+  // --ion-color-dark-rgb: 37,35,35;
+  // --ion-color-dark-contrast: #ffffff;
+  // --ion-color-dark-contrast-rgb: 255,255,255;
+  // --ion-color-dark-shade: #211f1f;
+  // --ion-color-dark-tint: #3b3939;
+
+  --ion-color-dark: #3F4045;
   --ion-color-dark-rgb: 37,35,35;
   --ion-color-dark-contrast: #ffffff;
   --ion-color-dark-contrast-rgb: 255,255,255;
@@ -104,6 +113,7 @@
    */
 
    body.dark {
+     
     --ion-background-color: #252323;
     --ion-background-color-rgb: 37,35,35;
   

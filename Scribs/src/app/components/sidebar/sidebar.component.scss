@@ -1,0 +1,14 @@
+.sidebar {
+  --ion-background-color: var(--ion-toolbar-background);
+  --ion-text-color: var(--light-color);
+  $size: 43px;
+  width: $size;
+  position: absolute;
+  z-index: 1;
+
+  ion-button {
+  --padding-start: 7px;
+  --padding-end: 7px;
+  }
+
+}

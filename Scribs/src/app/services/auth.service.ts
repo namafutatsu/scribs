@@ -7,6 +7,7 @@ import { tap, catchError } from 'rxjs/operators';
 import { BehaviorSubject } from 'rxjs';
 
 import { environment } from '../../environments/environment';
+import { Router } from '@angular/router';
 
 @Injectable({
   providedIn: 'root'
@@ -19,8 +20,8 @@ export class AuthService {
   user = null;
   authenticationState = new BehaviorSubject(false);
  
-  constructor(private http: HttpClient, private helper: JwtHelperService, private storage: Storage,
-    private plt: Platform, private alertController: AlertController) {
+  constructor(private http: HttpClient, private router: Router, private helper: JwtHelperService,
+    private storage: Storage, private plt: Platform, private alertController: AlertController) {
     this.plt.ready().then(() => {
       this.checkToken();
     });
@@ -60,6 +61,7 @@ export class AuthService {
           this.storage.set(this.TOKEN_KEY, this.token);
           this.user = this.helper.decodeToken(this.token);
           this.authenticationState.next(true);
+          // this.router.navigate(['projects']);
         }),
         catchError(e => {
           this.showAlert(e.error.msg);
