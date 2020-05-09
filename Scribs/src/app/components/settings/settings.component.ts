@@ -24,12 +24,18 @@ export class SettingsComponent implements OnInit {
   }
 
   segmentChanged(event) {
-    this.theme = event.detail.value;
-    document.body.classList.toggle('dark', this.theme === 'dark');
+    document.body.classList.toggle('dark', event.detail.value === 'dark');
   }
 
   save() {
+    const toggle: any = document.querySelector('#themeToggle');
+    this.theme = toggle.value;
     this.storage.set('theme', this.theme);
+    this.dismiss();
+  }
+
+  cancel() {
+    document.body.classList.toggle('dark', this.theme === 'dark');
     this.dismiss();
   }
 
