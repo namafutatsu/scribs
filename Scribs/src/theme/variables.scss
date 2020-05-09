@@ -4,7 +4,7 @@
 /** Ionic CSS Variables **/
 :root {
 
-  --ion-background-color: #FFFAEB;
+  --ion-background-color: #fffaeb;
   --ion-background-color-rgb: 255,250,235;
 
   --ion-text-color: #3F4045;
@@ -97,6 +97,42 @@
   --ion-toolbar-color: #FFFAEB;
 
   --ion-item-background: #E6E1D4;
+
+   /*
+   * Dark Colors
+   * -------------------------------------------
+   */
+
+   body.dark {
+    --ion-background-color: #252323;
+    --ion-background-color-rgb: 37,35,35;
+  
+    --ion-text-color: #fffaeb;
+    --ion-text-color-rgb: 255,250,235;
+  
+    --ion-color-step-50: #302e2d;
+    --ion-color-step-100: #3b3937;
+    --ion-color-step-150: #464341;
+    --ion-color-step-200: #514e4b;
+    --ion-color-step-250: #5c5955;
+    --ion-color-step-300: #66645f;
+    --ion-color-step-350: #716e69;
+    --ion-color-step-400: #7c7973;
+    --ion-color-step-450: #87847d;
+    --ion-color-step-500: #928f87;
+    --ion-color-step-550: #9d9991;
+    --ion-color-step-600: #a8a49b;
+    --ion-color-step-650: #b3afa5;
+    --ion-color-step-700: #bebaaf;
+    --ion-color-step-750: #c9c4b9;
+    --ion-color-step-800: #d3cfc3;
+    --ion-color-step-850: #dedacd;
+    --ion-color-step-900: #e9e5d7;
+    --ion-color-step-950: #f4efe1;
+
+    --ion-item-background: #252323;
+   }
+
 }
 
 @media (prefers-color-scheme: dark) {
@@ -105,7 +141,7 @@
    * -------------------------------------------
    */
 
-  //  body {
+  //  body.dark {
   //   --ion-color-primary: #428cff;
   //  }
 

@@ -3,6 +3,7 @@ import { Router } from '@angular/router';
 
 import { Platform } from '@ionic/angular';
 import { SplashScreen } from '@ionic-native/splash-screen/ngx';
+import { Storage } from '@ionic/storage';
 import { StatusBar } from '@ionic-native/status-bar/ngx';
 
 import { AuthService } from './services/auth.service';
@@ -18,7 +19,8 @@ export class AppComponent {
     private splashScreen: SplashScreen,
     private statusBar: StatusBar,
     private authService: AuthService,
-    private router: Router
+    private router: Router,
+    private storage: Storage
   ) {
     this.initializeApp();
   }
@@ -34,6 +36,11 @@ export class AppComponent {
           this.router.navigate(['login']);
         }
       });
+    });
+    this.storage.get('theme').then((val) => {
+      if (val === 'dark') {
+        document.body.classList.toggle('dark', true);
+      }
     });
   }
 }
