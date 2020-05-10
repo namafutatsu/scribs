@@ -1,23 +1,12 @@
 <ion-content class="sidebar">
-  <ion-button fill="default" color="dark">
-    <ion-icon expand="full" slot="icon-only" name="documents"></ion-icon>
-  </ion-button>
-  <ion-button fill="default" color="dark">
-    <ion-icon expand="full" slot="icon-only" name="document-text"></ion-icon>
-  </ion-button>
-  <ion-button fill="default" color="dark">
-    <ion-icon expand="full" slot="icon-only" name="git-branch"></ion-icon>
-  </ion-button>
-  <ion-button fill="default" color="dark">
-    <ion-icon expand="full" slot="icon-only" name="stats-chart"></ion-icon>
-  </ion-button>
-  <ion-button fill="default" color="dark">
-    <ion-icon expand="full" slot="icon-only" name="cloud-download"></ion-icon>
-  </ion-button>
-  <ion-button fill="default" color="dark">
-    <ion-icon expand="full" slot="icon-only" name="book"></ion-icon>
-  </ion-button>
-  <ion-button fill="default" color="dark">
-    <ion-icon expand="full" slot="icon-only" name="build"></ion-icon>
-  </ion-button>
+  <s-action [context]="actionContext" action="explorer" icon="documents"></s-action>
+  <s-action [context]="actionContext" action="notes" icon="document-text"></s-action>
+  <s-action [context]="actionContext" action="commit" icon="git-branch"></s-action>
+  <s-action [context]="actionContext" action="stats" icon="stats-chart"></s-action>
+  <s-action [context]="actionContext" action="export" icon="cloud-download"></s-action>
+  <s-action [context]="actionContext" action="publish" icon="book"></s-action>
+  <s-action [context]="actionContext" action="settings" icon="build"></s-action>
+</ion-content>
+<ion-content class="actionbar" *ngIf="actionContext.action !== undefined && actionContext.action !== null">
+  {{actionContext.action}}
 </ion-content>

@@ -6,6 +6,7 @@ import { IonicModule } from '@ionic/angular';
 import { ToolbarComponent } from './toolbar/toolbar.component';
 import { SettingsComponent } from './settings/settings.component';
 import { SidebarComponent } from './sidebar/sidebar.component';
+import { ActionComponent } from './sidebar/action/action.component';
 
 @NgModule({
   imports: [
@@ -14,11 +15,13 @@ import { SidebarComponent } from './sidebar/sidebar.component';
     IonicModule
   ],
   declarations: [
+    ActionComponent,
     ToolbarComponent,
     SettingsComponent,
-    SidebarComponent
+    SidebarComponent,
   ],
   exports: [
+    ActionComponent,
     ToolbarComponent,
     SettingsComponent,
     SidebarComponent
