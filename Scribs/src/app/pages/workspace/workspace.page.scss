@@ -1,0 +1,13 @@
+:host {
+  display: inline-flex;
+  --ion-grid-padding: 0px;
+  --ion-grid-column-padding: 0px;
+}
+
+ion-grid {
+  height: 100%;
+}
+
+ion-row {
+  height: 100%;
+}

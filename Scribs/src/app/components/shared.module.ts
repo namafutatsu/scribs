@@ -8,6 +8,8 @@ import { SettingsComponent } from './settings/settings.component';
 import { SidebarComponent } from './sidebar/sidebar.component';
 import { ActionComponent } from './sidebar/action/action.component';
 import { ExplorerComponent } from './sidebar/explorer/explorer.component';
+import { EditorComponent } from './editor/editor.component';
+import { MenuComponent } from './menu/menu.component';
 
 @NgModule({
   imports: [
@@ -17,14 +19,18 @@ import { ExplorerComponent } from './sidebar/explorer/explorer.component';
   ],
   declarations: [
     ActionComponent,
+    EditorComponent,
     ExplorerComponent,
+    MenuComponent,
     ToolbarComponent,
     SettingsComponent,
     SidebarComponent,
   ],
   exports: [
     ActionComponent,
+    EditorComponent,
     ExplorerComponent,
+    MenuComponent,
     ToolbarComponent,
     SettingsComponent,
     SidebarComponent

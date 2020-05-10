@@ -1,19 +1,8 @@
-$size: 44px;
-
 .sidebar {
   --ion-background-color: var(--ion-toolbar-background);
   --ion-text-color: var(--light-color);
-  width: $size;
-  position: absolute;
+  width: var(--sidebar-size);
+  // position: absolute;
   z-index: 1;
   --overflow: hidden;
-}
-
-.actionbar {
-  --ion-background-color: var(--ion-actionbar-background);
-  --ion-text-color: var(--light-color);
-  width: 5*$size;
-  position: absolute;
-  left: $size;
-  z-index: 1;
 }

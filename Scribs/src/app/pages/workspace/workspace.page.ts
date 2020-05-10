@@ -1,7 +1,14 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { switchMap } from 'rxjs/operators';
+
 import { ProjectService } from 'src/app/services/project.service';
+
+export class WorkspaceContext {
+  public action: string;
+  constructor(action: string) {
+    this.action = action;
+  }
+}
 
 @Component({
   selector: 'app-workspace',
@@ -9,10 +16,13 @@ import { ProjectService } from 'src/app/services/project.service';
   styleUrls: ['./workspace.page.scss'],
 })
 export class WorkspacePage implements OnInit {
+  context: WorkspaceContext;
   projectId: string;
   workspace;
 
-  constructor(private route: ActivatedRoute, private projectService: ProjectService) { }
+  constructor(private route: ActivatedRoute, private projectService: ProjectService) {
+    this.context = new WorkspaceContext(null);
+  }
 
   ngOnInit() {
     this.projectId = this.route.snapshot.paramMap.get('id');

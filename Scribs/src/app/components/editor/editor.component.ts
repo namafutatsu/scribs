@@ -3,15 +3,15 @@ import { Component, OnInit, Input } from '@angular/core';
 import { WorkspaceContext } from 'src/app/pages/workspace/workspace.page';
 
 @Component({
-  selector: 's-sidebar',
-  templateUrl: './sidebar.component.html',
-  styleUrls: ['./sidebar.component.scss'],
+  selector: 's-editor',
+  templateUrl: './editor.component.html',
+  styleUrls: ['./editor.component.scss'],
 })
-export class SidebarComponent implements OnInit {
+export class EditorComponent implements OnInit {
   @Input() context: WorkspaceContext;
 
-  constructor() {}
+  constructor() { }
 
   ngOnInit() {}
-  
+
 }

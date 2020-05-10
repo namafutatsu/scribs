@@ -1,11 +1,6 @@
 import { Component, OnInit, Input } from '@angular/core';
 
-export class ActionContext {
-  public action: string;
-  constructor(action: string) {
-    this.action = action;
-  }
-}
+import { WorkspaceContext } from 'src/app/pages/workspace/workspace.page';
 
 @Component({
   selector: 's-action',
@@ -13,7 +8,7 @@ export class ActionContext {
   styleUrls: ['./action.component.scss'],
 })
 export class ActionComponent implements OnInit {
-  @Input() context: ActionContext;
+  @Input() context: WorkspaceContext;
   @Input() action: string;
   @Input() icon: string;
 

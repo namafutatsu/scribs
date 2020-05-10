@@ -1,5 +1,6 @@
 import { Component, OnInit, Input } from '@angular/core';
-import { ActionContext } from '../action/action.component';
+
+import { WorkspaceContext } from 'src/app/pages/workspace/workspace.page';
 
 @Component({
   selector: 's-explorer',
@@ -7,7 +8,7 @@ import { ActionContext } from '../action/action.component';
   styleUrls: ['./explorer.component.scss'],
 })
 export class ExplorerComponent implements OnInit {
-  @Input() context: ActionContext;
+  @Input() context: WorkspaceContext;
 
   constructor() { }
 

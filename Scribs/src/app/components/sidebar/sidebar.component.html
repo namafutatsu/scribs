@@ -1,13 +1,9 @@
 <ion-content class="sidebar">
-  <s-action [context]="actionContext" action="explorer" icon="documents"></s-action>
-  <s-action [context]="actionContext" action="notes" icon="document-text"></s-action>
-  <s-action [context]="actionContext" action="commit" icon="git-branch"></s-action>
-  <s-action [context]="actionContext" action="stats" icon="stats-chart"></s-action>
-  <s-action [context]="actionContext" action="export" icon="cloud-download"></s-action>
-  <s-action [context]="actionContext" action="publish" icon="book"></s-action>
-  <s-action [context]="actionContext" action="settings" icon="build"></s-action>
-</ion-content>
-<ion-content class="actionbar" *ngIf="actionContext.action !== undefined && actionContext.action !== null">
-  {{actionContext.action}}
-  <s-explorer [context]="actionContext" *ngIf="actionContext.action === 'explorer'"></s-explorer>
+  <s-action [context]="context" action="explorer" icon="documents"></s-action>
+  <s-action [context]="context" action="notes" icon="document-text"></s-action>
+  <s-action [context]="context" action="commit" icon="git-branch"></s-action>
+  <s-action [context]="context" action="stats" icon="stats-chart"></s-action>
+  <s-action [context]="context" action="export" icon="cloud-download"></s-action>
+  <s-action [context]="context" action="publish" icon="book"></s-action>
+  <s-action [context]="context" action="settings" icon="build"></s-action>
 </ion-content>
