@@ -1,3 +1,4 @@
-<ion-button fill="default" color="dark" (click)="run()">
+<ion-button fill="default" color="dark" (click)="run()"
+  [ngClass]="context.action === action ? 'active' : 'inactive'">
   <ion-icon expand="full" slot="icon-only" [name]="icon"></ion-icon>
 </ion-button>

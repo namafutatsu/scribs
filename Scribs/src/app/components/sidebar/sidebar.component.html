@@ -9,4 +9,5 @@
 </ion-content>
 <ion-content class="actionbar" *ngIf="actionContext.action !== undefined && actionContext.action !== null">
   {{actionContext.action}}
+  <s-explorer [context]="actionContext" *ngIf="actionContext.action === 'explorer'"></s-explorer>
 </ion-content>

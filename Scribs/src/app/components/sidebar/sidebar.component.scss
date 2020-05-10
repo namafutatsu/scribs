@@ -6,6 +6,7 @@ $size: 44px;
   width: $size;
   position: absolute;
   z-index: 1;
+  --overflow: hidden;
 }
 
 .actionbar {

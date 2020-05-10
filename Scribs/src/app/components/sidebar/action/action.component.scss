@@ -2,3 +2,9 @@ ion-button {
   --padding-start: 7px;
   --padding-end: 7px;
 }
+
+.active {
+  // --color: var(--dark-color);
+  // --background: var(--light-color);
+  --background: var(--ion-actionbar-background);
+}
