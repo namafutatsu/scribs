@@ -1,6 +1,11 @@
 <s-toolbar *ngIf="workspace" [title]="workspace.project.name"></s-toolbar>
+
+<ion-content *ngIf="!workspace">
+  <ion-spinner class="center" name="crescent"></ion-spinner>
+</ion-content>
+
 <ion-content *ngIf="workspace">
-  <ion-grid>
+  <ion-grid scroll-y="false">
     <ion-row>
       <ion-col size="auto">
         <s-sidebar [context]="context"></s-sidebar>
@@ -8,14 +13,11 @@
       <ion-col size="auto">
         <s-menu *ngIf="context.action !== null" [context]="context"></s-menu>
       </ion-col>
-      <ion-col>
-        <s-explorer [context]="context"></s-explorer>
+      <ion-col *ngIf="workspace">
+        <ion-content scroll-y="true">
+          <s-editor></s-editor>
+        </ion-content>
       </ion-col>
     </ion-row>
   </ion-grid>
-  
-  <ion-content *ngIf="!workspace">
-    <ion-spinner class="center" name="crescent"></ion-spinner>
-  </ion-content>
-  
 </ion-content>

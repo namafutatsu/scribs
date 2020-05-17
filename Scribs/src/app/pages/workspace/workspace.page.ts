@@ -11,7 +11,7 @@ export class WorkspaceContext {
 }
 
 @Component({
-  selector: 'app-workspace',
+  selector: 's-workspace',
   templateUrl: './workspace.page.html',
   styleUrls: ['./workspace.page.scss'],
 })

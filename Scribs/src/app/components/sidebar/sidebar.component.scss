@@ -1,8 +1,7 @@
 .sidebar {
   --ion-background-color: var(--ion-toolbar-background);
   --ion-text-color: var(--light-color);
-  width: var(--sidebar-size);
-  // position: absolute;
-  z-index: 1;
   --overflow: hidden;
+  width: var(--sidebar-size);
+  z-index: 1;
 }

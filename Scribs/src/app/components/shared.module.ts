@@ -3,6 +3,8 @@ import { ModuleWithProviders, NgModule } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { IonicModule } from '@ionic/angular';
 
+import { FroalaEditorModule } from 'angular-froala-wysiwyg';
+
 import { ToolbarComponent } from './toolbar/toolbar.component';
 import { SettingsComponent } from './settings/settings.component';
 import { SidebarComponent } from './sidebar/sidebar.component';
@@ -15,6 +17,7 @@ import { MenuComponent } from './menu/menu.component';
   imports: [
     CommonModule,
     FormsModule,
+    FroalaEditorModule,
     IonicModule
   ],
   declarations: [
