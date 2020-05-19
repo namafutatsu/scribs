@@ -43,6 +43,12 @@
               },
               {
                 "input": "./node_modules/froala-editor/css/froala_style.min.css"
+              },
+              {
+                "input": "src/theme/froala_light.css"
+              },
+              {
+                "input": "src/theme/froala_dark.css"
               }
             ],
             "scripts": [
