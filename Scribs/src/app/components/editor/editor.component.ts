@@ -22,7 +22,7 @@ export class EditorComponent implements OnInit {
       if (this.theme === undefined || this.theme === null || this.theme === 'light') {
         this.theme = 'gray';
       }
-      this.buttons = [
+      const buttons = [
         'bold',
         'italic',
         'underline',
@@ -30,7 +30,7 @@ export class EditorComponent implements OnInit {
         'specialCharacters',
         'align',
         'print',
-        // 'fullscreen',
+        'fullscreen',
         'undo',
         'redo',
         'alert',
@@ -44,7 +44,7 @@ export class EditorComponent implements OnInit {
         inlineMode: false,
         // heightMax: window.innerHeight - 56,
         // width: 600,
-        toolbarSticky: true,
+        toolbarSticky: false,
         attribution: false,
         // scrollableContainer: '#scrollable',
         pluginsEnabled: [
@@ -92,10 +92,10 @@ export class EditorComponent implements OnInit {
         //   // 'insertImage',
         //   'createLink','paragraphFormat'
         // ],
-        toolbarButtons: this.buttons,
-        toolbarButtonsSM: this.buttons,
-        toolbarButtonsMD: this.buttons,
-        toolbarButtonsXS: this.buttons,
+        toolbarButtons: buttons,
+        toolbarButtonsSM: buttons,
+        toolbarButtonsMD: buttons,
+        toolbarButtonsXS: buttons,
         events : {
           // 'froalaEditor.save.before' : (e: any, editor: any) => {
             // e.stopPropagation();

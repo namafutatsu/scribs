@@ -5,6 +5,7 @@ import { ProjectService } from 'src/app/services/project.service';
 
 export class WorkspaceContext {
   public action: string;
+  public workspace: any;
   constructor(action: string) {
     this.action = action;
   }
@@ -28,6 +29,7 @@ export class WorkspacePage implements OnInit {
     this.projectId = this.route.snapshot.paramMap.get('id');
     this.projectService.getProject(this.projectId).subscribe(res => {
       this.workspace = res;
+      this.context.workspace = res;
     });
   }
 

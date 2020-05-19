@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { IonicModule } from '@ionic/angular';
 
 import { FroalaEditorModule } from 'angular-froala-wysiwyg';
+import { TreeModule } from 'angular-tree-component';
 
 import { ToolbarComponent } from './toolbar/toolbar.component';
 import { SettingsComponent } from './settings/settings.component';
@@ -18,6 +19,7 @@ import { MenuComponent } from './menu/menu.component';
     CommonModule,
     FormsModule,
     FroalaEditorModule,
+    TreeModule,
     IonicModule
   ],
   declarations: [

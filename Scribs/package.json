@@ -26,6 +26,7 @@
     "@ionic/angular": "^5.0.0",
     "@ionic/storage": "^2.2.0",
     "angular-froala-wysiwyg": "^3.1.1-1",
+    "angular-tree-component": "^8.5.6",
     "core-js": "^2.5.4",
     "rxjs": "~6.5.1",
     "tslib": "^1.9.0",
