@@ -45,6 +45,9 @@
                 "input": "./node_modules/froala-editor/css/froala_style.min.css"
               },
               {
+                "input": "./node_modules/froala-editor/css/plugins.pkgd.min.css"
+              },
+              {
                 "input": "src/theme/froala_light.css"
               },
               {
@@ -56,7 +59,13 @@
             ],
             "scripts": [
               {
+                "input": "./node_modules/froala-editor/js/froala_editor.min.js"
+              },
+              {
                 "input": "./node_modules/froala-editor/js/froala_editor.pkgd.min.js"
+              },
+              {
+                "input": "./node_modules/froala-editor/js/plugins.pkgd.min.js"
               }
             ]
           },

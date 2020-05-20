@@ -12,6 +12,8 @@ import { StatusBar } from '@ionic-native/status-bar/ngx';
 import { FroalaEditorModule, FroalaViewModule } from 'angular-froala-wysiwyg';
 import { TreeModule } from 'angular-tree-component';
 
+import 'froala-editor/js/plugins.pkgd.min.js';
+
 import { AppComponent } from './app.component';
 import { AppRoutingModule } from './app-routing.module';
 
