@@ -43,8 +43,10 @@ export class EditorComponent implements OnInit {
         // height:'750',
         inlineMode: false,
         // heightMax: window.innerHeight - 56,
-        // width: 600,
-        toolbarSticky: false,
+        // width: 600,,
+        // scrollableContainer: '#editor-wrapper',
+        toolbarSticky: true,
+        toolbarStickyOffset: 56,
         attribution: false,
         // scrollableContainer: '#scrollable',
         pluginsEnabled: [
