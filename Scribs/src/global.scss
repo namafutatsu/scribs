@@ -44,3 +44,8 @@ ion-spinner.center {
   // height: 50px !important;
   transform: scale(3);
 }
+
+.toggle-children {
+  filter: invert(1) sepia(100%);
+  //saturate(10000%) hue-rotate(45deg)
+}
