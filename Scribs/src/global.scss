@@ -49,3 +49,15 @@ ion-spinner.center {
   filter: invert(1) sepia(100%);
   //saturate(10000%) hue-rotate(45deg)
 }
+
+$color: #dfdcd8;
+.node-wrapper {display: flex; align-items: flex-start;}
+.node-content-wrapper-active,
+.node-content-wrapper.node-content-wrapper-active:hover,
+.node-content-wrapper-active.node-content-wrapper-focused {
+  // background: $color !important;
+  background: darken($color, 10%) !important;
+}
+.node-content-wrapper:hover {
+  background: darken($color, 10%) !important;
+}
