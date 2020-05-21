@@ -43,6 +43,7 @@ namespace Scribs.Core.Services {
                 .AddSingleton<GitStorage>()
                 .AddSingleton<JsonStorage>()
                 .AddSingleton<MongoStorage>()
+                .AddSingleton<PandocService>()
                 // todo virer ?
                 .AddSingleton<Factory<User>>()
                 .AddSingleton<Factory<Document>>()
