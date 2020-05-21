@@ -11,5 +11,5 @@
   <ion-icon name="trash-outline"></ion-icon>
 </ion-button>
 <div class="tree-node-wrapper" *ngIf="nodes">
-  <tree-root #tree [nodes]="nodes" [options]="options"></tree-root>
+  <tree-root #tree [nodes]="nodes" [options]="options" (activate)="onActivated($event)"></tree-root>
 </div>

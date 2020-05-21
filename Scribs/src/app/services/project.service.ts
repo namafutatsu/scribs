@@ -1,6 +1,9 @@
 import { Injectable } from '@angular/core';
 
 import { AuthorizedService } from './authorized.service';
+import { Observable } from 'rxjs';
+import { Workspace } from '../models/workspace';
+import { WorkspaceContext } from '../pages/workspace/workspace.page';
 
 @Injectable({
   providedIn: 'root'
@@ -12,7 +15,7 @@ export class ProjectService extends AuthorizedService {
     return this.get('getlist');
   }
 
-  public getProject(id: string) {
-    return this.post({ Id: id }, 'get');
+  public getProject(id: string): Observable<Workspace> {
+    return this.post<Workspace>({ Id: id }, 'get');
   }
 }

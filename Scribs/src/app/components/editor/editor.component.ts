@@ -34,21 +34,17 @@ export class EditorComponent implements OnInit {
         'undo',
         'redo',
         'alert',
-        'save'
+        // 'save'
       ];
       this.options = {
         charCounterCount: true,
         theme: this.theme,
         tooltips: false,
-        // height:'750',
         inlineMode: false,
-        // heightMax: window.innerHeight - 56,
-        // width: 600,,
         // scrollableContainer: '#editor-wrapper',
         toolbarSticky: true,
         toolbarStickyOffset: 56,
         attribution: false,
-        // scrollableContainer: '#scrollable',
         pluginsEnabled: [
           'align',
           // 'charCounter',

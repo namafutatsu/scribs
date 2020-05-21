@@ -25,4 +25,8 @@ export class ExplorerComponent implements AfterViewInit, OnInit {
   ngAfterViewInit() {
     this.tree.treeModel.expandAll();
   }
+
+  onActivated(event) {
+    this.context.open = event.node.id;
+  }
 }

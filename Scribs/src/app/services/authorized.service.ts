@@ -6,6 +6,7 @@ import { catchError } from 'rxjs/operators';
 
 import { AuthService } from './auth.service';
 import { environment } from '../../environments/environment';
+import { Observable } from 'rxjs';
 
 @Injectable()
 export abstract class AuthorizedService {
@@ -36,8 +37,8 @@ export abstract class AuthorizedService {
     )
   }
 
-  public post(body, action: string = 'post') {
-    return this.http.post(`${environment.url}/api/${this.controller}/${action}`, body, this.getOptions()).pipe(
+  public post<T>(body, action: string = 'post'): Observable<T> {
+    return this.http.post<T>(`${environment.url}/api/${this.controller}/${action}`, body, this.getOptions()).pipe(
       catchError(e => {
         let status = e.status;
         if (status === 401) {

@@ -36,7 +36,6 @@ namespace Scribs.IntegrationTest {
             FillProject(Project);
             SaveProject<GitStorage>(Project);
             SaveProject<JsonStorage>(Project);
-            Services.GetService<MongoStorage>().SaveAsync(Project, true).Wait();
             SaveProject<MongoStorage>(Project);
             CommitRepo(Project);
         }
