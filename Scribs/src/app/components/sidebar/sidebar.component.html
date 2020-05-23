@@ -3,7 +3,10 @@
   <s-action [context]="context" action="notes" icon="document-text"></s-action>
   <s-action [context]="context" action="commit" icon="git-branch"></s-action>
   <s-action [context]="context" action="stats" icon="stats-chart"></s-action>
-  <s-action [context]="context" action="export" icon="cloud-download"></s-action>
+  <s-action [context]="context" action="export" icon="download"></s-action>
   <s-action [context]="context" action="publish" icon="book"></s-action>
   <s-action [context]="context" action="settings" icon="build"></s-action>
+  <s-action *ngIf="!context.isUploading" [context]="context" action="connection" icon="cloud-done"></s-action>
+  <s-action *ngIf="context.isDisconnected" [context]="context" action="connection" icon="cloud-offline"></s-action>
+  <ion-spinner *ngIf="context.isUploading && !context.isDisconnected" name="crescent"></ion-spinner>
 </ion-content>

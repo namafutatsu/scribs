@@ -9,8 +9,11 @@ export class WorkspaceContext {
   public workspace: Workspace;
   public action: string;
   public open: string;
-  public syncProject = true;
+  public syncProject = false;
   public syncTexts = {};
+  public uploading = {};
+  public isUploading = false;
+  public isDisconnected = false;
 
   constructor(action: string) {
     this.action = action;
@@ -39,34 +42,67 @@ export class WorkspacePage implements OnInit {
     });
   }
 
-  onSaving() {
+  markUploading(id: string) {
+    this.context.uploading[id] = true;
+    this.context.isUploading = true;
+  }
+
+  unmarkUploading(id: string) {
+    delete this.context.uploading[id];
+    if (Object.keys(this.context.uploading).length == 0) {
+      this.context.isUploading = false;
+    }
+  }
+
+  updateProject() {
+    const id = "project";
     if (this.context.syncProject === true) {
       this.context.syncProject = false;
+      this.markUploading(id);
       this.projectService.postProject(this.context.workspace.project).subscribe(
         res => {
+          this.context.isDisconnected = false;
         },
         err => {
+          this.context.isDisconnected = true;
           this.context.syncProject = true;
+        },
+        () => {
+          this.unmarkUploading(id);
         }
       );
     }
+  }
+
+  updateTexts() {
     const syncTexts = {};
     for (const id in this.context.syncTexts) {
       syncTexts[id] = true;
     }
     for (const id in syncTexts) {
       delete this.context.syncTexts[id];
+      this.markUploading(id);
       const text = new Text();
       text.id = id;
       text.content = this.context.workspace.texts[id];
       this.textService.postText(text).subscribe(
         res => {
+          this.context.isDisconnected = false;
         },
         err => {
+          this.context.isDisconnected = true;
           this.context.syncTexts[id] = true;
+        },
+        () => {
+          this.unmarkUploading(id);
         }
       );
     }
+  }
+
+  onSaving() {
+    this.updateProject();
+    this.updateTexts();
   }
 
 }

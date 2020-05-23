@@ -1,4 +1,7 @@
 <ion-content class="menu" *ngIf="context.action !== undefined && context.action !== null">
-  <!-- {{context.action}} -->
   <s-explorer [context]="context" *ngIf="context.action === 'explorer'"></s-explorer>
+  <ion-content class="connection" *ngIf="context.action === 'connection'">
+    <ion-content *ngIf="context.isDisconnected">You are currently offline.</ion-content>
+    <ion-content *ngIf="!context.isDisconnected">Everything is up and running.</ion-content>
+  </ion-content>
 </ion-content>
