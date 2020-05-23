@@ -13,7 +13,10 @@ export class ExplorerComponent implements AfterViewInit, OnInit {
   nodes;
   options = {
     allowDrag: true,
-    allowDrop: true
+    allowDrop: (element, { parent, index }) => {
+      return !parent.isLeaf;
+    },
+    hasChildrenField: 'isNode'
   };
   
   constructor() { }

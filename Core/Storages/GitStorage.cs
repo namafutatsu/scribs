@@ -188,6 +188,7 @@ namespace Scribs.Core.Storages {
 
         public Document LoadFile(User user, Document parent, string path, bool content) {
             var document = GetDocument(user, parent, path, true, parent.IndexLeaves);
+            document.IsLeaf = true;
             ReadMetadata(document, path);
             if (content)
                 ReadDocument(document, path);

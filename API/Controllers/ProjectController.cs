@@ -70,6 +70,14 @@ namespace Scribs.API.Controllers {
                 if (project != null)
                     return BadRequest($"A project with the name {project.Name} already exists for user {user.Name}");
                 model.Id = Utils.CreateId();
+                if (model.Children == null || !model.Children.Any()) {
+                    model.Children = new System.Collections.ObjectModel.ObservableCollection<DocumentModel> {
+                        new DocumentModel {
+                            Name = "Content",
+                            Id =  Utils.CreateId()
+                        }
+                    };
+                }
             }
             project = mapper.Map<Document>(model);
             project.UserName = user.Name;

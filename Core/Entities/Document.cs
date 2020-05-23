@@ -18,6 +18,8 @@ namespace Scribs.Core.Entities {
         public bool IndexNodes { get; set; } = false;
         [BsonElement, DataMember]
         public bool IndexLeaves { get; set; } = false;
+        [BsonElement, DataMember]
+        public bool IsLeaf { get; set; } = false;
         [BsonIgnore]
         public string Content { get; set; }
         [BsonIgnore]
@@ -31,7 +33,6 @@ namespace Scribs.Core.Entities {
         [BsonIgnore]
         public bool NoMetadata { get; set; } = false;
         public string Path => System.IO.Path.Join(Parent != null ? Parent.Path : User?.Path, Name);
-        public bool IsLeaf => Children == null;
 
         // Project
         [BsonIgnore]
@@ -52,14 +53,17 @@ namespace Scribs.Core.Entities {
             SetParent(parent, false);
         }
 
-        public Document CreateDocument(string name, string text = null, int? index = null) {
+        public Document CreateDocument(string name, string text = null, int? index = null, bool isLeaf = false) {
             var document = new Document(name, User, this);
+            document.IsLeaf = isLeaf;
             if (text != null)
                 document.Content = text;
             if (index.HasValue)
                 document.Index = index.Value;
-            if (Children == null)
+            if (Children == null) {
                 Children = new ObservableCollection<Document>();
+                IsLeaf = false;
+            }
             Children.Add(document);
             return document;
         }

@@ -1,5 +1,4 @@
 ﻿using System.Collections.ObjectModel;
-using System.ComponentModel.DataAnnotations;
 
 namespace Scribs.Core.Models {
     public class DocumentModel {
@@ -10,5 +9,6 @@ namespace Scribs.Core.Models {
         public bool IndexLeaves { get; set; }
         public ObservableCollection<DocumentModel> Children { get; set; }
         public bool IsLeaf { get; set; }
+        public bool? IsNode => IsLeaf ? null : (bool?)true;
     }
 }

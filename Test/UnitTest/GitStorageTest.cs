@@ -161,6 +161,7 @@ namespace Scribs.UnitTest {
             var project = new Document("project", user);
             var leaf = new Document("leaf", user);
             leaf.Index = 3;
+            leaf.IsLeaf = true;
             leaf.Repo = "http://git";
             leaf.Content = "Lorem ipsum";
             using (var configuration = new MoqSystemConfiguration(null)) {
@@ -182,6 +183,7 @@ namespace Scribs.UnitTest {
             project.IndexLeaves = true;
             var leaf = new Document("leaf", user);
             leaf.Index = 3;
+            leaf.IsLeaf = true;
             leaf.Repo = "http://git";
             leaf.Content = "Lorem ipsum";
             using (var configuration = new MoqSystemConfiguration(null)) {
@@ -203,6 +205,7 @@ namespace Scribs.UnitTest {
             project.IndexLeaves = true;
             var leaf = new Document("leaf", user);
             leaf.Index = 3;
+            leaf.IsLeaf = true;
             leaf.Content = "Lorem ipsum";
             using (var configuration = new MoqSystemConfiguration(null)) {
                 var storage = configuration.Services.GetService<GitStorage>();
@@ -373,7 +376,7 @@ namespace Scribs.UnitTest {
             var parent = new Document("parent", null);
             parent.IndexNodes = false;
             parent.IndexLeaves = true;
-            var document = new Document("document", null, parent) { Index = 3 };
+            var document = new Document("document", null, parent) { Index = 3, IsLeaf = true };
             using (var configuration = new MoqSystemConfiguration(o => { })) {
                 Assert.Equal(Path.Join(path, "03.document.md"), configuration.Services.GetService<GitStorage>().GetDocumentPath(parent, document, path));
             }
@@ -397,7 +400,7 @@ namespace Scribs.UnitTest {
             var parent = new Document("parent", null);
             parent.IndexNodes = true;
             parent.IndexLeaves = false;
-            var document = new Document("document", null, parent) { Index = 3 };
+            var document = new Document("document", null, parent) { Index = 3, IsLeaf = true };
             using (var configuration = new MoqSystemConfiguration(o => { })) {
                 Assert.Equal(Path.Join(path, "document.md"), configuration.Services.GetService<GitStorage>().GetDocumentPath(parent, document, path));
             }
@@ -531,10 +534,10 @@ namespace Scribs.UnitTest {
             var documents = new List<Document> {
                 new Document("A", null) { Id = "1", Index = 0, Children = new ObservableCollection<Document>() },
                 new Document("B", null) { Id = "2", Index = 0, Children = new ObservableCollection<Document>() },
-                new Document("A", null) { Id = "3", Index = 0 },
-                new Document("B", null) { Id = "4", Index = 0 },
+                new Document("A", null) { Id = "3", Index = 0, IsLeaf = true },
+                new Document("B", null) { Id = "4", Index = 0, IsLeaf = true },
                 new Document("C", null) { Id = "5", Index = 1, Children = new ObservableCollection<Document>() },
-                new Document("C", null) { Id = "6", Index = 1 },
+                new Document("C", null) { Id = "6", Index = 1, IsLeaf = true },
                 new Document("C", null) { Id = "7", Index = 2, Children = new ObservableCollection<Document>() },
                 new Document("D", null) { Id = "8", Index = 2, Children = new ObservableCollection<Document>() },
                 new Document("C", null) { Id = "9", Index = 3, Children = new ObservableCollection<Document>() }

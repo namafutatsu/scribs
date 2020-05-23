@@ -26,9 +26,12 @@ namespace Scribs.Core.Storages {
                 system.CreateNode(path);
             var project = ReadJson(Path.Combine(path, jsonDocument));
             Document.BuildProject(project, user);
-            if (content)
-                foreach (var document in project.ProjectDocuments.Values)
+            if (content) {
+                foreach (var document in project.ProjectDocuments.Values) {
+                    document.IsLeaf = document.Children == null;
                     ReadDocument(path, document);
+                }
+            }
             return project;
         }
 
