@@ -58,28 +58,48 @@ namespace Scribs.API.Controllers {
             return Ok(result);
         }
 
+        private void GenerateIds(DocumentModel model) {
+            if (String.IsNullOrEmpty(model.Id))
+                model.Id = Utils.CreateId();
+            if (model.Children == null)
+                return;
+            foreach (var child in model.Children)
+                GenerateIds(child);
+        }
+
+        private void InitProject(DocumentModel model) {
+            model.Id = Utils.CreateId();
+            if (model.Children == null || !model.Children.Any()) {
+                model.Children = new System.Collections.ObjectModel.ObservableCollection<DocumentModel> {
+                    new DocumentModel {
+                        Name = "Content",
+                        Id = Utils.CreateId()
+                    }
+                };
+            }
+        }
+
+        private async Task<ActionResult> GetNameErrors(User user, DocumentModel model) {
+            string name = model.Name.Trim();
+            if (String.IsNullOrWhiteSpace(name))
+                return BadRequest($"A name is required");
+            var project = await storage.LoadAsyncByName(user, name, false);
+            if (project != null)
+                return BadRequest($"A project with the name {project.Name} already exists for user {user.Name}");
+            return null;
+        }
+
         [HttpPost]
         public async Task<ActionResult> Post(DocumentModel model) {
             var user = await auth.Identify(User);
-            Document project;
             if (String.IsNullOrEmpty(model.Id)) {
-                string name = model.Name.Trim();
-                if (String.IsNullOrWhiteSpace(name))
-                    return BadRequest($"A name is required");
-                project = await storage.LoadAsyncByName(user, name, false);
-                if (project != null)
-                    return BadRequest($"A project with the name {project.Name} already exists for user {user.Name}");
-                model.Id = Utils.CreateId();
-                if (model.Children == null || !model.Children.Any()) {
-                    model.Children = new System.Collections.ObjectModel.ObservableCollection<DocumentModel> {
-                        new DocumentModel {
-                            Name = "Content",
-                            Id =  Utils.CreateId()
-                        }
-                    };
-                }
+                var errors = await GetNameErrors(user, model);
+                if (errors != null)
+                    return errors;
+                InitProject(model);
             }
-            project = mapper.Map<Document>(model);
+            GenerateIds(model);
+            var project = mapper.Map<Document>(model);
             project.UserName = user.Name;
             await storage.SaveAsync(project, false);
             return Ok(project);

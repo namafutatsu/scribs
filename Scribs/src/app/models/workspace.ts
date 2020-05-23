@@ -1,6 +1,7 @@
 import { Entity } from './entity';
 
 export class Document extends Entity {
+  tempId: string;
   children: Document[];
   index: number;
   isLeaf: boolean;

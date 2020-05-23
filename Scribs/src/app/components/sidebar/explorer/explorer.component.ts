@@ -16,6 +16,7 @@ export class ExplorerComponent implements AfterViewInit, OnInit {
     allowDrop: (element, { parent, index }) => {
       return !parent.isLeaf;
     },
+    idField: 'TempId',
     hasChildrenField: 'isNode'
   };
   
