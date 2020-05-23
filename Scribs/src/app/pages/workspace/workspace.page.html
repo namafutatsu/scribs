@@ -15,7 +15,7 @@
       </ion-col>
       <ion-col *ngIf="workspace">
         <ion-content scroll-y="true">
-          <s-editor [context]="context"></s-editor>
+          <s-editor [context]="context" (saving)="onSaving($event)"></s-editor>
         </ion-content>
       </ion-col>
     </ion-row>

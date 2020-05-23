@@ -29,4 +29,12 @@ export class ExplorerComponent implements AfterViewInit, OnInit {
   onActivated(event) {
     this.context.open = event.node.id;
   }
+
+  onUpdateData(event) {
+    this.context.syncProject = true;
+  }
+
+  onMoveNode(event) {
+    this.context.syncProject = true;
+  }
 }

@@ -61,3 +61,7 @@ $color: #dfdcd8;
 .node-content-wrapper:hover {
   background: darken($color, 10%) !important;
 }
+
+.second-toolbar {
+  visibility: hidden;;
+}

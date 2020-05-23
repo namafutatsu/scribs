@@ -21,12 +21,14 @@ namespace Scribs.API.Controllers {
         private readonly AuthService auth;
         private readonly MongoStorage storage;
         private readonly Factories factories;
+        private readonly PandocService pandoc;
 
-        public ProjectController(AuthService auth, IMapper mapper,  MongoStorage storage, Factories factories) {
+        public ProjectController(AuthService auth, IMapper mapper,  MongoStorage storage, Factories factories, PandocService pandoc) {
             this.auth = auth;
             this.mapper = mapper;
             this.storage = storage;
             this.factories = factories;
+            this.pandoc = pandoc;
         }
 
         [HttpGet]
@@ -51,7 +53,7 @@ namespace Scribs.API.Controllers {
                 var textsIds = project.ProjectDocuments.Keys;
                 var texts = await factories.Get<Text>().GetAsync(textsIds.ToList());
                 foreach (var text in texts)
-                    result.Texts.Add(text.Id, text.Content);
+                    result.Texts.Add(text.Id, pandoc.Convert(text.Content, FileType.markdown, FileType.html));
             }
             return Ok(result);
         }

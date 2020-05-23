@@ -8,8 +8,8 @@ export class WorkspaceContext {
   public workspace: Workspace;
   public action: string;
   public open: string;
-  public sync = true;
-  public syncTexts: {};
+  public syncProject = true;
+  public syncTexts = {};
 
   constructor(action: string) {
     this.action = action;
@@ -36,6 +36,19 @@ export class WorkspacePage implements OnInit {
       this.context.workspace = res;
       this.workspace = res;
     });
+  }
+
+  onSaving() {
+    if (this.context.syncProject === true) {
+      this.context.syncProject = false;
+      this.projectService.postProject(this.context.workspace.project).subscribe(
+        res => {
+        },
+        error => {
+          this.context.syncProject = true;
+        }
+      );
+    }
   }
 
 }

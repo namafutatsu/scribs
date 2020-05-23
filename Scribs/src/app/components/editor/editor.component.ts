@@ -1,4 +1,4 @@
-import { Component, OnInit, Input } from '@angular/core';
+import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
 import { Storage } from '@ionic/storage';
 
 import { WorkspaceContext } from 'src/app/pages/workspace/workspace.page';
@@ -10,8 +10,22 @@ import { WorkspaceContext } from 'src/app/pages/workspace/workspace.page';
 })
 export class EditorComponent implements OnInit {
   @Input() context: WorkspaceContext;
+  @Output() saving = new EventEmitter();
   theme: string;
-  buttons: string[];
+  buttons = [
+    'bold',
+    'italic',
+    'underline',
+    'paragraphFormat',
+    'specialCharacters',
+    'align',
+    'print',
+    'fullscreen',
+    'undo',
+    'redo',
+    'alert',
+    'save'
+  ];
   options: Object;
   
   constructor(private storage: Storage) { }
@@ -22,20 +36,6 @@ export class EditorComponent implements OnInit {
       if (this.theme === undefined || this.theme === null || this.theme === 'light') {
         this.theme = 'gray';
       }
-      const buttons = [
-        'bold',
-        'italic',
-        'underline',
-        'paragraphFormat',
-        'specialCharacters',
-        'align',
-        'print',
-        'fullscreen',
-        'undo',
-        'redo',
-        'alert',
-        // 'save'
-      ];
       this.options = {
         charCounterCount: true,
         theme: this.theme,
@@ -90,23 +90,29 @@ export class EditorComponent implements OnInit {
         //   // 'insertImage',
         //   'createLink','paragraphFormat'
         // ],
-        toolbarButtons: buttons,
-        toolbarButtonsSM: buttons,
-        toolbarButtonsMD: buttons,
-        toolbarButtonsXS: buttons,
+        toolbarButtons: this.buttons,
+        toolbarButtonsSM: this.buttons,
+        toolbarButtonsMD: this.buttons,
+        toolbarButtonsXS: this.buttons,
         events : {
-          // 'froalaEditor.save.before' : (e: any, editor: any) => {
-            // e.stopPropagation();
-            // this.save();
-          // },
-          // 'froalaEditor.contentChanged' : (e: any, editor: any) => {
-          //   if (this.file) {
-          //     this.file.changed = true;
-          //   }
-          // }
+          'save.before' : () => {
+            this.save();
+          },
+          'contentChanged' : () => {
+            this.context.syncTexts[this.context.open] = true;
+          }
         },
         // toolbarStickyOffset: 48
       };
-    });}
+    });
+    // $.FroalaEditor.RegisterShortcut(83, 'save');
+    // $.FroalaEditor.DefineIcon("customSave", {
+    //   NAME: "floppy-o",
+    //   template: "font_awesome"
+    // });
+  }
 
+  save() {
+    this.saving.emit();
+  }
 }
