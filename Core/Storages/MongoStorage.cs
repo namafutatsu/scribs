@@ -103,6 +103,8 @@ namespace Scribs.Core.Storages {
             if (content) {
                 foreach (var kvp in project.ProjectDocuments) {
                     var text = await GetTextAsync(kvp.Key, user, project);
+                    //if (kvp.Value.Content != null)
+                        //kvp.Value.Content = new PandocService().Convert(kvp.Value.Content, FileType.markdown, FileType.html);
                     if (text == null)
                         await CreateTextAsync(user, project, kvp.Value);
                     else

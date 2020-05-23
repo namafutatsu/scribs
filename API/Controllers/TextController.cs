@@ -48,7 +48,7 @@ namespace Scribs.API.Controllers {
                 if (saved == null) {
                     await factory.CreateAsync(text);
                 } else {
-                    if (saved.UserId != model.UserId)
+                    if (saved.UserId != user.Id)
                         return Unauthorized();
                     await factory.UpdateAsync(text);
                     return Ok(saved);

@@ -1,9 +1,9 @@
 import { Injectable } from '@angular/core';
 
-import { AuthorizedService } from './authorized.service';
 import { Observable } from 'rxjs';
+
+import { AuthorizedService } from './authorized.service';
 import { Workspace, Project } from '../models/workspace';
-import { WorkspaceContext } from '../pages/workspace/workspace.page';
 
 @Injectable({
   providedIn: 'root'

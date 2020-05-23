@@ -2,7 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 
 import { ProjectService } from 'src/app/services/project.service';
-import { Workspace } from 'src/app/models/workspace';
+import { Workspace, Text } from 'src/app/models/workspace';
+import { TextService } from 'src/app/services/text.service';
 
 export class WorkspaceContext {
   public workspace: Workspace;
@@ -26,7 +27,7 @@ export class WorkspacePage implements OnInit {
   projectId: string;
   workspace: Workspace;
 
-  constructor(private route: ActivatedRoute, private projectService: ProjectService) {
+  constructor(private route: ActivatedRoute, private projectService: ProjectService, private textService: TextService) {
     this.context = new WorkspaceContext('explorer');
   }
 
@@ -44,8 +45,25 @@ export class WorkspacePage implements OnInit {
       this.projectService.postProject(this.context.workspace.project).subscribe(
         res => {
         },
-        error => {
+        err => {
           this.context.syncProject = true;
+        }
+      );
+    }
+    const syncTexts = {};
+    for (const id in this.context.syncTexts) {
+      syncTexts[id] = true;
+    }
+    for (const id in syncTexts) {
+      delete this.context.syncTexts[id];
+      const text = new Text();
+      text.id = id;
+      text.content = this.context.workspace.texts[id];
+      this.textService.postText(text).subscribe(
+        res => {
+        },
+        err => {
+          this.context.syncTexts[id] = true;
         }
       );
     }

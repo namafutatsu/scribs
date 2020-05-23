@@ -9,6 +9,10 @@ export class Project extends Document {
 
 }
 
+export class Text extends Entity {
+  content: string;
+}
+
 export class Workspace {
   project: Project;
   texts: {};
