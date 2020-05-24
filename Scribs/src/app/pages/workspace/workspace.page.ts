@@ -2,11 +2,13 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 
 import { ProjectService } from 'src/app/services/project.service';
-import { Workspace, Text } from 'src/app/models/workspace';
+import { Document, Text, Workspace } from 'src/app/models/workspace';
 import { TextService } from 'src/app/services/text.service';
 
 export class WorkspaceContext {
   public workspace: Workspace;
+  public documents = {};
+  public parents = {};
   public action: string;
   public open: string;
   public syncProject = false;
@@ -39,7 +41,18 @@ export class WorkspacePage implements OnInit {
     this.projectService.getProject(this.projectId).subscribe(res => {
       this.context.workspace = res;
       this.workspace = res;
+      this.getDocuments(this.context.workspace.project, null);
     });
+  }
+
+  getDocuments(document: Document, parent: Document) {
+    this.context.documents[document.tempId] = document;
+    this.context.parents[document.tempId] = parent;
+    if (document.children !== undefined && document.children !== null) {
+      for (const index in document.children) {
+        this.getDocuments(document.children[index], document);
+      }
+    }
   }
 
   markUploading(id: string) {

@@ -10,6 +10,6 @@ namespace Scribs.Core.Models {
         public bool IndexLeaves { get; set; }
         public ObservableCollection<DocumentModel> Children { get; set; }
         public bool IsLeaf { get; set; }
-        public bool? IsNode => IsLeaf ? null : (bool?)true;
+        public bool? IsDirectory => IsLeaf ? null : (bool?)true;
     }
 }

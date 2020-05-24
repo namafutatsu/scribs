@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { ModuleWithProviders, NgModule } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { IonicModule } from '@ionic/angular';
 
 import { FroalaEditorModule } from 'angular-froala-wysiwyg';
@@ -13,34 +13,41 @@ import { ActionComponent } from './sidebar/action/action.component';
 import { ExplorerComponent } from './sidebar/explorer/explorer.component';
 import { EditorComponent } from './editor/editor.component';
 import { MenuComponent } from './menu/menu.component';
+import { NamingComponent } from './naming/naming.component';
 
 @NgModule({
   imports: [
     CommonModule,
+    IonicModule,
     FormsModule,
     FroalaEditorModule,
-    TreeModule,
-    IonicModule
+    ReactiveFormsModule,
+    TreeModule
   ],
   declarations: [
     ActionComponent,
     EditorComponent,
     ExplorerComponent,
     MenuComponent,
-    ToolbarComponent,
+    NamingComponent,
     SettingsComponent,
     SidebarComponent,
+    ToolbarComponent
   ],
   exports: [
     ActionComponent,
     EditorComponent,
     ExplorerComponent,
     MenuComponent,
-    ToolbarComponent,
+    NamingComponent,
     SettingsComponent,
-    SidebarComponent
+    SidebarComponent,
+    ToolbarComponent
   ],
-  entryComponents: [SettingsComponent],
+  entryComponents: [
+    NamingComponent,
+    SettingsComponent
+  ],
 })
 export class SharedModule {
   static forRoot(): ModuleWithProviders {
