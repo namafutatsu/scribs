@@ -4,10 +4,10 @@
 <ion-button color="dark" (click)="onCreateLeaf()">
   <ion-icon name="document-outline"></ion-icon>
 </ion-button>
-<ion-button color="dark" (click)="rename()">
+<ion-button color="dark" (click)="rename()" [disabled]="!canRename()">
   <ion-icon name="text-outline"></ion-icon>
 </ion-button>
-<ion-button color="dark" (click)="delete()">
+<ion-button color="dark" (click)="onDelete()" [disabled]="!canDelete()">
   <ion-icon name="trash-outline"></ion-icon>
 </ion-button>
 <div class="tree-node-wrapper" *ngIf="nodes">

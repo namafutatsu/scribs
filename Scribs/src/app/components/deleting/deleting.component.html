@@ -1,0 +1,15 @@
+<form [formGroup]="form" (ngSubmit)="submit()">
+  <ion-content>
+    <ion-input formControlName="name" autofocus="true" placeholder="Type DELETE to confirm"></ion-input>
+  </ion-content>
+  <ion-footer >
+    <ion-row>
+      <ion-col>
+        <ion-button expand="block" type="submit" [disabled]="!form.valid || !isValid()">Delete</ion-button>
+      </ion-col>
+      <ion-col>
+        <ion-button color="secondary" expand="block" (click)="cancel()">Cancel</ion-button>
+      </ion-col>
+    </ion-row>
+  </ion-footer>
+</form>

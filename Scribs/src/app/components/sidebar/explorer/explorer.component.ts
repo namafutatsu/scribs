@@ -4,6 +4,7 @@ import { ModalController } from '@ionic/angular';
 import { Document } from 'src/app/models/workspace';
 import { WorkspaceContext } from 'src/app/pages/workspace/workspace.page';
 import { NamingComponent } from '../../naming/naming.component';
+import { DeletingComponent } from '../../deleting/deleting.component';
 
 @Component({
   selector: 's-explorer',
@@ -47,6 +48,7 @@ export class ExplorerComponent implements AfterViewInit, OnInit {
 
   onMoveNode(event) {
     this.touch();
+    this.context.parents[event.node.tempId] = event.to.parent;
   }
 
   generateDocument(isLeaf: boolean, name: string): Document {
@@ -75,6 +77,10 @@ export class ExplorerComponent implements AfterViewInit, OnInit {
     parent.children = newChildren;
   }
 
+  insertLastChild(parent: Document, document: Document) {
+    parent.children.push(document) 
+  }
+
   insertDocumentInContext(document: Document, parent: Document) {
     this.context.documents[document.tempId] = document;
     this.context.parents[document.tempId] = parent;
@@ -82,19 +88,28 @@ export class ExplorerComponent implements AfterViewInit, OnInit {
     this.touch();
   }
 
+  getActive() {
+    if (this.context.open) {
+      return this.context.documents[this.context.open];
+    }
+    return this.context.workspace.project;
+  }
+
+  getActiveParent(document: Document) {
+    if (document.isLeaf) {
+      return this.context.parents[document.tempId];
+    } 
+    return document;
+  }
+
   createDocument(isLeaf: boolean, name: string) {
     const document = this.generateDocument(isLeaf, name);
-    let active = this.context.workspace.project;
-    if (this.context.open) {
-      active = this.context.documents[this.context.open];
-    }
-    let parent = null;
+    const active = this.getActive();
+    let parent = this.getActiveParent(active);
     if (active.isLeaf) {
-      parent = this.context.parents[active.tempId];
       this.insertBrother(parent, active, document);
     } else {
-      parent = active;
-      parent.children.push(document) 
+      this.insertLastChild(parent, document);
     }
     this.insertDocumentInContext(document, parent);
     this.tree.treeModel.update();
@@ -117,6 +132,47 @@ export class ExplorerComponent implements AfterViewInit, OnInit {
     const dataFromModal = await modal.onWillDismiss();
     const name = dataFromModal.data.value['name'];
     this.createDocument(isLeaf, name);
+  }
+
+  canRename() {
+    return this.context.open && this.context.open != this.context.workspace.project.tempId;
+  }
+
+  canDelete() {
+    return this.context.open && this.context.open != this.context.workspace.project.tempId;
+  }
+
+  deleteChild(parent: Document, document: Document) {
+    const index = parent.children.indexOf(document);
+    if (index === 0) {
+      parent.children.shift();
+    } else if (index === parent.children.length - 1) {
+      parent.children.pop();
+    } else {
+      parent.children = parent.children.slice(0, index).concat(parent.children.slice(index + 1));
+    }
+  }
+
+  delete() {
+    const active = this.getActive();
+    const parent = this.context.parents[active.tempId];
+    this.deleteChild(parent, active);
+    this.tree.treeModel.update();
+  }
+
+  onDelete() {
+    this.deletingModal();
+  }
+
+  async deletingModal() {
+    const modal = await this.modalController.create({
+      component: DeletingComponent,
+      cssClass: 'deleting-modal'
+    });
+    modal.present();
+    const dataFromModal = await modal.onWillDismiss();
+    const name = dataFromModal.data.value['name'];
+    this.delete();
   }
 
   createTempId() {

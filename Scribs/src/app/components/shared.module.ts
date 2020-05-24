@@ -14,6 +14,7 @@ import { ExplorerComponent } from './sidebar/explorer/explorer.component';
 import { EditorComponent } from './editor/editor.component';
 import { MenuComponent } from './menu/menu.component';
 import { NamingComponent } from './naming/naming.component';
+import { DeletingComponent } from './deleting/deleting.component';
 
 @NgModule({
   imports: [
@@ -26,6 +27,7 @@ import { NamingComponent } from './naming/naming.component';
   ],
   declarations: [
     ActionComponent,
+    DeletingComponent,
     EditorComponent,
     ExplorerComponent,
     MenuComponent,
@@ -36,6 +38,7 @@ import { NamingComponent } from './naming/naming.component';
   ],
   exports: [
     ActionComponent,
+    DeletingComponent,
     EditorComponent,
     ExplorerComponent,
     MenuComponent,
@@ -45,6 +48,7 @@ import { NamingComponent } from './naming/naming.component';
     ToolbarComponent
   ],
   entryComponents: [
+    DeletingComponent,
     NamingComponent,
     SettingsComponent
   ],
