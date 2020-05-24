@@ -130,12 +130,40 @@ export class ExplorerComponent implements AfterViewInit, OnInit {
     });
     modal.present();
     const dataFromModal = await modal.onWillDismiss();
+    if (dataFromModal.data === null || dataFromModal.data === undefined) {
+      return;
+    }
     const name = dataFromModal.data.value['name'];
     this.createDocument(isLeaf, name);
   }
 
   canRename() {
     return this.context.open && this.context.open != this.context.workspace.project.tempId;
+  }
+
+  onRename() {
+    this.renamingModal();
+  }
+
+  async renamingModal() {
+    let active = this.context.workspace.project;
+    if (this.context.open) {
+      active = this.context.documents[this.context.open];
+    }
+    const modal = await this.modalController.create({
+      component: NamingComponent,
+      cssClass: 'naming-modal',
+      componentProps: { 
+        name: active.name
+      }
+    });
+    modal.present();
+    const dataFromModal = await modal.onWillDismiss();
+    if (dataFromModal.data === null || dataFromModal.data === undefined) {
+      return;
+    }
+    const name = dataFromModal.data.value['name'];
+    active.name = name;
   }
 
   canDelete() {
@@ -157,6 +185,7 @@ export class ExplorerComponent implements AfterViewInit, OnInit {
     const active = this.getActive();
     const parent = this.context.parents[active.tempId];
     this.deleteChild(parent, active);
+    this.touch();
     this.tree.treeModel.update();
   }
 
@@ -171,6 +200,9 @@ export class ExplorerComponent implements AfterViewInit, OnInit {
     });
     modal.present();
     const dataFromModal = await modal.onWillDismiss();
+    if (dataFromModal.data === null || dataFromModal.data === undefined) {
+      return;
+    }
     const name = dataFromModal.data.value['name'];
     this.delete();
   }
