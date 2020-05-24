@@ -1,4 +1,4 @@
 <div class="editor-wrapper" *ngIf="options">
-  <div class="editor" *ngIf="context.open" [froalaEditor]='options' [(froalaModel)]="context.workspace.texts[context.open]">
+  <div class="editor" *ngIf="context.open && context.documents[context.open].isLeaf" [froalaEditor]='options' [(froalaModel)]="context.workspace.texts[context.open]">
   </div>
 </div>
