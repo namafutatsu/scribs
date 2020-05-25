@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 
 import { ProjectService } from 'src/app/services/project.service';
+import { WorkspaceService } from 'src/app/services/workspace.service';
 import { Document, Text, Workspace } from 'src/app/models/workspace';
 import { TextService } from 'src/app/services/text.service';
 
@@ -32,13 +33,13 @@ export class WorkspacePage implements OnInit {
   projectId: string;
   workspace: Workspace;
 
-  constructor(private route: ActivatedRoute, private projectService: ProjectService, private textService: TextService) {
+  constructor(private route: ActivatedRoute, private workspaceService: WorkspaceService, private projectService: ProjectService, private textService: TextService) {
     this.context = new WorkspaceContext('explorer');
   }
 
   ngOnInit() {
     this.projectId = this.route.snapshot.paramMap.get('id');
-    this.projectService.getProject(this.projectId).subscribe(res => {
+    this.workspaceService.getWorkspace(this.projectId).subscribe(res => {
       this.context.workspace = res;
       this.workspace = res;
       this.getDocuments(this.context.workspace.project, null);

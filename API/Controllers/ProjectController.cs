@@ -49,12 +49,6 @@ namespace Scribs.API.Controllers {
                 Project = mapper.Map<DocumentModel>(project),
                 Texts = new Dictionary<string, string>()
             };
-            if (project.ProjectDocuments != null) {
-                var textsIds = project.ProjectDocuments.Keys;
-                var texts = await factories.Get<Text>().GetAsync(textsIds.ToList());
-                foreach (var text in texts)
-                    result.Texts.Add(text.Id, text.Content);// pandoc.Convert(text.Content, FileType.markdown, FileType.html));
-            }
             return Ok(result);
         }
 

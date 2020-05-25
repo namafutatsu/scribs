@@ -205,7 +205,7 @@ namespace Scribs.IntegrationTest {
                     Name = fixture.ProjectName
                 });
                 var contentData = new StringContent(data, System.Text.Encoding.UTF8, "application/json");
-                var response = await client.PostAsync($"api/project/get", contentData);
+                var response = await client.PostAsync($"api/workspace/get", contentData);
                 var workspace = JsonConvert.DeserializeObject<WorkspaceModel>(await response.Content.ReadAsStringAsync());
                 var project = workspace.Project;
                 Assert.Equal(fixture.Project.Id, project.Id);
@@ -224,7 +224,7 @@ namespace Scribs.IntegrationTest {
                     Id = fixture.Project.Id
                 });
                 var contentData = new StringContent(data, System.Text.Encoding.UTF8, "application/json");
-                var response = await client.PostAsync($"api/project/get", contentData);
+                var response = await client.PostAsync($"api/workspace/get", contentData);
                 var workspace = JsonConvert.DeserializeObject<WorkspaceModel>(await response.Content.ReadAsStringAsync());
                 var project = workspace.Project;
                 Assert.Equal(fixture.Project.Id, project.Id);
@@ -254,7 +254,7 @@ namespace Scribs.IntegrationTest {
                     Name = fixture.ProjectName
                 });
                 var contentData = new StringContent(data, System.Text.Encoding.UTF8, "application/json");
-                await Assert.ThrowsAsync<UnauthorizedAccessException>(() => client.PostAsync($"api/project/get", contentData));
+                await Assert.ThrowsAsync<UnauthorizedAccessException>(() => client.PostAsync($"api/workspace/get", contentData));
             }
         }
 
