@@ -87,7 +87,7 @@ namespace Scribs.IntegrationTest {
 
         private void CommitRepo(Document project) {
             string path = Path.Combine(Services.GetService<GitStorage>().Root, project.Path);
-            Services.GetService<RepositoryService>().Commit(path, "Message");
+            Services.GetService<UserRepositoryService>().Commit(path, "Message");
         }
 
         private void FillProject(Document project) {

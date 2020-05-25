@@ -592,7 +592,7 @@ namespace Scribs.UnitTest {
                     .Returns(new string[] { Path.Combine(path, GitStorage.DirectoryDocumentName) });
             };
             using (var configuration = new MoqSystemConfiguration(setupReading, setupSystem)) {
-                var gitStorage = new Mock<GitStorage>(new GitStorageSettings { Local = false }, null, null, configuration.Moq.Object);
+                var gitStorage = new Mock<GitStorage>(new GitStorageSettings { Local = false }, null, null, null, configuration.Moq.Object);
                 gitStorage.Setup(o => o.GetChildren(It.IsAny<Document>(), It.Is<User>(o => o == user), path, true)).Returns(new ObservableCollection<Document> {
                     new Document("node1", user),
                     new Document("node2", user),

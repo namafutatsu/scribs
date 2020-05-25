@@ -21,8 +21,11 @@ namespace Scribs.Core.Services {
                 .Configure<GitHubSettings>(configuration.GetSection(nameof(GitHubSettings)))
                 .AddSingleton<IGitHubSettings>(s => s.GetRequiredService<IOptions<GitHubSettings>>().Value)
                 // Repository
-                .Configure<RepositorySettings>(configuration.GetSection(nameof(RepositorySettings)))
-                .AddSingleton<IRepositorySettings>(s => s.GetRequiredService<IOptions<RepositorySettings>>().Value)
+                .Configure<UserRepositorySettings>(configuration.GetSection(nameof(UserRepositorySettings)))
+                .AddSingleton(s => s.GetRequiredService<IOptions<UserRepositorySettings>>().Value)
+                // Admin repository
+                .Configure<AdminRepositorySettings>(configuration.GetSection(nameof(AdminRepositorySettings)))
+                .AddSingleton(s => s.GetRequiredService<IOptions<AdminRepositorySettings>>().Value)
                 // Git storage
                 .Configure<GitStorageSettings>(configuration.GetSection(nameof(GitStorageSettings)))
                 .AddSingleton(s => s.GetRequiredService<IOptions<GitStorageSettings>>().Value)
@@ -39,7 +42,8 @@ namespace Scribs.Core.Services {
                 .AddSingleton<MongoService>()
                 .AddSingleton<Factories>()
                 .AddSingleton<GitHubService>()
-                .AddSingleton<RepositoryService>()
+                .AddSingleton<UserRepositoryService>()
+                .AddSingleton<AdminRepositoryService>()
                 .AddSingleton<GitStorage>()
                 .AddSingleton<JsonStorage>()
                 .AddSingleton<MongoStorage>()

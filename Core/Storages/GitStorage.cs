@@ -11,22 +11,33 @@ namespace Scribs.Core.Storages {
     public class GitStorage: ILocalStorage {
         private SystemService System { get; }
         private GitHubService gitHubService;
-        public RepositoryService repositoryService;
+        public AdminRepositoryService adminRepositoryService;
+        public UserRepositoryService userRepositoryService;
         public string Root { get; }
         public static string DirectoryDocumentName => ".dir.md";
 
-        public GitStorage(GitStorageSettings settings, GitHubService gitHubService, RepositoryService repositoryService, SystemService system) {
+        public GitStorage(GitStorageSettings settings, GitHubService gitHubService, AdminRepositoryService adminRepositoryService, UserRepositoryService userRepositoryService, SystemService system) {
             System = system;
             if (settings.Local)
                 Root = settings.Root;
             this.gitHubService = gitHubService;
-            this.repositoryService = repositoryService;
+            this.userRepositoryService = userRepositoryService;
+            this.adminRepositoryService = adminRepositoryService;
         }
+
+        private IRepositoryService GetRepositoryService(string userName) {
+            if (adminRepositoryService.UserName == userName)
+                return adminRepositoryService;
+            return userRepositoryService;
+        }
+
+        private IRepositoryService GetRepositoryService(Document project) => GetRepositoryService(project.UserName);
 
         public Document Load(string userName, string name) => Load(userName, name, true);
         public void Save(Document project) => Save(project, null);
 
         public void Save(Document project, string message = null) {
+            var repositoryService = GetRepositoryService(project);
             var path = Path.Combine(Root, project.User.Path, project.Name);
             if (project.Disconnect) {
                 if (!System.NodeExists(path))
@@ -120,6 +131,7 @@ namespace Scribs.Core.Storages {
             var user = new User(userName);
             string path = Path.Combine(Root, user.Path, name);
             bool disconnect = false;
+            var repositoryService = GetRepositoryService(userName);
             try {
                 repositoryService.Pull(path);
             } catch {

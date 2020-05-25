@@ -5,13 +5,14 @@ using LibGit2Sharp.Handlers;
 
 namespace Scribs.Core.Services {
 
-    public class RepositoryService {
+    public abstract class RepositoryService<S> : IRepositoryService where S : IRepositorySettings {
         private Signature signature;
         private UsernamePasswordCredentials credentials;
         private string ownerUrl;
+        public string UserName => signature.Name;
         public CredentialsHandler CredentialsHandler => new CredentialsHandler((url, usernameFromUrl, types) => credentials);
 
-        public RepositoryService(IRepositorySettings settings) {
+        public RepositoryService(S settings) {
             if (String.IsNullOrEmpty(settings.Username))
                 return;
             signature = new Signature(new Identity(settings.Username, settings.Mail), DateTimeOffset.Now);
@@ -62,7 +63,33 @@ namespace Scribs.Core.Services {
         }
     }
 
-    public class RepositorySettings : IRepositorySettings {
+    public interface IRepositoryService {
+        public string UserName { get; }
+        public CredentialsHandler CredentialsHandler { get; }
+        public bool IsRepo(string path);
+        public string Url(string path);
+        public void Commit(string path, string message);
+        public void Clone(string repoName, string path);
+        public void Pull(string path);
+    }
+
+    public class AdminRepositoryService : RepositoryService<AdminRepositorySettings> {
+        public AdminRepositoryService(AdminRepositorySettings settings) : base(settings) {
+        }
+    }
+
+    public class AdminRepositorySettings : UserRepositorySettings {
+    }
+
+    public class UserRepositoryService : RepositoryService<UserRepositorySettings> {
+        public UserRepositoryService(UserRepositorySettings settings) : base(settings) {
+        }
+    }
+
+    public class UserRepositorySettings : RepositorySettings {
+    }
+
+    public abstract class RepositorySettings : IRepositorySettings {
         public string Owner { get; set; }
         public string Password { get; set; }
         public string Username { get; set; }
