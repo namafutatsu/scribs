@@ -1,7 +1,12 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using LibGit2Sharp;
 using LibGit2Sharp.Handlers;
+using MongoDB.Bson.Serialization.Serializers;
+using Scribs.Core.Entities;
+using Scribs.Core.Storages;
 
 namespace Scribs.Core.Services {
 
@@ -9,6 +14,8 @@ namespace Scribs.Core.Services {
         private Signature signature;
         private UsernamePasswordCredentials credentials;
         private string ownerUrl;
+        private GitStorage gitStorage;
+
         public string UserName => signature.Name;
         public CredentialsHandler CredentialsHandler => new CredentialsHandler((url, usernameFromUrl, types) => credentials);
 
@@ -61,6 +68,12 @@ namespace Scribs.Core.Services {
                 });
             }
         }
+
+        public T GetDiff<T>(string path) where T: class, IDiffResult {
+            using (var repo = new Repository(path)) {
+                return repo.Diff.Compare<T>();
+            }
+        }
     }
 
     public interface IRepositoryService {
@@ -71,6 +84,7 @@ namespace Scribs.Core.Services {
         public void Commit(string path, string message);
         public void Clone(string repoName, string path);
         public void Pull(string path);
+        T GetDiff<T>(string path) where T : class, IDiffResult;
     }
 
     public class AdminRepositoryService : RepositoryService<AdminRepositorySettings> {

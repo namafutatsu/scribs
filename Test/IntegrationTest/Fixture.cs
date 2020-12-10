@@ -82,7 +82,7 @@ namespace Scribs.IntegrationTest {
                 return;
             var service = Services.GetService<GitHubService>();
             if (service.Exists(project))
-                service.Delete(Project);
+                service.Delete(project);
         }
 
         private void CommitRepo(Document project) {

@@ -4,11 +4,13 @@ using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Text;
+using LibGit2Sharp;
+using MongoDB.Driver.Core.Operations;
 using Scribs.Core.Entities;
 using Scribs.Core.Services;
 
 namespace Scribs.Core.Storages {
-    public class GitStorage: ILocalStorage {
+    public class GitStorage : ILocalStorage {
         private SystemService System { get; }
         private GitHubService gitHubService;
         public AdminRepositoryService adminRepositoryService;
@@ -34,9 +36,9 @@ namespace Scribs.Core.Storages {
         private IRepositoryService GetRepositoryService(Document project) => GetRepositoryService(project.UserName);
 
         public Document Load(string userName, string name) => Load(userName, name, true);
-        public void Save(Document project) => Save(project, null);
+        public void Save(Document project) => Save(project, true, null);
 
-        public void Save(Document project, string message = null) {
+        public void Save(Document project, bool commit = true, string message = null) {
             var repositoryService = GetRepositoryService(project);
             var path = Path.Combine(Root, project.User.Path, project.Name);
             if (project.Disconnect) {
@@ -54,7 +56,7 @@ namespace Scribs.Core.Storages {
             SaveDirectory(project, Path.Combine(Root, project.Path), true);
             if (message == null)
                 message = DateTime.Now.ToString();
-            if (!project.Disconnect)
+            if (!project.Disconnect && commit)
                 repositoryService.Commit(path, message);
         }
 
@@ -230,7 +232,7 @@ namespace Scribs.Core.Storages {
             foreach (var metadata in Document.Metadatas) {
                 if (metadatas == null || !metadatas.ContainsKey(metadata.Id)) {
                     //if (metadata.Get(document) != null)
-                        //metadata.Set(document, metadata.Default());
+                    //metadata.Set(document, metadata.Default());
                 } else {
                     metadata.Set(document, metadatas[metadata.Id]);
                 }
@@ -250,6 +252,14 @@ namespace Scribs.Core.Storages {
                 if (!String.IsNullOrEmpty(text))
                     document.Content = text;
             }
+        }
+
+        public void GetDiff(Document project) {
+            Save(project, false);
+            string path = Path.Join(Root, project.Path);
+            var service = GetRepositoryService(project.UserName);
+            var t = service.GetDiff<TreeChanges>(path);
+            var p = service.GetDiff<Patch>(path);
         }
     }
 
